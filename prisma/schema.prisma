@@ -61,6 +61,7 @@ model User {
     //   feedbacks       Feedback[]
     //   ratings         Rating[]
     otp             String?
+    verifiction     Boolean           @default(false)
 }
 
 model Hostel {

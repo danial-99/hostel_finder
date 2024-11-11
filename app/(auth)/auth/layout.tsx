@@ -8,7 +8,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         <div className="py-8 max-w-[1500px] mx-auto">
           <Image
           className="mb-3"
-            src={"/logo.png"}
+            src={"/assets/logo.png"}
             alt="Logo"
             height={30}
             width={100}

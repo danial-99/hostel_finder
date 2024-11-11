@@ -31,7 +31,7 @@ export default function Navbar() {
             </Sheet>
             <div className='lg:hidden flex-shrink-0 flex items-center'>
               <Image
-                src={"/logo-dark.png"}
+                src={"/assets/logo-dark.png"}
                 alt='logo'
                 width={80}
                 height={40}

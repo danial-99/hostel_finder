@@ -33,7 +33,7 @@ export default function Header() {
     <header className='sticky top-0 z-50 w-full bg-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-secondary'>
       <div className='container mx-auto flex h-14 items-center justify-between'>
         <Link href='/' className='flex items-center space-x-2'>
-          <Image src={"/logo.png"} alt='logo' width={100} height={40} />
+          <Image src={"/assets/logo.png"} alt='logo' width={100} height={40} />
         </Link>
 
         <nav className='hidden md:flex gap-6'>

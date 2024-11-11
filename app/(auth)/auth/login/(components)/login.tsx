@@ -42,7 +42,6 @@ const LoginForm = () => {
   // const { handleSubmit } = form;
 
   const onSubmit = async (data: z.infer<typeof LoginFormSchema>) => {
-    console.log("reached to login");
     setIsLoading(true);
     try {
       const formData = new FormData();
@@ -105,7 +104,7 @@ const LoginForm = () => {
           result.data.role === "USER"
             ? "/"
             : result.data.role === "ADMIN"
-            ? "/dashboard"
+            ? "/admin/dashboard"
             : result.data.role === "SUPER-ADMIN"
             ? "/super-admin/dashboard"
             : "/"

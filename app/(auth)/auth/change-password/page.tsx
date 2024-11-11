@@ -28,7 +28,7 @@ const Page = () => {
             <div className="">
               <Image
                 className="mx-auto mb-9"
-                src={"/Successmark.svg"}
+                src={"/assets/Successmark.svg"}
                 alt="success"
                 height={100}
                 width={100}

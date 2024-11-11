@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export default function Hero() {
   return (
-    <section className="relative min-h-[600px] flex items-center justify-center bg-cover bg-center" style={{backgroundImage: 'url(/heroBanner.png)'}}>
+    <section className="relative min-h-[600px] flex items-center justify-center bg-cover bg-center" style={{backgroundImage: 'url(/assets/heroBanner.png)'}}>
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 text-center text-white container mx-auto px-4 py-12 sm:py-16 md:py-20">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 max-w-3xl mx-auto">

@@ -77,7 +77,7 @@ export default function PaymentSummary({
         <div>
           <Image
           unoptimized
-            src="/room1.png"
+            src="/assets/room1.png"
             alt="Hostel Room"
             width={0}
             height={0}

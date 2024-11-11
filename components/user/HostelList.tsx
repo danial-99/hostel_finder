@@ -9,7 +9,7 @@ const hostels = [
     rating: 4.5,
     location: "City Center",
     capacity: 50,
-    image: "/room.jpg",
+    image: "/assets/room.jpg",
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ const hostels = [
     rating: 4.2,
     location: "Downtown",
     capacity: 40,
-    image: "/room.jpg",
+    image: "/assets/room.jpg",
   },
   {
     id: 3,
@@ -25,7 +25,7 @@ const hostels = [
     rating: 4.8,
     location: "University Area",
     capacity: 60,
-    image: "/room.jpg",
+    image: "/assets/room.jpg",
   },
 ];
 

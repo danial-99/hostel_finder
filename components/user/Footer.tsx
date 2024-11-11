@@ -33,7 +33,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           <div className="col-span-1 lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <Image src="/logo.png" alt="Hostel Finder Logo" width={100} height={40} />
+              <Image src="/assets/logo.png" alt="Hostel Finder Logo" width={100} height={40} />
             </Link>
             <p className="text-sm mb-4">
               Find your perfect stay with Hostel Finder. Discover affordable accommodations worldwide.

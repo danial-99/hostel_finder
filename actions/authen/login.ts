@@ -74,6 +74,14 @@ export async function Login(formData: FormData) {
       path: "/",
     });
 
+    cookies().set("userId", existingUser.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 15 * 60,
+      sameSite: "strict",
+      path: "/",
+    });
+
     return {
       status: 200,
       success: true,

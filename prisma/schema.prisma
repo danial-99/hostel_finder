@@ -1,0 +1,122 @@
+// schema.prisma
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+    SUPER_ADMIN
+    ADMIN
+    USER
+}
+
+enum HostelType {
+    MALE
+    FEMALE
+}
+
+enum BookingStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
+enum HostelStatus {
+    PENDING
+    APPROVED
+    REJECTED
+    SUSPENDED
+    CLOSED
+}
+enum RoomTypes {
+    SINGLE
+    DOUBLE
+    TRIPLE
+    FOUR_BED
+    FIVE_BED
+    SIX_BED
+    SEVEN_BED
+    EIGHT_BED
+    NINE_BED
+    TEN_BED
+}
+
+model User {
+    id              String            @id @default(uuid())
+    name            String
+    username        String?           @unique
+    email           String            @unique
+    password        String
+    phone           String?
+    termsConditions Boolean           @default(true)
+    role            UserRole          @default(USER)
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    hostels         Hostel[]
+    bookings        BookingRequests[]
+    //   feedbacks       Feedback[]
+    //   ratings         Rating[]
+    otp             String?
+}
+
+model Hostel {
+    id              String       @id @default(uuid())
+    ownerId         String
+    owner           User?        @relation(fields: [ownerId], references: [id])
+    status          HostelStatus @default(PENDING)
+    hostelName      String
+    hostelImage     Bytes?
+    country         String
+    province        String
+    city            String
+    zipCode         String
+    type            HostelType @default(MALE)
+    cnic            String
+    phone           String
+    description     String
+    rooms           RoomType[]
+    facilities      String[]
+    createdAt       DateTime     @default(now())
+    updatedAt       DateTime     @updatedAt
+}
+
+model RoomType {
+    id              String   @id @default(uuid())
+    hostelId        String
+    hostel          Hostel   @relation(fields: [hostelId], references: [id])
+    type            RoomTypes
+    beds            Int
+    price           Float
+    roomImages      Bytes[]
+}
+
+model BookingRequests {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    userId    String
+    user      User     @relation(fields: [userId], references: [id])
+}
+
+// model Feedback {
+//   id              String            @id @default(uuid())
+//   rating          Int
+//   comment         String
+//   createdAt       DateTime          @default(now())
+//   updatedAt       DateTime          @updatedAt
+//   userId          String
+//   user            User              @relation(fields: [userId], references: [id])
+// }
+
+// model Rating {
+//   id              String            @id @default(uuid())
+//   rating          Int
+//   createdAt       DateTime          @default(now())
+//   updatedAt       DateTime          @updatedAt
+//   userId          String
+//   user            User              @relation(fields: [userId], references: [id])
+// }

@@ -168,7 +168,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-start items-center gap-x-2">
-                    <Checkbox value={field.value} onSelect={field.onChange} />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     <FormLabel className="text-muted-foreground text-xs">
                       Remember me
                     </FormLabel>

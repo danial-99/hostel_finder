@@ -22,7 +22,7 @@ const navItems = [
     label: "Hostel Details",
     href: "/hostel-details",
   },
-  { icon: Calendar, label: "Facilities", href: "/facilities" },
+ // { icon: Calendar, label: "Facilities", href: "/facilities" },
   {
     icon: Users,
     label: "Booking Requests",

@@ -58,7 +58,7 @@ export default function BookingRoom() {
         <Card className="lg:w-1/3">
           <CardContent className="p-6">
             <Image
-              src="/room1.png"
+              src="/assets/room1.png"
               alt="Premium Deluxe Room"
               width={400}
               height={300}

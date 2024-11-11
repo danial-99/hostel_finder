@@ -3,9 +3,9 @@ import { Star } from "lucide-react";
 import Image from "next/image";
 
 const hostels = [
-  { id: 1, name: "Capital Boys Hostel", rating: 4.5, image: "/room.jpg" },
-  { id: 2, name: "Capital Boys Hostel", rating: 4.2, image: "/room.jpg" },
-  { id: 3, name: "Capital Boys Hostel", rating: 4.8, image: "/room.jpg" },
+  { id: 1, name: "Capital Boys Hostel", rating: 4.5, image: "/assets/room.jpg" },
+  { id: 2, name: "Capital Boys Hostel", rating: 4.2, image: "/assets/room.jpg" },
+  { id: 3, name: "Capital Boys Hostel", rating: 4.8, image: "/assets/room.jpg" },
 ];
 
 export default function TopRatedHostels() {

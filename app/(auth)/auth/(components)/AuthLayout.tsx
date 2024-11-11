@@ -33,7 +33,7 @@ const AuthLayout: FC<IProps> = ({ title, subTitle, description, children }) => {
           </div>
             <Image
               className="w-[385px] h-[331px]"
-              src={"/Saly-1.png"}
+              src={"/assets/Saly-1.png"}
               alt="Logo"
               height={0}
               width={0}

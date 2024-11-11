@@ -3,7 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 export default function ImageViewer() {
-  const [activeImage, setActiveImage] = useState("/bed.png");
+  const [activeImage, setActiveImage] = useState("/assets/bed.png");
 
   return (
     <>
@@ -17,11 +17,11 @@ export default function ImageViewer() {
         />
         <div className='grid grid-cols-4 gap-2'>
           {[
-            "/bed.png",
-            "/room1.png",
-            "/room.jpg",
-            "/room1.png",
-            "/bed.png",
+            "/assets/bed.png",
+            "/assets/room1.png",
+            "/assets/room.jpg",
+            "/assets/room1.png",
+            "/assets/bed.png",
           ].map((img, index) => (
             <Image
               key={index}
@@ -35,7 +35,7 @@ export default function ImageViewer() {
           ))}
           <div className='relative'>
             <Image
-              src='/bed.png'
+              src='/assets/bed.png'
               alt='More images'
               width={100}
               height={100}

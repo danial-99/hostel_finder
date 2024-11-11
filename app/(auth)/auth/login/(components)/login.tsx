@@ -42,7 +42,6 @@ const LoginForm = () => {
   // const { handleSubmit } = form;
 
   const onSubmit = async (data: z.infer<typeof LoginFormSchema>) => {
-    console.log("reached to login");
     setIsLoading(true);
     try {
       const formData = new FormData();
@@ -105,7 +104,7 @@ const LoginForm = () => {
           result.data.role === "USER"
             ? "/"
             : result.data.role === "ADMIN"
-            ? "/dashboard"
+            ? "/admin/dashboard"
             : result.data.role === "SUPER-ADMIN"
             ? "/super-admin/dashboard"
             : "/"
@@ -169,7 +168,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-start items-center gap-x-2">
-                    <Checkbox value={field.value} onSelect={field.onChange} />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     <FormLabel className="text-muted-foreground text-xs">
                       Remember me
                     </FormLabel>

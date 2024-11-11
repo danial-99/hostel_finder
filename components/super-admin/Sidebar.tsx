@@ -49,7 +49,7 @@ export default function Sidebar() {
     <div className='bg-white lg:w-64 h-screen flex flex-col'>
       <div className='flex items-center justify-center h-20'>
         <Image
-          src={"/logo-dark.png"}
+          src={"/assets/logo-dark.png"}
           alt='logo'
           width={150}
           height={80}

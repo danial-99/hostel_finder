@@ -11,6 +11,7 @@ import Sidebar from "./Sidebar";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
+  const isBrowser = typeof window !== 'undefined';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuth();
 
@@ -31,7 +32,7 @@ export default function Navbar() {
             </Sheet>
             <div className='lg:hidden flex-shrink-0 flex items-center'>
               <Image
-                src={"/logo-dark.png"}
+                src={"/assets/logo-dark.png"}
                 alt='logo'
                 width={80}
                 height={40}
@@ -60,12 +61,12 @@ export default function Navbar() {
                   <AvatarImage src='/placeholder-avatar.jpg' alt='Moni Roy' />
                   <AvatarFallback>MR</AvatarFallback>
                 </Avatar>
-                <div className='ml-3'>
+                {isBrowser && <div className='ml-3'>
                   <div className='text-sm font-medium text-gray-700'>
                     {user?.name}
                   </div>
                   <div className='text-xs text-gray-500 lowercase'>{user?.role}</div>
-                </div>
+                </div>}
               </div>
             </div>
           </div>

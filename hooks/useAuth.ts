@@ -1,5 +1,5 @@
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { logoutByCookies } from "@/actions/authen/logout";
 
 interface User {
@@ -16,13 +16,15 @@ interface AuthState {
 
 export const useAuth = () => {
   const router = useRouter();
-  const [auth, setAuth] = useState<AuthState>(() => {
-    // Initialize state from localStorage
-    const storedAuth = localStorage.getItem("auth");
-    return storedAuth ? JSON.parse(storedAuth) : { user: null, token: null };
-  });
 
-  console.log(auth);
+  const [auth, setAuth] = useState<AuthState>(() => {
+    if (typeof window !== 'undefined') {
+      // Initialize state from localStorage
+      const storedAuth = localStorage.getItem("auth");
+      return storedAuth ? JSON.parse(storedAuth) : { user: null, token: null };
+    }
+    return { user: null, token: null };
+  });
 
   useEffect(() => {
     // Update localStorage when auth state changes
@@ -36,17 +38,16 @@ export const useAuth = () => {
   const logoutHook = async () => {
     const yes = confirm("Are you sure you want to log Out");
     if (yes) {
-      console.log(yes);
-      const respoonse = await logoutByCookies();
-      console.log("logot response", respoonse);
-      if (respoonse.success) {
+      const response = await logoutByCookies();
+      console.log("logout response", response);
+      if (response.success) {
         localStorage.removeItem("auth");
         window.location.href = "/auth/login";
         // router.push("/login");
         // router.refresh();
       } else {
         return alert(
-          respoonse.message || "Failed to logout. Please try again."
+          response.message || "Failed to logout. Please try again."
         );
       }
     }

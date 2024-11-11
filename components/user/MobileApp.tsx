@@ -20,7 +20,7 @@ export default function MobileApp() {
                     unoptimized
                     width={0}
                     height={0}
-                    src='/Apple-Store.png'
+                    src='/assets/Apple-Store.png'
                     alt='Mobile App'
                     className='w-full'
                   />
@@ -32,7 +32,7 @@ export default function MobileApp() {
                     unoptimized
                     width={0}
                     height={0}
-                    src='/Google-Store.png'
+                    src='/assets/Google-Store.png'
                     alt='Mobile App'
                     className='w-full'
                   />
@@ -45,7 +45,7 @@ export default function MobileApp() {
               unoptimized
               width={0}
               height={0}
-              src='/app.svg'
+              src='/assets/app.svg'
               alt='Mobile App'
               className='w-full max-w-md mx-auto'
             />

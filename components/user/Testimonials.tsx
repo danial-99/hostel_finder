@@ -5,19 +5,19 @@ const testimonials = [
   {
     id: 1,
     name: 'Antony Lukas',
-    avatar: '/Avatar2.png',
+    avatar: '/assets/Avatar2.png',
     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
   },
   {
     id: 2,
     name: 'Antony Lukas',
-    avatar: '/Avatar2.png',
+    avatar: '/assets/Avatar2.png',
     content: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
   },
   {
     id: 3,
     name: 'Antony Lukas',
-    avatar: '/Avatar2.png',
+    avatar: '/assets/Avatar2.png',
     content: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
 ]

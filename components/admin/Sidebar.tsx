@@ -16,24 +16,24 @@ import { useAuth } from "@/hooks/useAuth";
 import { clearSession } from "@/lib/auth";
 
 const navItems = [
-  { icon: Home, label: "Overview", href: "/dashboard" },
+  { icon: Home, label: "Overview", href: "/admin/dashboard" },
   {
     icon: Building,
     label: "Hostel Details",
-    href: "/hostel-details",
+    href: "/admin/hostel-details",
   },
  // { icon: Calendar, label: "Facilities", href: "/facilities" },
   {
     icon: Users,
     label: "Booking Requests",
-    href: "/booking-requests",
+    href: "/admin/booking-requests",
   },
-  { icon: Users, label: "Manage Bookings", href: "/manage-bookings" },
-  { icon: CreditCard, label: "Payments", href: "/payments" },
+  { icon: Users, label: "Manage Bookings", href: "/admin/manage-bookings" },
+  { icon: CreditCard, label: "Payments", href: "/admin/payments" },
 ];
 
 export default function Sidebar() {
-  const [activePath, setActivePath] = useState("/dashboard");
+  const [activePath, setActivePath] = useState("/admin/dashboard");
   const { logoutHook } = useAuth();
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function Sidebar() {
     <div className="bg-white lg:w-64 h-screen flex flex-col">
       <div className="flex items-center justify-center h-20">
         <Image
-          src={"/logo-dark.png"}
+          src={"/assets/logo-dark.png"}
           alt="logo"
           width={150}
           height={80}

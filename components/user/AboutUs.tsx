@@ -25,7 +25,7 @@ export default function AboutUs() {
             unoptimized
               width={0}
               height={0}
-              src='/about-us-banner.png'
+              src='/assets/about-us-banner.png'
               alt='About Us'
               className='w-full h-auto rounded-lg shadow-lg'
             />

@@ -103,6 +103,14 @@ model BookingRequests {
     user      User     @relation(fields: [userId], references: [id])
 }
 
+model Image {
+  id        Int      @id @default(autoincrement())
+  name      String
+  data      Bytes
+  mimeType  String
+  createdAt DateTime @default(now())
+}
+
 // model Feedback {
 //   id              String            @id @default(uuid())
 //   rating          Int

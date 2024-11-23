@@ -3,6 +3,7 @@
 import { createHostel } from "@/actions/admin/createHostel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -31,7 +32,7 @@ import { useDropzone } from "react-dropzone";
 
 interface RoomDetail {
   id: number;
-  bedCount: number;
+  beds: number;
   numberOfRooms: number;
   price: number;
 }
@@ -64,6 +65,7 @@ interface ImageUploadData {
 
 export default function HostelRegistrationForm() {
   const { user } = useAuth();
+  const router = useRouter();
   const userId = user?.id as string;
   const [step, setStep] = useState(1);
   const [imageUploadData, setImageUploadData] = useState<ImageUploadData>({
@@ -87,7 +89,7 @@ export default function HostelRegistrationForm() {
   });
 
   const [rooms, setRooms] = useState<RoomDetail[]>([
-    { id: 1, bedCount: 1, numberOfRooms: 1, price: 0 },
+    { id: 1, beds: 1, numberOfRooms: 1, price: 0 },
   ]);
 
   const [roomData, setRoomData] = useState<RoomFormData>({
@@ -213,6 +215,7 @@ export default function HostelRegistrationForm() {
           description: response.message,
           variant: "default",
         });
+        router.push("/admin/dashboard");
       }
     }
   };
@@ -459,14 +462,14 @@ export default function HostelRegistrationForm() {
                 />
               </div>
               <div>
-                <Label htmlFor={`bedCount-${room.id}`}>Number of Beds</Label>
+                <Label htmlFor={`beds-${room.id}`}>Number of Beds</Label>
                 <Select
-                  value={room.bedCount.toString()}
+                  value={room.beds.toString()}
                   onValueChange={(value) =>
-                    updateRoom(room.id, "bedCount", parseInt(value))
+                    updateRoom(room.id, "beds", parseInt(value))
                   }
                 >
-                  <SelectTrigger id={`bedCount-${room.id}`}>
+                  <SelectTrigger id={`beds-${room.id}`}>
                     <SelectValue placeholder='Select bed count' />
                   </SelectTrigger>
                   <SelectContent>
@@ -689,7 +692,7 @@ export default function HostelRegistrationForm() {
               <p>
                 <span className='font-medium'>Total Beds:</span>{" "}
                 {rooms.reduce(
-                  (acc, room) => acc + room.numberOfRooms * room.bedCount,
+                  (acc, room) => acc + room.numberOfRooms * room.beds,
                   0
                 )}
               </p>
@@ -697,14 +700,14 @@ export default function HostelRegistrationForm() {
                 <span className='font-medium'>Room Types:</span>{" "}
                 {[
                   ...Array.from(
-                    new Set(rooms.map((room) => `${room.bedCount}-Bed`))
+                    new Set(rooms.map((room) => `${room.beds}-Bed`))
                   ),
                 ].join(", ")}
               </p>
               {rooms.map((room) => (
                 <p key={room.id}>
                   <span className='font-medium'>
-                    {room.bedCount}-Bed Room Price:
+                    {room.beds}-Bed Room Price:
                   </span>{" "}
                   ${room.price}
                 </p>
@@ -742,7 +745,7 @@ export default function HostelRegistrationForm() {
     setRooms((prevRooms) => {
       const newRoom = {
         id: prevRooms.length + 1,
-        bedCount: 1,
+        beds: 1,
         numberOfRooms: 1,
         price: 0,
       };

@@ -41,7 +41,7 @@ enum RoomTypes {
     SIX_BED
     SEVEN_BED
     EIGHT_BED
-    NINE_BED
+    NINE_BEDa
     TEN_BED
 }
 
@@ -89,7 +89,6 @@ model RoomType {
     id              String   @id @default(uuid())
     hostelId        String
     hostel          Hostel   @relation(fields: [hostelId], references: [id])
-    type            RoomTypes
     beds            Int
     price           Float
     roomImages      Bytes[]

@@ -19,8 +19,12 @@ const navItems = [
   { icon: Home, label: "Overview", href: "/admin/dashboard" },
   {
     icon: Building,
-    label: "Hostel Details",
+    label: "Register New Hostel",
     href: "/admin/hostel-details",
+  },{
+    icon: Building,
+    label: "Hostel Details",
+    href: "/admin/myApprovedHostels",
   },
  // { icon: Calendar, label: "Facilities", href: "/facilities" },
   {

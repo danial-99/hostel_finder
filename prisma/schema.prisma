@@ -37,12 +37,13 @@ enum RoomTypes {
     DOUBLE
     TRIPLE
     FOUR_BED
-    FIVE_BED
-    SIX_BED
-    SEVEN_BED
-    EIGHT_BED
-    NINE_BEDa
-    TEN_BED
+}
+
+enum Category {
+    STUDENT
+    PROFESSIONAL
+    FAMILY
+    OTHER
 }
 
 model User {
@@ -76,6 +77,7 @@ model Hostel {
     city            String
     zipCode         String
     type            HostelType @default(MALE)
+    category        Category   @default(STUDENT)
     cnic            String
     phone           String
     description     String

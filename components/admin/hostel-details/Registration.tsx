@@ -1,102 +1,83 @@
-"use client";
+'use client'
 
-import { createHostel } from "@/actions/admin/createHostel";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { HostelType } from "@prisma/client";
-import { Image as ImageIcon, Plus, Trash2, X } from "lucide-react";
-import { ChangeEvent, FormEvent, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useState, useEffect } from "react"
+import { useForm, useFieldArray } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Card, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
+import { toast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/useAuth"
+import { HostelType, Category } from "@prisma/client"
+import { ImageIcon, Plus, Trash2, X, Camera, Upload, MapPin } from 'lucide-react'
+import { useDropzone } from "react-dropzone"
+import Image from "next/image"
+import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api'
 
-interface RoomDetail {
-  id: number;
-  beds: number;
-  numberOfRooms: number;
-  price: number;
-}
+const formSchema = z.object({
+  hostelImages: z.array(z.instanceof(File)).min(1, "At least one hostel image is required"),
+  hostelName: z.string().min(1, "Hostel name is required"),
+  country: z.string().min(1, "Country is required"),
+  province: z.string().min(1, "Province is required"),
+  city: z.string().min(1, "City is required"),
+  zipCode: z.string().min(1, "Zip code is required"),
+  address: z.string().min(1, "Address is required"),
+  type: z.nativeEnum(HostelType),
+  category: z.nativeEnum(Category),
+  cnic: z.string().regex(/^\d{13}$/, "CNIC must be 13 digits"),
+  phone: z.string().regex(/^\+92\d{10}$/, "Phone number must be in format +92XXXXXXXXXX"),
+  description: z.string().optional(),
+  rooms: z.array(z.object({
+    numberOfRooms: z.number().min(1, "Number of rooms must be at least 1"),
+    bedCount: z.number().min(1, "Bed count must be at least 1"),
+    price: z.number().min(1, "Price must be at least 1"),
+    images: z.array(z.instanceof(File)).optional()
+  })).min(1, "At least one room must be added"),
+  facilities: z.record(z.boolean()),
+  electricityBill: z.instanceof(File).optional().nullable(),
+  gasBill: z.instanceof(File).optional().nullable(),
+  latitude: z.number(),
+  longitude: z.number()
+})
 
-interface HostelFormData {
-  hostelImage: File | null;
-  hostelName: string;
-  ownerId: string;
-  country: string;
-  province: string;
-  city: string;
-  zipCode: string;
-  type: HostelType;
-  cnic: string;
-  phone: string;
-  description: string;
-}
+type FormData = z.infer<typeof formSchema>
 
-interface RoomFormData {
-  roomDetails: RoomDetail[];
-}
-
-interface FacilitiesData {
-  [key: string]: boolean;
-}
-
-interface ImageUploadData {
-  roomImages: File[] | null;
-}
+const pakistanCenter = { lat: 30.3753, lng: 69.3451 }
 
 export default function HostelRegistrationForm() {
-  const { user } = useAuth();
-  const router = useRouter();
-  const userId = user?.id as string;
-  const [step, setStep] = useState(1);
-  const [imageUploadData, setImageUploadData] = useState<ImageUploadData>({
-    roomImages: [],
-  });
+  const { user } = useAuth()
+  const userId = user?.id as string
+  const [step, setStep] = useState(1)
 
-  const [hostelImage, setHostelImage] = useState<File | null>(null);
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    libraries: ['places']
+  })
 
-  const [hostelData, setHostelData] = useState<HostelFormData>({
-    hostelImage: null,
-    hostelName: "",
-    ownerId: userId,
-    country: "",
-    province: "",
-    city: "",
-    zipCode: "",
-    type: HostelType.MALE,
-    cnic: "",
-    description: "",
-    phone: "",
-  });
+  const { register, control, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      hostelImages: [],
+      rooms: [{ numberOfRooms: 1, bedCount: 1, price: 1, images: [] }],
+      facilities: {},
+      latitude: pakistanCenter.lat,
+      longitude: pakistanCenter.lng
+    }
+  })
 
-  const [rooms, setRooms] = useState<RoomDetail[]>([
-    { id: 1, beds: 1, numberOfRooms: 1, price: 0 },
-  ]);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "rooms"
+  })
 
-  const [roomData, setRoomData] = useState<RoomFormData>({
-    roomDetails: rooms,
-  });
-
-  const [facilitiesData, setFacilitiesData] = useState<FacilitiesData>({
+  const [facilitiesData, setFacilitiesData] = useState<Record<string, boolean>>({
     security: false,
     internet: false,
     electricity24_7: false,
@@ -115,7 +96,6 @@ export default function HostelRegistrationForm() {
     airConditioning: false,
     freeWiFi: false,
     breakfastIncluded: false,
-    linenIncluded: false,
     towelsIncluded: false,
     freeCityMaps: false,
     hotShowers: false,
@@ -125,459 +105,307 @@ export default function HostelRegistrationForm() {
     lockers: false,
     commonRoom: false,
     swimmingPool: false,
-    bar: false,
+    cupboards: false,
     poolTable: false,
     kitchen: false,
     cooker: false,
     vendingMachines: false,
     washingMachine: false,
     readingLight: false,
-  });
+    UPS: false,
+  })
 
-
-  const handleHostelInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setHostelData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleHostelSelectChange = (
-    name: keyof HostelFormData,
-    value: string
-  ) => {
-    setHostelData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleFacilityChange = (facility: string, checked: boolean) => {
-    setFacilitiesData((prev) => ({ ...prev, [facility]: checked }));
-  };
-
-  const handleImageUpload = (file: File, type: "logo" | "roomImages") => {
-    if (type === "logo") {
-      setHostelImage(file);
-      setHostelData((prevData) => ({ ...prevData, hostelImage: file }));
+  const onSubmit = async (data: FormData) => {
+    if (step < 6) {
+      setStep(prev => prev + 1)
     } else {
-      setImageUploadData((prev) => ({
-        ...prev,
-        roomImages: [...(prev.roomImages || []), file],
-      }));
+      console.log(data)
+      toast({
+        title: "Success",
+        description: "Hostel registration submitted successfully",
+        variant: "default",
+      })
     }
-  };
+  }
 
-  const handleRemoveImage = (type: "logo" | "roomImages", index?: number) => {
-    setImageUploadData((prev) => {
-      if (type === "roomImages" && typeof index === "number") {
-        return {
-          ...prev,
-          roomImages: (prev.roomImages || []).filter((_, i) => i !== index),
-        };
-      } else {
-        return {
-          ...prev,
-          [type]: null,
-        };
-      }
-    });
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    //processing room data
-    const processedRoomData = roomData.roomDetails.map((room: any) => ({
-      beds: room.beds,
-      price: room.price,
-      roomImages: room.roomImages || [],
-    }));
-    
-    if (step < 5) {
-      setStep((prev) => prev + 1);
-    } else {
-      const selectedFacilities = Object.entries(facilitiesData)
-        .filter(([_, value]) => value)
-        .reduce((acc, [key]) => ({ ...acc, [key]: true }), {});
-
-      const formData = new FormData();
-      formData.append(
-        "hostelData",
-        JSON.stringify({ ...hostelData, ownerId: userId })
-      );
-      formData.append("roomData", JSON.stringify(processedRoomData));
-      formData.append("facilitiesData", JSON.stringify(selectedFacilities));
-      imageUploadData.roomImages &&
-        imageUploadData.roomImages.forEach((image) =>
-          formData.append("roomImages", image)
-        );
-
-      const response = await createHostel(formData, userId);
-      if (!response.success) {
-        toast({
-          title: "Error",
-          description: response.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: response.message,
-          variant: "default",
-        });
-        router.push("/admin/dashboard");
-      }
-    }
-  };
-
-  const handleBack = () => {
-    setStep((prev) => Math.max(1, prev - 1));
-  };
-
-  const logoDropzone = useDropzone({
-    accept: { "image/*": [] },
-    onDrop: (acceptedFiles) => handleImageUpload(acceptedFiles[0], "logo"),
-  });
+  const handleBack = () => setStep(prev => Math.max(1, prev - 1))
 
   const hostelImagesDropzone = useDropzone({
-    accept: { "image/*": [] },
-    onDrop: (acceptedFiles) => handleImageUpload(acceptedFiles[0], "roomImages"),
-    multiple: true,
-  });
+    accept: { 'image/*': [] },
+    onDrop: acceptedFiles => {
+      const currentImages = watch('hostelImages') || []
+      setValue('hostelImages', [...currentImages, ...acceptedFiles])
+    }
+  })
 
-  const renderHostelRegistrationStep = () => (
+  const handleFacilityChange = (facility: string, checked: boolean) => {
+    setFacilitiesData(prev => ({ ...prev, [facility]: checked }))
+    setValue(`facilities.${facility}`, checked)
+  }
+
+  useEffect(() => {
+    Object.entries(facilitiesData).forEach(([key, value]) => {
+      setValue(`facilities.${key}`, value)
+    })
+  }, [facilitiesData, setValue])
+
+  const renderPersonalDetails = () => (
     <div className='space-y-4'>
       <div>
-        <Label htmlFor='logo'>Hostel Image or Logo</Label>
-        <div
-          {...logoDropzone.getRootProps()}
-          className='mt-2 border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition-colors'
-        >
-          <input {...logoDropzone.getInputProps()} />
-          {hostelImage ? (
-            <div className='flex items-center justify-center'>
-              <Avatar className='w-20 h-20'>
-                <AvatarImage
-                  src={URL.createObjectURL(hostelImage)}
-                  alt='Logo'
-                />
-                <AvatarFallback>Logo</AvatarFallback>
-              </Avatar>
+        <Label htmlFor='hostelImages'>Hostel Images</Label>
+        <div {...hostelImagesDropzone.getRootProps()} className='mt-2 border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition-colors'>
+          <input {...hostelImagesDropzone.getInputProps()} />
+          <div>
+            <p className='mb-2'>Drag & drop your images here, or click to select</p>
+            <Button type='button'>Upload Images</Button>
+          </div>
+        </div>
+        <div className='mt-4 grid grid-cols-3 gap-4'>
+          {watch('hostelImages')?.map((file, index) => (
+            <div key={index} className='relative'>
+              <Image src={URL.createObjectURL(file)} alt={`Hostel Image ${index + 1}`} width={100} height={100} className='object-cover rounded-md' />
               <Button
                 type='button'
-                variant='ghost'
-                size='sm'
-                className='ml-2'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveImage("logo");
+                variant='destructive'
+                size='icon'
+                className='absolute top-0 right-0'
+                onClick={() => {
+                  const currentImages = watch('hostelImages') || []
+                  setValue(
+                    'hostelImages',
+                    currentImages.filter((_, i) => i !== index)
+                  )
                 }}
               >
                 <X className='h-4 w-4' />
               </Button>
             </div>
-          ) : (
-            <div>
-              <p className='mb-2'>
-                Drag & drop your image here, or choose an option:
-              </p>
-              <div className='flex justify-center space-x-4'>
-                <Button
-                  type='button'
-                  onClick={() =>
-                    document.getElementById("logo-upload")?.click()
-                  }
-                >
-                  Upload
-                </Button>
-              </div>
-              <input
-                required
-                id='logo-upload'
-                type='file'
-                accept='image/*'
-                className='hidden'
-                onChange={(e) => {
-                  if (e.target.files)
-                    handleImageUpload(e.target.files[0], "logo");
-                }}
-              />
-            </div>
-          )}
+          ))}
         </div>
       </div>
+
       <div>
         <Label htmlFor='hostelName'>Hostel Name</Label>
-        <Input
-          id='hostelName'
-          name='hostelName'
-          value={hostelData.hostelName}
-          onChange={handleHostelInputChange}
-          required
-        />
+        <Input id='hostelName' {...register('hostelName')} />
+        {errors.hostelName && <p className='text-red-500'>{errors.hostelName.message}</p>}
       </div>
 
       <div className='grid grid-cols-2 gap-4'>
         <div>
           <Label htmlFor='country'>Country</Label>
-          <Select
-            name='country'
-            onValueChange={(value) =>
-              handleHostelSelectChange("country", value)
-            }
-          >
+          <Select onValueChange={value => setValue('country', value)}>
             <SelectTrigger>
               <SelectValue placeholder='Select country' />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='pakistan'>Pakistan</SelectItem>
-              <SelectItem value='india'>India</SelectItem>
-              <SelectItem value='bangladesh'>Bangladesh</SelectItem>
             </SelectContent>
           </Select>
+          {errors.country && <p className='text-red-500'>{errors.country.message}</p>}
         </div>
 
         <div>
           <Label htmlFor='province'>Province</Label>
-          <Input
-            id='province'
-            name='province'
-            value={hostelData.province}
-            onChange={handleHostelInputChange}
-            required
-            placeholder='Enter province'
-          />
+          <Select onValueChange={value => setValue('province', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder='Select Province' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='Punjab'>Punjab</SelectItem>
+              <SelectItem value='Sindh'>Sindh</SelectItem>
+              <SelectItem value='Balochistan'>Balochistan</SelectItem>
+              <SelectItem value='KPK'>KPK</SelectItem>
+              <SelectItem value='GB'>Gilgit Baltistan</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.province && <p className='text-red-500'>{errors.province.message}</p>}
         </div>
       </div>
 
       <div className='grid grid-cols-2 gap-4'>
         <div>
           <Label htmlFor='city'>City</Label>
-          <Input
-            id='city'
-            name='city'
-            value={hostelData.city}
-            onChange={handleHostelInputChange}
-            required
-          />
+          <Input id='city' {...register('city')} />
+          {errors.city && <p className='text-red-500'>{errors.city.message}</p>}
         </div>
 
         <div>
           <Label htmlFor='zipCode'>Zip/Postal Code</Label>
-          <Input
-            type='number'
-            min={1}
-            max={99999}
-            id='zipCode'
-            name='zipCode'
-            value={hostelData.zipCode}
-            onChange={handleHostelInputChange}
-            required
-          />
+          <Input id='zipCode' {...register('zipCode')} />
+          {errors.zipCode && <p className='text-red-500'>{errors.zipCode.message}</p>}
         </div>
       </div>
 
       <div>
-        <Label htmlFor='hostelType'>Hostel Type</Label>
-        <Select
-          name='hostelType'
-          onValueChange={(value) => handleHostelSelectChange("type", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder='Select hostel type' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={HostelType.MALE}>Male</SelectItem>
-            <SelectItem value={HostelType.FEMALE}>Female</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label htmlFor='address'>Address</Label>
+        <Input id='address' {...register('address')} />
+        {errors.address && <p className='text-red-500'>{errors.address.message}</p>}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor='hostelType'>Hostel Type</Label>
+          <Select onValueChange={value => setValue('type', value as HostelType)}>
+            <SelectTrigger>
+              <SelectValue placeholder='Select hostel type' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={HostelType.MALE}>Male</SelectItem>
+              <SelectItem value={HostelType.FEMALE}>Female</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.type && <p className='text-red-500'>{errors.type.message}</p>}
+        </div>
+
+        <div>
+          <Label htmlFor='category'>Hostel Category</Label>
+          <Select onValueChange={value => setValue('category', value as Category)}>
+            <SelectTrigger>
+              <SelectValue placeholder='Select hostel category' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={Category.STUDENT}>Students</SelectItem>
+              <SelectItem value={Category.PROFESSIONAL}>Professionals</SelectItem>
+              <SelectItem value={Category.FAMILY}>Family</SelectItem>
+              <SelectItem value={Category.OTHER}>Others</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.category && <p className='text-red-500'>{errors.category.message}</p>}
+        </div>
       </div>
 
       <div>
         <Label htmlFor='cnic'>CNIC Number</Label>
-        <Input
-          type='number'
-          min={1}
-          max={9999999999999}
-          id='cnic'
-          name='cnic'
-          value={hostelData.cnic}
-          onChange={handleHostelInputChange}
-          required
-          placeholder='1234567890123'
-        />
+        <Input id='cnic' {...register('cnic')} placeholder='1234567890123' />
+        {errors.cnic && <p className='text-red-500'>{errors.cnic.message}</p>}
       </div>
 
       <div>
         <Label htmlFor='phone'>Phone Number</Label>
-        <Input
-          id='phone'
-          name='phone'
-          type='tel'
-          value={hostelData.phone}
-          onChange={handleHostelInputChange}
-          required
-          placeholder='+92 XXX XXXXXXX'
-        />
+        <Input id='phone' {...register('phone')} placeholder='+92XXXXXXXXXX' />
+        {errors.phone && <p className='text-red-500'>{errors.phone.message}</p>}
       </div>
 
       <div>
         <Label htmlFor='description'>Hostel Description</Label>
-        <Textarea
-          id='description'
-          name='description'
-          value={hostelData.description}
-          onChange={handleHostelInputChange}
-          rows={4}
-        />
+        <Textarea id='description' {...register('description')} rows={4} />
+        {errors.description && <p className='text-red-500'>{errors.description.message}</p>}
       </div>
     </div>
-  );
+  )
 
-  const renderRoomDetailsStep = () => (
+  const renderRoomDetails = () => (
     <div className='space-y-6'>
-      {rooms.map((room) => (
-        <div
-          key={room.id}
-          className='p-4 border rounded-lg space-y-4'
-        >
-          <div className='flex justify-between items-center'>
-            <h3 className='text-lg font-semibold'>Room {room.id}</h3>
-            {rooms.length > 1 && (
-              <Button
-                variant='destructive'
-                size='icon'
-                onClick={() => removeRoom(room.id)}
-              >
-                <Trash2 className='h-4 w-4' />
-              </Button>
-            )}
-          </div>
-          <div className='grid grid-cols-1 gap-4'>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+      {fields.map((field, index) => (
+        <Card key={field.id} className='p-4'>
+          <CardContent className='space-y-4'>
+            <div className='flex justify-between items-center'>
+              <h3 className='text-lg font-semibold'>Room {index + 1}</h3>
+              {fields.length > 1 && (
+                <Button variant='destructive' size='icon' onClick={() => remove(index)}>
+                  <Trash2 className='h-4 w-4' />
+                </Button>
+              )}
+            </div>
+            <div className='grid grid-cols-3 gap-4'>
               <div>
-                <Label htmlFor={`numberOfRooms-${room.id}`}>Room Number</Label>
+                <Label htmlFor={`rooms.${index}.numberOfRooms`}>Number of Rooms</Label>
                 <Input
-                  id={`numberOfRooms-${room.id}`}
+                  id={`rooms.${index}.numberOfRooms`}
                   type='number'
-                  min='1'
-                  value={room.numberOfRooms}
-                  onChange={(e) =>
-                    updateRoom(
-                      room.id,
-                      "numberOfRooms",
-                      parseInt(e.target.value)
-                    )
-                  }
+                  min={1}
+                  {...register(`rooms.${index}.numberOfRooms` as const, { 
+                    valueAsNumber: true,
+                    min: 1
+                  })}
                 />
+                {errors.rooms?.[index]?.numberOfRooms && <p className='text-red-500'>{errors.rooms[index]?.numberOfRooms?.message}</p>}
               </div>
               <div>
-                <Label htmlFor={`beds-${room.id}`}>Number of Beds</Label>
-                <Select
-                  value={room.beds.toString()}
-                  onValueChange={(value) =>
-                    updateRoom(room.id, "beds", parseInt(value))
-                  }
-                >
-                  <SelectTrigger id={`beds-${room.id}`}>
+                <Label htmlFor={`rooms.${index}.bedCount`}>Number of Beds</Label>
+                <Select onValueChange={value => setValue(`rooms.${index}.bedCount`, parseInt(value))}>
+                  <SelectTrigger id={`rooms.${index}.bedCount`}>
                     <SelectValue placeholder='Select bed count' />
                   </SelectTrigger>
                   <SelectContent>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((count) => (
-                      <SelectItem
-                        key={count}
-                        value={count.toString()}
-                      >
-                        {count} {count === 1 ? "Bed" : "Beds"}
+                    {[1, 2, 3, 4].map(count => (
+                      <SelectItem key={count} value={count.toString()}>
+                        {count} {count === 1 ? 'Bed' : 'Beds'}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.rooms?.[index]?.bedCount && <p className='text-red-500'>{errors.rooms[index]?.bedCount?.message}</p>}
               </div>
               <div>
-                <Label htmlFor={`price-${room.id}`}>Price per Bed</Label>
+                <Label htmlFor={`rooms.${index}.price`}>Price per Bed</Label>
                 <Input
-                  id={`price-${room.id}`}
+                  id={`rooms.${index}.price`}
                   type='number'
-                  min='0'
-                  value={room.price}
-                  onChange={(e) =>
-                    updateRoom(room.id, "price", parseInt(e.target.value))
-                  }
+                  min={1}
+                  {...register(`rooms.${index}.price` as const, { 
+                    valueAsNumber: true,
+                    min: 1
+                  })}
                 />
+                {errors.rooms?.[index]?.price && <p className='text-red-500'>{errors.rooms[index]?.price?.message}</p>}
               </div>
             </div>
             <div>
-              <Label htmlFor='roomImages'>Room Images</Label>
-              <div
-                {...hostelImagesDropzone.getRootProps()}
-                className='mt-2 border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition-colors'
-              >
-                <input {...hostelImagesDropzone.getInputProps()} />
-                <p className='mb-2'>
-                  Drag & drop room images here, or choose an option:
-                </p>
-                <div className='flex justify-center space-x-4'>
-                  <Button
-                    type='button'
-                    onClick={() =>
-                      document.getElementById("hostel-images-upload")?.click()
-                    }
-                  >
-                    Upload from Device
-                  </Button>
-                </div>
-                <input
-                  id='hostel-images-upload'
+              <Label>Room Images</Label>
+              <div className='mt-2 flex items-center space-x-4'>
+                <Input
                   type='file'
                   accept='image/*'
                   multiple
-                  className='hidden'
-                  onChange={(e) => {
-                    if (e.target.files)
-                      handleImageUpload(
-                        e.target.files[0],
-                        "roomImages"
-                      );
+                  onChange={e => {
+                    const files = e.target.files
+                    if (files) {
+                      const currentImages = watch(`rooms.${index}.images`) || []
+                      setValue(`rooms.${index}.images`, [...currentImages, ...Array.from(files)])
+                    }
                   }}
+                  className='hidden'
+                  id={`room-images-${index}`}
                 />
+                <Button type='button' onClick={() => document.getElementById(`room-images-${index}`)?.click()}>
+                  <Upload className='mr-2 h-4 w-4' /> Upload Images
+                </Button>
+                <Button type='button' variant='outline'>
+                  <Camera className='mr-2 h-4 w-4' /> Take Photo
+                </Button>
               </div>
-              {imageUploadData.roomImages &&
-                imageUploadData.roomImages.length > 0 && (
-                  <div className='mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
-                    {imageUploadData.roomImages.map((file, index) => (
-                      <div
-                        key={index}
-                        className='relative'
-                      >
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Hostel ${index + 1}`}
-                          className='w-full h-32 object-cover rounded-md'
-                        />
-                        <Button
-                          type='button'
-                          variant='destructive'
-                          size='sm'
-                          className='absolute top-1 right-1'
-                          onClick={() => handleRemoveImage("roomImages", index)}
-                        >
-                          <X className='h-4 w-4' />
-                        </Button>
-                      </div>
-                    ))}
+              <div className='mt-4 grid grid-cols-3 gap-4'>
+                {watch(`rooms.${index}.images`)?.map((file, fileIndex) => (
+                  <div key={fileIndex} className='relative'>
+                    <Image src={URL.createObjectURL(file)} alt={`Room ${index + 1} Image ${fileIndex + 1}`} width={100} height={100} className='object-cover rounded-md' />
+                    <Button
+                      type='button'
+                      variant='destructive'
+                      size='icon'
+                      className='absolute top-0 right-0'
+                      onClick={() => {
+                        const currentImages = watch(`rooms.${index}.images`) || []
+                        setValue(
+                          `rooms.${index}.images`,
+                          currentImages.filter((_, i) => i !== fileIndex)
+                        )
+                      }}
+                    >
+                      <X className='h-4 w-4' />
+                    </Button>
                   </div>
-                )}
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
-      <Button
-        type='button'
-        onClick={addRoom}
-        className='w-full'
-      >
+      <Button type='button' onClick={() => append({ numberOfRooms: 1, bedCount: 1, price: 1, images: [] })} className='w-full'>
         <Plus className='mr-2 h-4 w-4' /> Add More Rooms
       </Button>
     </div>
-  );
+  )
 
   const renderFacilitiesStep = () => (
     <Card className='w-full'>
@@ -613,213 +441,269 @@ export default function HostelRegistrationForm() {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 
-  const renderSummaryStep = () => (
+  const renderBillsUpload = () => (
+    <div className='space-y-6'>
+      <div>
+        <Label htmlFor='electricityBill'>Electricity Bill</Label>
+        <div className='mt-2 flex items-center space-x-4'>
+          <Input
+            id='electricityBill'
+            type='file'
+            accept='image/*,application/pdf'
+            onChange={e => {
+              const file = e.target.files?.[0]
+              if (file) setValue('electricityBill', file)
+            }}
+            className='hidden'
+          />
+          <Button type='button' onClick={() => document.getElementById('electricityBill')?.click()}>
+            <Upload className='mr-2 h-4 w-4' /> Upload File
+          </Button>
+          <Button type='button' variant='outline'>
+            <Camera className='mr-2 h-4 w-4' /> Take Photo
+          </Button>
+        </div>
+        {watch('electricityBill') && (
+          <div className='mt-2 flex items-center justify-between'>
+            <p>{watch('electricityBill')?.name}</p>
+            <Button type='button' variant='destructive' size='sm' onClick={() => setValue('electricityBill', null)}>
+              <Trash2 className='h-4 w-4' />
+            </Button>
+          </div>
+        )}
+        {watch('electricityBill') && (
+          <div className='mt-2'>
+            {watch('electricityBill')?.type.startsWith('image/') ? (
+              <Image src={URL.createObjectURL(watch('electricityBill') as File)} alt="Electricity Bill" width={200} height={200} className='object-contain' />
+            ) : (
+              <p>File uploaded: {watch('electricityBill')?.name}</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor='gasBill'>Gas Bill</Label>
+        <div className='mt-2 flex items-center space-x-4'>
+          <Input
+            id='gasBill'
+            type='file'
+            accept='image/*,application/pdf'
+            onChange={e => {
+              const file = e.target.files?.[0]
+              if (file) setValue('gasBill', file)
+            }}
+            className='hidden'
+          />
+          <Button type='button' onClick={() => document.getElementById('gasBill')?.click()}>
+            <Upload className='mr-2 h-4 w-4' /> Upload File
+          </Button>
+          <Button type='button' variant='outline'>
+            <Camera className='mr-2 h-4 w-4' /> Take Photo
+          </Button>
+        </div>
+        {watch('gasBill') && (
+          <div className='mt-2 flex items-center justify-between'>
+            <p>{watch('gasBill')?.name}</p>
+            <Button type='button' variant='destructive' size='sm' onClick={() => setValue('gasBill', null)}>
+              <Trash2 className='h-4 w-4' />
+            </Button>
+          </div>
+        )}
+        {watch('gasBill') && (
+          <div className='mt-2'>
+            {watch('gasBill')?.type.startsWith('image/') ? (
+              <Image src={URL.createObjectURL(watch('gasBill') as File)} alt="Gas Bill" width={200} height={200} className='object-contain' />
+            ) : (
+              <p>File uploaded: {watch('gasBill')?.name}</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  const renderLocationMap = () => {
+    if (!isLoaded) return <div>Loading map...</div>
+
+    return (
+      <div className='space-y-6'>
+        <div>
+          <Label htmlFor='address'>Address</Label>
+          <div className='flex items-center space-x-2'>
+            <Input id='address' {...register('address')} />
+            <Button type='button' onClick={() => {
+              const geocoder = new google.maps.Geocoder()
+              geocoder.geocode({ address: watch('address') }, (results, status) => {
+                if (status === 'OK' && results?.[0]) {
+                  const { lat, lng } = results[0].geometry.location
+                  setValue('latitude', lat())
+                  setValue('longitude', lng())
+                }
+              })
+            }}>
+              <MapPin className='mr-2 h-4 w-4' /> Locate
+            </Button>
+          </div>
+        </div>
+        <div style={{ height: '400px', width: '100%' }}>
+          <GoogleMap
+            center={{ lat: watch('latitude'), lng: watch('longitude') }}
+            zoom={15}
+            mapContainerStyle={{ width: '100%', height: '100%' }}
+            options={{
+              restriction: {
+                latLngBounds: {
+                  north: 37.084107,
+                  south: 23.6345,
+                  west: 60.872955,
+                  east: 77.840516
+                },
+                strictBounds: true
+              }
+            }}
+            onClick={(e) => {
+              if (e.latLng) {
+                setValue('latitude', e.latLng.lat())
+                setValue('longitude', e.latLng.lng())
+              }
+            }}
+          >
+            <Marker position={{ lat: watch('latitude'), lng: watch('longitude') }} />
+          </GoogleMap>
+        </div>
+      </div>
+    )
+  }
+
+  const renderSummary = () => (
     <Card className='w-full'>
       <CardContent className='p-6'>
         <h3 className='text-2xl font-bold mb-6 text-center'>Summary</h3>
-        <div className='flex justify-center mb-6'>
-          {hostelImage ? (
-            <Avatar className='w-32 h-32'>
-              <AvatarImage
-                src={URL.createObjectURL(hostelImage)}
-                alt='Hostel Logo'
-              />
-              <AvatarFallback>Logo</AvatarFallback>
-            </Avatar>
-          ) : (
-            <div className='w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center'>
-              <ImageIcon className='w-16 h-16 text-gray-400' />
+        <Carousel className="w-full max-w-xs mx-auto mb-6">
+          <CarouselContent>
+            {watch('hostelImages')?.map((image, index) => (
+              <CarouselItem key={index}>
+                <div className="p-1">
+                  <Card>
+                    <CardContent className="flex aspect-square items-center justify-center p-6">
+                      <Image src={URL.createObjectURL(image)} alt={`Hostel Image ${index + 1}`} width={200} height={200} className="object-cover" />
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+        <div className='grid md:grid-cols-2 gap-6'>
+          <div>
+            <h4 className='font-semibold mb-4'>Hostel Information</h4>
+            <p><span className='font-medium'>Name:</span> {watch('hostelName')}</p>
+            <p><span className='font-medium'>Location:</span> {watch('city')}, {watch('province')}, {watch('country')}</p>
+            <p><span className='font-medium'>Zip Code:</span> {watch('zipCode')}</p>
+            <p><span className='font-medium'>Address:</span> {watch('address')}</p>
+            <p><span className='font-medium'>Hostel Type:</span> {watch('type')}</p>
+            <p><span className='font-medium'>Category:</span> {watch('category')}</p>
+            <p><span className='font-medium'>CNIC:</span> {watch('cnic')}</p>
+            <p><span className='font-medium'>Phone:</span> {watch('phone')}</p>
+          </div>
+          <div>
+            <h4 className='font-semibold mb-4'>Room Information</h4>
+            {watch('rooms').map((room, index) => (
+              <div key={index} className='mb-4'>
+                <p><span className='font-medium'>Room {index + 1}:</span> {room.numberOfRooms} room(s), {room.bedCount} bed(s), ${room.price}/bed</p>
+                <div className='mt-2 grid grid-cols-3 gap-2'>
+                  {room.images && room.images.map((image, imageIndex) => (
+                    <Image 
+                      key={imageIndex}
+                      src={URL.createObjectURL(image)}
+                      alt={`Room ${index + 1} Image ${imageIndex + 1}`}
+                      width={100}
+                      height={100}
+                      className='object-cover rounded-md'
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className='mt-6'>
+          <h4 className='font-semibold mb-2'>Facilities</h4>
+          <ul className='list-disc list-inside grid grid-cols-2 gap-2'>
+            {Object.entries(facilitiesData)
+              .filter(([_, value]) => value)
+              .map(([key]) => (
+                <li key={key}>
+                  {key.replace(/([A-Z])/g, ' PKR1').replace(/^./, str => str.toUpperCase())}
+                </li>
+              ))}
+          </ul>
+        </div>
+        <div className='mt-6'>
+          <h4 className='font-semibold mb-2'>Uploaded Bills</h4>
+          {watch('electricityBill') && (
+            <div className='mb-2'>
+              <p>Electricity Bill: {watch('electricityBill')?.name}</p>
+              {watch('electricityBill')?.type.startsWith('image/') && (
+                <Image src={URL.createObjectURL(watch('electricityBill') as File)} alt="Electricity Bill" width={200} height={200} className='object-contain mt-2' />
+              )}
+            </div>
+          )}
+          {watch('gasBill') && (
+            <div>
+              <p>Gas Bill: {watch('gasBill')?.name}</p>
+              {watch('gasBill')?.type.startsWith('image/') && (
+                <Image src={URL.createObjectURL(watch('gasBill') as File)} alt="Gas Bill" width={200} height={200} className='object-contain mt-2' />
+              )}
             </div>
           )}
         </div>
-        <div className='grid md:grid-cols-2 gap-6'>
-          <div>
-            <h4 className='font-semibold mb-4'>Uploaded Images</h4>
-            {imageUploadData.roomImages &&
-            imageUploadData.roomImages.length > 0 ? (
-              <Carousel className='w-full max-w-xs mx-auto'>
-                <CarouselContent>
-                  {imageUploadData.roomImages.map((file, index) => (
-                    <CarouselItem key={index}>
-                      <div className='p-1'>
-                        <div className='flex aspect-square items-center justify-center p-6'>
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`Hostel ${index + 1}`}
-                            className='w-full h-full object-cover rounded-md'
-                          />
-                        </div>
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-            ) : (
-              <p className='text-muted-foreground'>No images uploaded</p>
-            )}
-          </div>
-          <div className='space-y-6'>
-            <div>
-              <h4 className='font-semibold mb-2'>Hostel Information</h4>
-              <p>
-                <span className='font-medium'>Name:</span>{" "}
-                {hostelData.hostelName}
-              </p>
-              <p>
-                <span className='font-medium'>Owner:</span> {hostelData.ownerId}
-              </p>
-              <p>
-                <span className='font-medium'>Phone:</span> {hostelData.phone}
-              </p>
-              <p>
-                <span className='font-medium'>Location:</span> {hostelData.city}
-                , {hostelData.province}, {hostelData.country}
-              </p>
-              <p>
-                <span className='font-medium'>Zip Code:</span>{" "}
-                {hostelData.zipCode}
-              </p>
-              <p>
-                <span className='font-medium'>Hostel Type:</span>{" "}
-                {hostelData.type}
-              </p>
-              <p>
-                <span className='font-medium'>CNIC:</span> {hostelData.cnic}
-              </p>
-            </div>
-            <div>
-              <h4 className='font-semibold mb-2'>Room Information</h4>
-              <p>
-                <span className='font-medium'>Total Rooms:</span> {rooms.length}
-              </p>
-              <p>
-                <span className='font-medium'>Total Beds:</span>{" "}
-                {rooms.reduce(
-                  (acc, room) => acc + room.numberOfRooms * room.beds,
-                  0
-                )}
-              </p>
-              <p>
-                <span className='font-medium'>Room Types:</span>{" "}
-                {[
-                  ...Array.from(
-                    new Set(rooms.map((room) => `${room.beds}-Bed`))
-                  ),
-                ].join(", ")}
-              </p>
-              {rooms.map((room) => (
-                <p key={room.id}>
-                  <span className='font-medium'>
-                    {room.beds}-Bed Room Price:
-                  </span>{" "}
-                  ${room.price}
-                </p>
-              ))}
-              <p>
-                <span className='font-medium'>Payment Methods:</span>{" "}
-                {/* Add your payment methods here */}
-              </p>
-            </div>
-            <div>
-              <h4 className='font-semibold mb-2'>Facilities</h4>
-              <ul className='list-disc list-inside'>
-                {Object.entries(facilitiesData)
-                  .filter(([_, value]) => value)
-                  .map(([key]) => (
-                    <li key={key}>
-                      {key
-                        .replace(/([A-Z])/g, " $1")
-                        .replace(/^./, (str) => str.toUpperCase())}
-                    </li>
-                  ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className='font-semibold mb-2'>Description</h4>
-              <p>{hostelData.description || "No description provided."}</p>
-            </div>
-          </div>
+        <div className='mt-6'>
+          <h4 className='font-semibold mb-2'>Location</h4>
+          <p>Latitude: {watch('latitude')}</p>
+          <p>Longitude: {watch('longitude')}</p>
+        </div>
+        <div className='mt-6'>
+          <h4 className='font-semibold mb-2'>Description</h4>
+          <p>{watch('description') || 'No description provided.'}</p>
         </div>
       </CardContent>
     </Card>
-  );
-
-  const addRoom = () => {
-    setRooms((prevRooms) => {
-      const newRoom = {
-        id: prevRooms.length + 1,
-        beds: 1,
-        numberOfRooms: 1,
-        price: 0,
-      };
-      const updatedRooms = [...prevRooms, newRoom];
-      setRoomData({ roomDetails: updatedRooms });
-      return updatedRooms;
-    });
-  };
-
-  const removeRoom = (id: number) => {
-    setRooms((prevRooms) => {
-      const updatedRooms = prevRooms.filter((room) => room.id !== id);
-      setRoomData({ roomDetails: updatedRooms });
-      return updatedRooms;
-    });
-  };
-
-  const updateRoom = (id: number, field: keyof RoomDetail, value: number) => {
-    setRooms((prevRooms) => {
-      const updatedRooms = prevRooms.map((room) =>
-        room.id === id ? { ...room, [field]: value } : room
-      );
-      setRoomData({ roomDetails: updatedRooms });
-      return updatedRooms;
-    });
-  };
+  )
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className='space-y-6 max-w-4xl mx-auto p-6 bg-white rounded-lg shadow'
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6 max-w-4xl mx-auto p-6 bg-white rounded-lg shadow'>
       <h2 className='text-2xl font-bold text-center mb-6'>
-        {step === 1
-          ? "Hostel Registration"
-          : step === 2
-          ? "Room Details"
-          : step === 3
-          ? "Facilities"
-          : "Summary"}
+        {step === 1 ? "Personal Details" :
+         step === 2 ? "Room Details" :
+         step === 3 ? "Facilities" :
+         step === 4 ? "Bills Upload" :
+         step === 5 ? "Location" :
+         "Summary"}
       </h2>
 
-      {step === 1
-        ? renderHostelRegistrationStep()
-        : step === 2
-        ? renderRoomDetailsStep()
-        : step === 3
-        ? renderFacilitiesStep()
-        : renderSummaryStep()}
+      {step === 1 ? renderPersonalDetails() :
+       step === 2 ? renderRoomDetails() :
+       step === 3 ? renderFacilitiesStep():
+       step === 4 ? renderBillsUpload() :
+       step === 5 ? renderLocationMap() :
+       renderSummary()}
 
       <div className='flex justify-between gap-4'>
         {step > 1 && (
-          <Button
-            type='button'
-            variant='outline'
-            onClick={handleBack}
-          >
+          <Button type='button' variant='outline' onClick={handleBack}>
             Back
           </Button>
         )}
-        <Button
-          type='submit'
-          className={step === 1 ? "w-full" : "flex-1"}
-        >
-          {step === 4 ? "Request Registration" : "Continue"}
+        <Button type='submit' className={step === 1 ? 'w-full' : 'flex-1'}>
+          {step === 6 ? 'Submit Registration' : 'Continue'}
         </Button>
       </div>
     </form>
-  );
+  )
 }

@@ -183,6 +183,13 @@ export default function HostelRegistrationForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    //processing room data
+    const processedRoomData = roomData.roomDetails.map((room: any) => ({
+      beds: room.beds,
+      price: room.price,
+      roomImages: room.roomImages || [],
+    }));
+    
     if (step < 5) {
       setStep((prev) => prev + 1);
     } else {
@@ -195,7 +202,7 @@ export default function HostelRegistrationForm() {
         "hostelData",
         JSON.stringify({ ...hostelData, ownerId: userId })
       );
-      formData.append("roomData", JSON.stringify(roomData));
+      formData.append("roomData", JSON.stringify(processedRoomData));
       formData.append("facilitiesData", JSON.stringify(selectedFacilities));
       imageUploadData.roomImages &&
         imageUploadData.roomImages.forEach((image) =>

@@ -20,6 +20,7 @@ export async function createHostel(formData: FormData, userId: string) {
     const roomDetails = hostelData.description;
     // const images = Array.from(formData.getAll("hostelImages")) as Array<string>; // Changed to hostelImages
 
+    
     // Validation: Check for missing required fields
     if (!userId) {
       console.log('userId not found');

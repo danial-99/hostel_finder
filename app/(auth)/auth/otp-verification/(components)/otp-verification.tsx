@@ -17,7 +17,12 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+
+
 import z from "zod";
+import { optVerification } from "@/actions/authen/otpVerfiy";
 
 const formSchema = z.object({
   otp: z.string(),
@@ -33,7 +38,24 @@ const OTPVerificationForm = () => {
 
   const { reset, handleSubmit } = form;
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
+    const {toast} = useToast();
+    const router = useRouter();
+    const res = await optVerification(data);
+    if(res){
+      toast({
+        title: "Verification Successful",
+        description: "Your account has been verified successfully. Login to your account.",
+        variant: "default",
+      });
+      router.push("/auth/login");
+    }else{
+      toast({
+        title: "OPT verification failed!",
+        description: "OPT verification failed!",
+        variant: "default",
+      });
+    }
     console.log(data, "form data");
   };
 

@@ -117,7 +117,7 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
       const mailOptions: SendMailOptions = {
         from: 'uisrar293@gmail.com', // Replace with your sender email
         to: email,
-        subject: 'Booking Request Rejected',
+        subject: 'OTP Verification, Hostel Finder',
         text: 'OTP Verification, Hostel Finder',
         html: `<p>Dear User,</p>
                <p>This you OTP for acount verification: <strong>${otp}</strong></p>

@@ -8,8 +8,7 @@ export async function middleware(request: NextRequest) {
   // Allow access to the root page and auth folder for all users without token check
   if (url === "/" || url.startsWith("/auth/")) {
     return NextResponse.next();
-  }
-
+  } 
   // Check for token only if not accessing root or auth pages
   const token = request.cookies.get("accessToken");
 
@@ -44,7 +43,8 @@ export async function middleware(request: NextRequest) {
       }else {
         return NextResponse.redirect(new URL("/accessDenied", request.url));
       }
-    } else {
+    }
+    else {
       return NextResponse.redirect(new URL("/accessDenied", request.url));
     }
   } catch (error) {

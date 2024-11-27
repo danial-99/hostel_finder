@@ -29,6 +29,8 @@ const formSchema = z.object({
 });
 
 const OTPVerificationForm = () => {
+  const {toast} = useToast();
+  const router = useRouter();
   const form = useForm<any>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,8 +41,6 @@ const OTPVerificationForm = () => {
   const { reset, handleSubmit } = form;
 
   const onSubmit = async (data: any) => {
-    const {toast} = useToast();
-    const router = useRouter();
     const res = await optVerification(data);
     if(res){
       toast({
@@ -53,7 +53,7 @@ const OTPVerificationForm = () => {
       toast({
         title: "OPT verification failed!",
         description: "OPT verification failed!",
-        variant: "default",
+        variant: "destructive",
       });
     }
     console.log(data, "form data");

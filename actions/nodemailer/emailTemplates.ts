@@ -120,7 +120,7 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
         subject: 'OTP Verification, Hostel Finder',
         text: 'OTP Verification, Hostel Finder',
         html: `<p>Dear User,</p>
-               <p>This you OTP for acount verification: <strong>${otp}</strong></p>
+               <p>This is your OTP for email verification: <strong>${otp}</strong></p>
                <p>Best regards,<br>Team Hostel Management</p>`,
       };
 

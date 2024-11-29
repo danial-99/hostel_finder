@@ -69,10 +69,13 @@ export async function signUp(formData: FormData) {
 
     // if([name, role, email, password, termsConditions].find((t) => t))
 
-    // Check if user already exists
-    const existingUser = await prismadb.user.findUnique({
-      where: 
-          { email }});
+    //check if user already exists
+    const existingUser = await prismadb.user.findFirst({
+      where: {
+        email: email,
+        verifiction: true,
+      },
+    });
 
     if (existingUser) {
       return {
@@ -123,6 +126,14 @@ export async function signUp(formData: FormData) {
       maxAge: 15 * 60,
       sameSite: "strict",
       path: "/",
+    });
+
+    cookies().set("userEamil", email, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60,
+      sameSite: "strict",
+      path: '/',
     });
 
     return {

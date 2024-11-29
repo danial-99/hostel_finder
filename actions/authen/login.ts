@@ -28,9 +28,13 @@ export async function Login(formData: FormData) {
       };
 
     // Check if user exists
-    const existingUser = await prismadb.user.findUnique({
-      where: { email },
+    const existingUser = await prismadb.user.findFirst({
+      where: {
+        email: email,
+        verifiction: true,
+      },
     });
+    
 
     if (!existingUser) {
       return {

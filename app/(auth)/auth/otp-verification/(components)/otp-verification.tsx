@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 
 import z from "zod";
 import { optVerification } from "@/actions/authen/otpVerfiy";
+import { resendOTP } from "@/actions/authen/resendOTP";
 
 const formSchema = z.object({
   otp: z.string(),
@@ -101,7 +102,7 @@ const OTPVerificationForm = () => {
         {`Didn't received code?`}{" "}
         <Button
           variant={"link"}
-          onClick={() => console.log("code send successfully")}
+          onClick={() => resendOTP()}
           className="text-primary"
         >
           Resend

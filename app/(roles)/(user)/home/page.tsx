@@ -1,4 +1,5 @@
 import AboutUs from "@/components/user/AboutUs";
+import ContactPage from "@/components/user/Contact";
 import Footer from "@/components/user/Footer";
 import Header from "@/components/user/Header";
 import Hero from "@/components/user/Hero";
@@ -19,6 +20,7 @@ export default function Home() {
           <WhyChooseUs />
           <Testimonials />
           <MobileApp />
+          <ContactPage />
         </main>
         <Footer />
       </div>

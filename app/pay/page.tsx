@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { createPaymentIntent } from '@/actions/payment/stripeCheckout';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -50,23 +51,16 @@ const PaymentForm = ({ clientSecret }: { clientSecret: string }) => {
 
 const Payment = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // Define setError here
 
   useEffect(() => {
     const fetchClientSecret = async () => {
-      const res = await fetch('/actions/payment/stripeCheckout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ amount: 5000 }), // The amount in cents (e.g., $50.00)
-      });
-
-      if (res.ok) {
-        const { clientSecret } = await res.json();
-        setClientSecret(clientSecret);
-      } else {
+      try {
+        const secret = await createPaymentIntent(500); 
+        setClientSecret(secret);  // Set the client secret once returned
+      } catch (err) {
         setError('Failed to fetch payment intent.');
+        console.error(err);
       }
     };
 
@@ -74,7 +68,7 @@ const Payment = () => {
   }, []);
 
   if (!clientSecret) {
-    return <div>Loading...</div>;
+    return <div>{error ? error : 'Loading...'}</div>;  // Display error or loading message
   }
 
   return (

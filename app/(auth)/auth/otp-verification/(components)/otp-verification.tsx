@@ -56,6 +56,7 @@ const OTPVerificationForm = () => {
         description: "OPT verification failed!",
         variant: "destructive",
       });
+      router.push("/auth/login");
     }
     console.log(data, "form data");
   };

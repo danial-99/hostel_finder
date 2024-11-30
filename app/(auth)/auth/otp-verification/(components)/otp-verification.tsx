@@ -17,13 +17,21 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+
+
 import z from "zod";
+import { optVerification } from "@/actions/authen/otpVerfiy";
+import { resendOTP } from "@/actions/authen/resendOTP";
 
 const formSchema = z.object({
   otp: z.string(),
 });
 
 const OTPVerificationForm = () => {
+  const {toast} = useToast();
+  const router = useRouter();
   const form = useForm<any>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,7 +41,23 @@ const OTPVerificationForm = () => {
 
   const { reset, handleSubmit } = form;
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
+    const res = await optVerification(data);
+    if(res){
+      toast({
+        title: "Verification Successful",
+        description: "Your account has been verified successfully. Login to your account.",
+        variant: "default",
+      });
+      router.push("/auth/login");
+    }else{
+      toast({
+        title: "OPT verification failed!",
+        description: "OPT verification failed!",
+        variant: "destructive",
+      });
+      router.push("/auth/login");
+    }
     console.log(data, "form data");
   };
 
@@ -79,7 +103,7 @@ const OTPVerificationForm = () => {
         {`Didn't received code?`}{" "}
         <Button
           variant={"link"}
-          onClick={() => console.log("code send successfully")}
+          onClick={() => resendOTP()}
           className="text-primary"
         >
           Resend

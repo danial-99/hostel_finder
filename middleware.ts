@@ -8,8 +8,7 @@ export async function middleware(request: NextRequest) {
   // Allow access to the root page and auth folder for all users without token check
   if (url === "/" || url.startsWith("/auth/")) {
     return NextResponse.next();
-  }
-
+  } 
   // Check for token only if not accessing root or auth pages
   const token = request.cookies.get("accessToken");
 
@@ -23,7 +22,9 @@ export async function middleware(request: NextRequest) {
     if (!Role) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
-
+    if(url.startsWith("/pay")){
+      return NextResponse.next();
+    }
     if (Role === "SUPER_ADMIN") {
       if (url.startsWith("/super-admin")) {
         return NextResponse.next();
@@ -39,10 +40,13 @@ export async function middleware(request: NextRequest) {
     } else if (Role === "USER") {
       if (url.startsWith("/user")) {
         return NextResponse.next();
-      } else {
+      }else if(url.startsWith("/hostels")){
+        return NextResponse.next();
+      }else {
         return NextResponse.redirect(new URL("/accessDenied", request.url));
       }
-    } else {
+    }
+    else {
       return NextResponse.redirect(new URL("/accessDenied", request.url));
     }
   } catch (error) {

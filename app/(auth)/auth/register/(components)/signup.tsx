@@ -94,7 +94,7 @@ const SignupForm = () => {
           description: "Your account has been created successfully.",
           variant: "default",
         });
-        router.push("/auth/login");
+        router.push("/auth/otp-verification");
       }
     } catch (error) {
       toast({

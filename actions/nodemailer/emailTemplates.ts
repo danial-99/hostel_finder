@@ -108,5 +108,29 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
     }
   };
 
+  const sendOtp = async (email: string | undefined, otp: string | undefined) =>{
+    if (!email || !otp) {
+      console.log('No email provided');
+      return;
+    }
+    try {
+      const mailOptions: SendMailOptions = {
+        from: 'uisrar293@gmail.com', // Replace with your sender email
+        to: email,
+        subject: 'OTP Verification, Hostel Finder',
+        text: 'OTP Verification, Hostel Finder',
+        html: `<p>Dear User,</p>
+               <p>This is your OTP for email verification: <strong>${otp}</strong></p>
+               <p>Best regards,<br>Team Hostel Management</p>`,
+      };
 
-export { sendRejectionEmail, sendApprovalEmail, sendBookingApprovalEmail, sendBookingRejectionEmail };
+      await transporter.sendMail(mailOptions);
+      return `Account verification email sent to ${email}`;
+    } catch (error) {
+      console.error('Error sending booking rejection email:', error);
+      throw new Error('Error sending booking rejection email');
+    }
+  }
+
+
+export { sendRejectionEmail, sendApprovalEmail, sendBookingApprovalEmail, sendBookingRejectionEmail, sendOtp};

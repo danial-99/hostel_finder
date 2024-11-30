@@ -21,19 +21,29 @@ const navItems = [
     icon: Building,
     label: "Register New Hostel",
     href: "/admin/hostel-details",
-  },{
+  },
+  {
     icon: Building,
     label: "Hostel Details",
     href: "/admin/myApprovedHostels",
   },
- // { icon: Calendar, label: "Facilities", href: "/facilities" },
+  {
+    icon:Calendar,
+    label: "Hostel Update",
+    href :"/admin/Hostel-Update",
+  },
   {
     icon: Users,
     label: "Booking Requests",
     href: "/admin/booking-requests",
   },
+  {
+    icon:Building,
+    label:"Room Update",
+    href:"/admin/room-details",
+  },
   { icon: Users, label: "Manage Bookings", href: "/admin/manage-bookings" },
-  { icon: CreditCard, label: "Payments", href: "/admin/payments" },
+  { icon: CreditCard, label: "Subscription", href: "/admin/Subscription" },
 ];
 
 export default function Sidebar() {

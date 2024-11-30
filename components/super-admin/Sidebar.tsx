@@ -12,8 +12,8 @@ const navItems = [
   { icon: Home, label: "Overview", href: "/super-admin/dashboard" },
   {
     icon: Building,
-    label: "Manage Amenities",
-    href: "/super-admin/manage-amenities",
+    label: "Hostel Details",
+    href: "/super-admin/hostel-details",
   },
   {
     icon: Building,

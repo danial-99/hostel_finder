@@ -1,96 +1,98 @@
 'use client'
+
+import { useState } from "react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { MapPin, Bed, Utensils, Square, Shield, Wifi, Car } from 'lucide-react'
-import Image from 'next/image'
+import Image from "next/image"
 
 interface BookingRequestCardProps {
-  hostelName: string
-  hostelType: string
-  location: string
-  rooms: number
-  kitchens: number
-  size: string
-  amenities: string[]
+  id: number
+  name: string
+  profession: string
+  email:string
+  address:string
+  phone: string
+  cnic: string
+  roomType: string
   imageUrl: string
 }
 
 export default function BookingRequestCard({
-  hostelName,
-  hostelType,
-  location,
-  rooms,
-  kitchens,
-  size,
-  amenities,
-  imageUrl
+  id,
+  name,
+  profession,
+  email,
+  address,
+  phone,
+  cnic,
+  roomType,
+  imageUrl,
 }: BookingRequestCardProps) {
+  // Default payment status is 'Unpaid'
+  const [paymentStatus, setPaymentStatus] = useState<string>("Unpaid")
 
-  const onAccept = (id: number) => {
+  const onAccept = () => {
     console.log(`Accepted booking request ${id}`)
-    // Implement accept logic here
+    // Update payment status to indicate further action is required
+    setPaymentStatus("Pending Payment")
   }
 
-  const onReject = (id: number) => {
+  const onReject = () => {
     console.log(`Rejected booking request ${id}`)
-    // Implement reject logic here
+    // Keep payment status as 'Unpaid' since the request was rejected
+    setPaymentStatus("Unpaid")
   }
+
   return (
     <Card className="w-full mb-4">
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row">
           <div className="w-full md:w-1/4 mb-4 md:mb-0">
-            <Image unoptimized width={0} height={0} src={imageUrl} alt={hostelName} className="w-full h-48 object-cover rounded-lg" />
+            <Image
+              unoptimized
+              width={0}
+              height={0}
+              src={imageUrl}
+              alt={name}
+              className="w-full h-48 object-cover rounded-lg"
+            />
           </div>
           <div className="w-full md:w-3/4 md:pl-6">
-            <h2 className="text-2xl font-bold">{hostelName}</h2>
-            <p className="text-gray-500 mb-2">{hostelType}</p>
+            <h2 className="text-2xl font-bold">{name}</h2>
+            <p className="text-gray-500 mb-2">{profession}</p>
             <div className="flex items-center mb-2">
-              <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-              <span className="text-sm text-gray-600">{location}</span>
+              <span className="text-sm text-gray-600">Phone: {phone}</span>
             </div>
-            <div className="flex justify-start items-start gap-4 mb-4">
-              <div className="flex items-center">
-                <Bed className="w-4 h-4 mr-2 text-gray-400" />
-                <span className="text-sm">{rooms} Rooms</span>
-              </div>
-              <div className="flex items-center">
-                <Utensils className="w-4 h-4 mr-2 text-gray-400" />
-                <span className="text-sm">{kitchens} Kitchen</span>
-              </div>
-              <div className="flex items-center">
-                <Square className="w-4 h-4 mr-2 text-gray-400" />
-                <span className="text-sm">{size}</span>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {amenities.includes('Security') && (
-                <div className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-                  <Shield className="w-4 h-4 mr-2 text-gray-600" />
-                  <span className="text-sm">Security</span>
-                </div>
-              )}
-              {amenities.includes('Wifi') && (
-                <div className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-                  <Wifi className="w-4 h-4 mr-2 text-gray-600" />
-                  <span className="text-sm">Wifi</span>
-                </div>
-              )}
-              {amenities.includes('Parking') && (
-                <div className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-                  <Car className="w-4 h-4 mr-2 text-gray-600" />
-                  <span className="text-sm">Parking</span>
-                </div>
-              )}
-            </div>
+            <p className="text-gray-600 mb-2">CNIC: {cnic}</p>
+            <p className="text-gray-600 mb-2">email: {email}</p>
+            <p className="text-gray-600 mb-2">address: {address}</p>
+            <p className="text-gray-600 mb-4">Room Type: {roomType}</p>
+            <p
+              className={`text-sm font-medium ${
+                paymentStatus === "Pending Payment"
+                  ? "text-blue-600"
+                  : paymentStatus === "Paid"
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {paymentStatus}
+            </p>
           </div>
         </div>
       </CardContent>
       <CardFooter className="flex justify-end space-x-2 p-6">
-        <Button variant="outline" onClick={() => onReject} className="bg-red-500 text-white hover:bg-red-600">
+        <Button
+          variant="outline"
+          onClick={onReject}
+          className="bg-red-500 text-white hover:bg-red-600"
+        >
           Reject
         </Button>
-        <Button onClick={() => onAccept} className="bg-primary text-white hover:bg-primary-dark">
+        <Button
+          onClick={onAccept}
+          className="bg-primary text-white hover:bg-primary-dark"
+        >
           Accept
         </Button>
       </CardFooter>

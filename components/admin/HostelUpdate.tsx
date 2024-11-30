@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from "@/components/ui/button"
@@ -11,18 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { toast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/useAuth"
 import { HostelType, Category } from "@prisma/client"
-import { X, Camera, Upload, MapPin } from 'lucide-react'
+import { ImageIcon, Plus, Trash2, X, Camera, Upload, MapPin } from 'lucide-react'
 import { useDropzone } from "react-dropzone"
 import Image from "next/image"
 import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api'
 
 const formSchema = z.object({
+  hostelImages: z.array(z.instanceof(File)).min(1, "At least one hostel image is required"),
   hostelName: z.string().min(1, "Hostel name is required"),
-  ownerName: z.string().min(1, "Owner name is required"),
   country: z.string().min(1, "Country is required"),
   province: z.string().min(1, "Province is required"),
   city: z.string().min(1, "City is required"),
@@ -33,16 +34,14 @@ const formSchema = z.object({
   cnic: z.string().regex(/^\d{13}$/, "CNIC must be 13 digits"),
   phone: z.string().regex(/^\+92\d{10}$/, "Phone number must be in format +92XXXXXXXXXX"),
   description: z.string().optional(),
-  hostelImages: z.array(z.instanceof(File)).min(1, "At least one hostel image is required"),
   rooms: z.array(z.object({
-    bedCount: z.number().min(1).max(4),
-    numberOfRooms: z.number().min(0, "Number of rooms must be at least 0"),
-    price: z.number().min(0, "Price must be at least 0"),
-    images: z.array(z.instanceof(File)).optional()
-  })).min(1, "At least one room type must be added"),
+    numberOfRooms: z.number().min(1, "Number of rooms must be at least 1"),
+    bedCount: z.number().min(1, "Bed count must be at least 1"),
+    price: z.number().min(1, "Price must be at least 1"),
+    images: z.array(z.instanceof(File)).optional(),
+    isAvailable: z.boolean()
+  })).min(1, "At least one room must be added"),
   facilities: z.record(z.boolean()),
-  electricityBill: z.instanceof(File).optional().nullable(),
-  gasBill: z.instanceof(File).optional().nullable(),
   latitude: z.number(),
   longitude: z.number()
 })
@@ -51,34 +50,29 @@ type FormData = z.infer<typeof formSchema>
 
 const pakistanCenter = { lat: 30.3753, lng: 69.3451 }
 
-export default function HostelRegistrationForm() {
+export default function HostelUpdateForm({ hostelId }: { hostelId: string }) {
   const { user } = useAuth()
   const userId = user?.id as string
   const [step, setStep] = useState(1)
+  const [isLoading, setIsLoading] = useState(true)
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
     libraries: ['places']
   })
 
-  const { register, control, handleSubmit, setValue, watch, formState: { errors, isValid } } = useForm<FormData>({
+  const { register, control, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       hostelImages: [],
-      rooms: [
-        { bedCount: 1, numberOfRooms: 0, price: 0, images: [] },
-        { bedCount: 2, numberOfRooms: 0, price: 0, images: [] },
-        { bedCount: 3, numberOfRooms: 0, price: 0, images: [] },
-        { bedCount: 4, numberOfRooms: 0, price: 0, images: [] }
-      ],
+      rooms: [{ numberOfRooms: 1, bedCount: 1, price: 1, images: [], isAvailable: true }],
       facilities: {},
       latitude: pakistanCenter.lat,
       longitude: pakistanCenter.lng
-    },
-    mode: 'onChange'
+    }
   })
 
-  const { fields, update, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "rooms"
   })
@@ -121,27 +115,62 @@ export default function HostelRegistrationForm() {
     UPS: false,
   })
 
+  useEffect(() => {
+    const fetchHostelData = async () => {
+      try {
+        const response = await fetch(`/api/hostels/${hostelId}`)
+        if (!response.ok) throw new Error('Failed to fetch hostel data')
+        const hostelData = await response.json()
+        
+        // Reset form with fetched data
+        reset(hostelData)
+        setFacilitiesData(hostelData.facilities)
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error fetching hostel data:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load hostel data. Please try again.",
+          variant: "destructive",
+        })
+        setIsLoading(false)
+      }
+    }
+
+    fetchHostelData()
+  }, [hostelId, reset])
+
   const onSubmit = async (data: FormData) => {
-    if (step < 6) {
+    if (step < 5) {
       setStep(prev => prev + 1)
     } else {
-      console.log(data)
-      toast({
-        title: "Success",
-        description: "Hostel registration submitted successfully",
-      })
-    }
-  }
+      setIsLoading(true)
+      try {
+        const response = await fetch(`/api/hostels/${hostelId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        })
 
-  const handleContinue = () => {
-    if (isValid) {
-      setStep(prev => Math.min(6, prev + 1))
-    } else {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields before continuing.",
-        variant: "destructive",
-      })
+        if (!response.ok) throw new Error('Failed to update hostel')
+
+        toast({
+          title: "Success",
+          description: "Hostel information updated successfully",
+          variant: "default",
+        })
+      } catch (error) {
+        console.error('Error updating hostel:', error)
+        toast({
+          title: "Error",
+          description: "Failed to update hostel information. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -151,18 +180,18 @@ export default function HostelRegistrationForm() {
     accept: { 'image/*': [] },
     onDrop: acceptedFiles => {
       const currentImages = watch('hostelImages') || []
-      setValue('hostelImages', [...currentImages, ...acceptedFiles], { shouldValidate: true })
+      setValue('hostelImages', [...currentImages, ...acceptedFiles])
     }
   })
 
   const handleFacilityChange = (facility: string, checked: boolean) => {
     setFacilitiesData(prev => ({ ...prev, [facility]: checked }))
-    setValue(`facilities.${facility}`, checked, { shouldValidate: true })
+    setValue(`facilities.${facility}`, checked)
   }
 
   useEffect(() => {
     Object.entries(facilitiesData).forEach(([key, value]) => {
-      setValue(`facilities.${key}`, value, { shouldValidate: true })
+      setValue(`facilities.${key}`, value)
     })
   }, [facilitiesData, setValue])
 
@@ -180,7 +209,7 @@ export default function HostelRegistrationForm() {
         <div className='mt-4 grid grid-cols-3 gap-4'>
           {watch('hostelImages')?.map((file, index) => (
             <div key={index} className='relative'>
-              <Image src={URL.createObjectURL(file)} alt={`Hostel Image ${index + 1}`} width={100} height={100} className='object-cover rounded-md' />
+              <Image src={typeof file === 'string' ? file : URL.createObjectURL(file)} alt={`Hostel Image ${index + 1}`} width={100} height={100} className='object-cover rounded-md' />
               <Button
                 type='button'
                 variant='destructive'
@@ -190,8 +219,7 @@ export default function HostelRegistrationForm() {
                   const currentImages = watch('hostelImages') || []
                   setValue(
                     'hostelImages',
-                    currentImages.filter((_, i) => i !== index),
-                    { shouldValidate: true }
+                    currentImages.filter((_, i) => i !== index)
                   )
                 }}
               >
@@ -200,7 +228,6 @@ export default function HostelRegistrationForm() {
             </div>
           ))}
         </div>
-        {errors.hostelImages && <p className='text-red-500'>{errors.hostelImages.message}</p>}
       </div>
 
       <div>
@@ -209,52 +236,34 @@ export default function HostelRegistrationForm() {
         {errors.hostelName && <p className='text-red-500'>{errors.hostelName.message}</p>}
       </div>
 
-      <div>
-        <Label htmlFor='ownerName'>Owner Name</Label>
-        <Input id='ownerName' {...register('ownerName')} />
-        {errors.ownerName && <p className='text-red-500'>{errors.ownerName.message}</p>}
-      </div>
-
       <div className='grid grid-cols-2 gap-4'>
         <div>
           <Label htmlFor='country'>Country</Label>
-          <Controller
-            name="country"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder='Select country' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='pakistan'>Pakistan</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <Select onValueChange={value => setValue('country', value)} defaultValue={watch('country')}>
+            <SelectTrigger>
+              <SelectValue placeholder='Select country' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='pakistan'>Pakistan</SelectItem>
+            </SelectContent>
+          </Select>
           {errors.country && <p className='text-red-500'>{errors.country.message}</p>}
         </div>
 
         <div>
           <Label htmlFor='province'>Province</Label>
-          <Controller
-            name="province"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder='Select Province' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='Punjab'>Punjab</SelectItem>
-                  <SelectItem value='Sindh'>Sindh</SelectItem>
-                  <SelectItem value='Balochistan'>Balochistan</SelectItem>
-                  <SelectItem value='KPK'>KPK</SelectItem>
-                  <SelectItem value='GB'>Gilgit Baltistan</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <Select onValueChange={value => setValue('province', value)} defaultValue={watch('province')}>
+            <SelectTrigger>
+              <SelectValue placeholder='Select Province' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='Punjab'>Punjab</SelectItem>
+              <SelectItem value='Sindh'>Sindh</SelectItem>
+              <SelectItem value='Balochistan'>Balochistan</SelectItem>
+              <SelectItem value='KPK'>KPK</SelectItem>
+              <SelectItem value='GB'>Gilgit Baltistan</SelectItem>
+            </SelectContent>
+          </Select>
           {errors.province && <p className='text-red-500'>{errors.province.message}</p>}
         </div>
       </div>
@@ -282,43 +291,31 @@ export default function HostelRegistrationForm() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor='hostelType'>Hostel Type</Label>
-          <Controller
-            name="type"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder='Select hostel type' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={HostelType.MALE}>Male</SelectItem>
-                  <SelectItem value={HostelType.FEMALE}>Female</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <Select onValueChange={value => setValue('type', value as HostelType)} defaultValue={watch('type')}>
+            <SelectTrigger>
+              <SelectValue placeholder='Select hostel type' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={HostelType.MALE}>Male</SelectItem>
+              <SelectItem value={HostelType.FEMALE}>Female</SelectItem>
+            </SelectContent>
+          </Select>
           {errors.type && <p className='text-red-500'>{errors.type.message}</p>}
         </div>
 
         <div>
           <Label htmlFor='category'>Hostel Category</Label>
-          <Controller
-            name="category"
-            control={control}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder='Select hostel category' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={Category.STUDENT}>Students</SelectItem>
-                  <SelectItem value={Category.PROFESSIONAL}>Professionals</SelectItem>
-                  <SelectItem value={Category.FAMILY}>Family</SelectItem>
-                  <SelectItem value={Category.OTHER}>Others</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <Select onValueChange={value => setValue('category', value as Category)} defaultValue={watch('category')}>
+            <SelectTrigger>
+              <SelectValue placeholder='Select hostel category' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={Category.STUDENT}>Students</SelectItem>
+              <SelectItem value={Category.PROFESSIONAL}>Professionals</SelectItem>
+              <SelectItem value={Category.FAMILY}>Family</SelectItem>
+              <SelectItem value={Category.OTHER}>Others</SelectItem>
+            </SelectContent>
+          </Select>
           {errors.category && <p className='text-red-500'>{errors.category.message}</p>}
         </div>
       </div>
@@ -348,34 +345,65 @@ export default function HostelRegistrationForm() {
       {fields.map((field, index) => (
         <Card key={field.id} className='p-4'>
           <CardContent className='space-y-4'>
-            <h3 className='text-lg font-semibold'>{field.bedCount} Bed Room</h3>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='flex justify-between items-center'>
+              <h3 className='text-lg font-semibold'>Room {index + 1}</h3>
+              {fields.length > 1 && (
+                <Button variant='destructive' size='icon' onClick={() => remove(index)}>
+                  <Trash2 className='h-4 w-4' />
+                </Button>
+              )}
+            </div>
+            <div className='grid grid-cols-3 gap-4'>
               <div>
                 <Label htmlFor={`rooms.${index}.numberOfRooms`}>Number of Rooms</Label>
                 <Input
                   id={`rooms.${index}.numberOfRooms`}
                   type='number'
-                  min={0}
+                  min={1}
                   {...register(`rooms.${index}.numberOfRooms` as const, { 
                     valueAsNumber: true,
-                    min: 0
+                    min: 1
                   })}
                 />
                 {errors.rooms?.[index]?.numberOfRooms && <p className='text-red-500'>{errors.rooms[index]?.numberOfRooms?.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor={`rooms.${index}.bedCount`}>Number of Beds</Label>
+                <Select onValueChange={value => setValue(`rooms.${index}.bedCount`, parseInt(value))} defaultValue={watch(`rooms.${index}.bedCount`)?.toString()}>
+                  <SelectTrigger id={`rooms.${index}.bedCount`}>
+                    <SelectValue placeholder='Select bed count' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4].map(count => (
+                      <SelectItem key={count} value={count.toString()}>
+                        {count} {count === 1 ? 'Bed' : 'Beds'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.rooms?.[index]?.bedCount && <p className='text-red-500'>{errors.rooms[index]?.bedCount?.message}</p>}
               </div>
               <div>
                 <Label htmlFor={`rooms.${index}.price`}>Price per Bed</Label>
                 <Input
                   id={`rooms.${index}.price`}
                   type='number'
-                  min={0}
+                  min={1}
                   {...register(`rooms.${index}.price` as const, { 
                     valueAsNumber: true,
-                    min: 0
+                    min: 1
                   })}
                 />
                 {errors.rooms?.[index]?.price && <p className='text-red-500'>{errors.rooms[index]?.price?.message}</p>}
               </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id={`rooms.${index}.isAvailable`}
+                checked={watch(`rooms.${index}.isAvailable`)}
+                onCheckedChange={(checked) => setValue(`rooms.${index}.isAvailable`, checked)}
+              />
+              <Label htmlFor={`rooms.${index}.isAvailable`}>Room Available</Label>
             </div>
             <div>
               <Label>Room Images</Label>
@@ -388,7 +416,7 @@ export default function HostelRegistrationForm() {
                     const files = e.target.files
                     if (files) {
                       const currentImages = watch(`rooms.${index}.images`) || []
-                      setValue(`rooms.${index}.images`, [...currentImages, ...Array.from(files)], { shouldValidate: true })
+                      setValue(`rooms.${index}.images`, [...currentImages, ...Array.from(files)])
                     }
                   }}
                   className='hidden'
@@ -404,7 +432,7 @@ export default function HostelRegistrationForm() {
               <div className='mt-4 grid grid-cols-3 gap-4'>
                 {watch(`rooms.${index}.images`)?.map((file, fileIndex) => (
                   <div key={fileIndex} className='relative'>
-                    <Image src={URL.createObjectURL(file)} alt={`${field.bedCount} Bed Room Image ${fileIndex + 1}`} width={100} height={100} className='object-cover rounded-md' />
+                    <Image src={typeof file === 'string' ? file : URL.createObjectURL(file)} alt={`Room ${index + 1} Image ${fileIndex + 1}`} width={100} height={100} className='object-cover rounded-md' />
                     <Button
                       type='button'
                       variant='destructive'
@@ -414,8 +442,7 @@ export default function HostelRegistrationForm() {
                         const currentImages = watch(`rooms.${index}.images`) || []
                         setValue(
                           `rooms.${index}.images`,
-                          currentImages.filter((_, i) => i !== fileIndex),
-                          { shouldValidate: true }
+                          currentImages.filter((_, i) => i !== fileIndex)
                         )
                       }}
                     >
@@ -428,6 +455,9 @@ export default function HostelRegistrationForm() {
           </CardContent>
         </Card>
       ))}
+      <Button type='button' onClick={() => append({ numberOfRooms: 1, bedCount: 1, price: 1, images: [], isAvailable: true })} className='w-full'>
+        <Plus className='mr-2 h-4 w-4' /> Add More Rooms
+      </Button>
     </div>
   )
 
@@ -467,88 +497,6 @@ export default function HostelRegistrationForm() {
     </Card>
   )
 
-  const renderBillsUpload = () => (
-    <div className='space-y-6'>
-      <div>
-        <Label htmlFor='electricityBill'>Electricity Bill</Label>
-        <div className='mt-2 flex items-center space-x-4'>
-          <Input
-            id='electricityBill'
-            type='file'
-            accept='image/*,application/pdf'
-            onChange={e => {
-              const file = e.target.files?.[0]
-              if (file) setValue('electricityBill', file, { shouldValidate: true })
-            }}
-            className='hidden'
-          />
-          <Button type='button' onClick={() => document.getElementById('electricityBill')?.click()}>
-            <Upload className='mr-2 h-4 w-4' /> Upload File
-          </Button>
-          <Button type='button' variant='outline'>
-            <Camera className='mr-2 h-4 w-4' /> Take Photo
-          </Button>
-        </div>
-        {watch('electricityBill') && (
-          <div className='mt-2 flex items-center justify-between'>
-            <p>{watch('electricityBill')?.name}</p>
-            <Button type='button' variant='destructive' size='sm' onClick={() => setValue('electricityBill', null, { shouldValidate: true })}>
-              <X className='h-4 w-4' />
-            </Button>
-          </div>
-        )}
-        {watch('electricityBill') && (
-          <div className='mt-2'>
-            {watch('electricityBill')?.type.startsWith('image/') ? (
-              <Image src={URL.createObjectURL(watch('electricityBill') as File)} alt="Electricity Bill" width={200} height={200} className='object-contain' />
-            ) : (
-              <p>File uploaded: {watch('electricityBill')?.name}</p>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor='gasBill'>Gas Bill</Label>
-        <div className='mt-2 flex items-center space-x-4'>
-          <Input
-            id='gasBill'
-            type='file'
-            accept='image/*,application/pdf'
-            onChange={e => {
-              const file = e.target.files?.[0]
-              if (file) setValue('gasBill', file, { shouldValidate: true })
-            }}
-            className='hidden'
-          />
-          <Button type='button' onClick={() => document.getElementById('gasBill')?.click()}>
-            <Upload className='mr-2 h-4 w-4' /> Upload File
-          </Button>
-          <Button type='button' variant='outline'>
-            <Camera className='mr-2 h-4 w-4' /> Take Photo
-          </Button>
-        </div>
-        {watch('gasBill') && (
-          <div className='mt-2 flex items-center justify-between'>
-            <p>{watch('gasBill')?.name}</p>
-            <Button type='button' variant='destructive' size='sm' onClick={() => setValue('gasBill', null, { shouldValidate: true })}>
-              <X className='h-4 w-4' />
-            </Button>
-          </div>
-        )}
-        {watch('gasBill') && (
-          <div className='mt-2'>
-            {watch('gasBill')?.type.startsWith('image/') ? (
-              <Image src={URL.createObjectURL(watch('gasBill') as File)} alt="Gas Bill" width={200} height={200} className='object-contain' />
-            ) : (
-              <p>File uploaded: {watch('gasBill')?.name}</p>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
   const renderLocationMap = () => {
     if (!isLoaded) return <div>Loading map...</div>
 
@@ -563,8 +511,8 @@ export default function HostelRegistrationForm() {
               geocoder.geocode({ address: watch('address') }, (results, status) => {
                 if (status === 'OK' && results?.[0]) {
                   const { lat, lng } = results[0].geometry.location
-                  setValue('latitude', lat(), { shouldValidate: true })
-                  setValue('longitude', lng(), { shouldValidate: true })
+                  setValue('latitude', lat())
+                  setValue('longitude', lng())
                 }
               })
             }}>
@@ -590,8 +538,8 @@ export default function HostelRegistrationForm() {
             }}
             onClick={(e) => {
               if (e.latLng) {
-                setValue('latitude', e.latLng.lat(), { shouldValidate: true })
-                setValue('longitude', e.latLng.lng(), { shouldValidate: true })
+                setValue('latitude', e.latLng.lat())
+                setValue('longitude', e.latLng.lng())
               }
             }}
           >
@@ -613,7 +561,7 @@ export default function HostelRegistrationForm() {
                 <div className="p-1">
                   <Card>
                     <CardContent className="flex aspect-square items-center justify-center p-6">
-                      <Image src={URL.createObjectURL(image)} alt={`Hostel Image ${index + 1}`} width={200} height={200} className="object-cover" />
+                      <Image src={typeof image === 'string' ? image : URL.createObjectURL(image)} alt={`Hostel Image ${index + 1}`} width={200} height={200} className="object-cover" />
                     </CardContent>
                   </Card>
                 </div>
@@ -627,7 +575,6 @@ export default function HostelRegistrationForm() {
           <div>
             <h4 className='font-semibold mb-4'>Hostel Information</h4>
             <p><span className='font-medium'>Name:</span> {watch('hostelName')}</p>
-            <p><span className='font-medium'>Owner:</span> {watch('ownerName')}</p>
             <p><span className='font-medium'>Location:</span> {watch('city')}, {watch('province')}, {watch('country')}</p>
             <p><span className='font-medium'>Zip Code:</span> {watch('zipCode')}</p>
             <p><span className='font-medium'>Address:</span> {watch('address')}</p>
@@ -639,23 +586,22 @@ export default function HostelRegistrationForm() {
           <div>
             <h4 className='font-semibold mb-4'>Room Information</h4>
             {watch('rooms').map((room, index) => (
-              room.numberOfRooms > 0 && (
-                <div key={index} className='mb-4'>
-                  <p><span className='font-medium'>{room.bedCount} Bed Room:</span> {room.numberOfRooms} room(s), ${room.price}/bed</p>
-                  <div className='mt-2 grid grid-cols-3 gap-2'>
-                    {room.images && room.images.map((image, imageIndex) => (
-                      <Image 
-                        key={imageIndex}
-                        src={URL.createObjectURL(image)}
-                        alt={`${room.bedCount} Bed Room Image ${imageIndex + 1}`}
-                        width={100}
-                        height={100}
-                        className='object-cover rounded-md'
-                      />
-                    ))}
-                  </div>
+              <div key={index} className='mb-4'>
+                <p><span className='font-medium'>Room {index + 1}:</span> {room.numberOfRooms} room(s), {room.bedCount} bed(s), ${room.price}/bed</p>
+                <p><span className='font-medium'>Availability:</span> {room.isAvailable ? 'Available' : 'Not Available'}</p>
+                <div className='mt-2 grid grid-cols-3 gap-2'>
+                  {room.images && room.images.map((image, imageIndex) => (
+                    <Image 
+                      key={imageIndex}
+                      src={typeof image === 'string' ? image : URL.createObjectURL(image)}
+                      alt={`Room ${index + 1} Image ${imageIndex + 1}`}
+                      width={100}
+                      height={100}
+                      className='object-cover rounded-md'
+                    />
+                  ))}
                 </div>
-              )
+              </div>
             ))}
           </div>
         </div>
@@ -672,25 +618,6 @@ export default function HostelRegistrationForm() {
           </ul>
         </div>
         <div className='mt-6'>
-          <h4 className='font-semibold mb-2'>Uploaded Bills</h4>
-          {watch('electricityBill') && (
-            <div className='mb-2'>
-              <p>Electricity Bill: {watch('electricityBill')?.name}</p>
-              {watch('electricityBill')?.type.startsWith('image/') && (
-                <Image src={URL.createObjectURL(watch('electricityBill') as File)} alt="Electricity Bill" width={200} height={200} className='object-contain mt-2' />
-              )}
-            </div>
-          )}
-          {watch('gasBill') && (
-            <div>
-              <p>Gas Bill: {watch('gasBill')?.name}</p>
-              {watch('gasBill')?.type.startsWith('image/') && (
-                <Image src={URL.createObjectURL(watch('gasBill') as File)} alt="Gas Bill" width={200} height={200} className='object-contain mt-2' />
-              )}
-            </div>
-          )}
-        </div>
-        <div className='mt-6'>
           <h4 className='font-semibold mb-2'>Location</h4>
           <p>Latitude: {watch('latitude')}</p>
           <p>Longitude: {watch('longitude')}</p>
@@ -703,22 +630,24 @@ export default function HostelRegistrationForm() {
     </Card>
   )
 
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6 max-w-4xl mx-auto p-6 bg-white rounded-lg shadow'>
       <h2 className='text-2xl font-bold text-center mb-6'>
-        {step === 1 ? "Personal Details" :
-         step === 2 ? "Room Details" :
-         step === 3 ? "Facilities" :
-         step === 4 ? "Bills Upload" :
-         step === 5 ? "Location" :
-         "Summary"}
+        {step === 1 ? "Update Personal Details" :
+         step === 2 ? "Update Room Details" :
+         step === 3 ? "Update Facilities" :
+         step === 4 ? "Update Location" :
+         "Review Updates"}
       </h2>
 
       {step === 1 ? renderPersonalDetails() :
        step === 2 ? renderRoomDetails() :
        step === 3 ? renderFacilitiesStep() :
-       step === 4 ? renderBillsUpload() :
-       step === 5 ? renderLocationMap() :
+       step === 4 ? renderLocationMap() :
        renderSummary()}
 
       <div className='flex justify-between gap-4'>
@@ -727,17 +656,10 @@ export default function HostelRegistrationForm() {
             Back
           </Button>
         )}
-        {step < 6 ? (
-          <Button type='button' onClick={handleContinue} className={step === 1 ? 'w-full' : 'flex-1'}>
-            Continue
-          </Button>
-        ) : (
-          <Button type='submit' className='flex-1'>
-            Submit Registration
-          </Button>
-        )}
+        <Button type='submit' className={step === 1 ? 'w-full' : 'flex-1'} disabled={isLoading}>
+          {isLoading ? 'Updating...' : step === 5 ? 'Confirm Updates' : 'Continue'}
+        </Button>
       </div>
     </form>
   )
 }
-

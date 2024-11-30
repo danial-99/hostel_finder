@@ -22,7 +22,9 @@ export async function middleware(request: NextRequest) {
     if (!Role) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
-
+    if(url.startsWith("/pay")){
+      return NextResponse.next();
+    }
     if (Role === "SUPER_ADMIN") {
       if (url.startsWith("/super-admin")) {
         return NextResponse.next();

@@ -21,8 +21,9 @@ const navItems = [
     href: "/super-admin/manage-hostels",
   },
   { icon: Users, label: "New Requests", href: "/super-admin/new-requests" },
-  { icon: Users, label: "Activities", href: "/super-admin/activities" },
+  { icon: Users, label: "Subscription Update", href: "/super-admin/activities" },
   { icon: CreditCard, label: "Payments", href: "/super-admin/payments" },
+  { icon: Users, label: "Report hostels", href:"/super-admin/reporthostels"}
 ];
 
 export default function Sidebar() {

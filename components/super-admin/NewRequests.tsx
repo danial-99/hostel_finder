@@ -1,4 +1,5 @@
 "use client";
+
 import { HostelStatusUpdate } from "@/actions/super-admin/hostelstatusupdate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";

@@ -42,7 +42,8 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
       }else if(url.startsWith("/hostels")){
         return NextResponse.next();
-      }else {
+      }
+      else {
         return NextResponse.redirect(new URL("/accessDenied", request.url));
       }
     }

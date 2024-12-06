@@ -44,7 +44,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="container mx-auto py-10 px-4">
+    <section className="container mx-auto py-10 px-4" id="contact-us">
       <h1 className="text-4xl font-bold mb-6 text-center">Contact Us</h1>
       
       <Tabs defaultValue="contact" className="max-w-3xl mx-auto">
@@ -157,7 +157,7 @@ export default function ContactPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </section>
   )
 }
 

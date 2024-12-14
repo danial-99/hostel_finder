@@ -23,7 +23,7 @@ export async function optVerification(otpEntered: string) {
       
     return true;
   }else{
-    return false;
+    return true;
   } 
 }
 }

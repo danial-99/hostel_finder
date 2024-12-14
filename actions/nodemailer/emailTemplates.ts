@@ -127,8 +127,8 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
       await transporter.sendMail(mailOptions);
       return `Account verification email sent to ${email}`;
     } catch (error) {
-      console.error('Error sending booking rejection email:', error);
-      throw new Error('Error sending booking rejection email');
+      console.error('Error sending otp:', error);
+      throw new Error('Error otp');
     }
   }
 

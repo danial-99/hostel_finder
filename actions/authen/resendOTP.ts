@@ -14,6 +14,10 @@ export async function resendOTP(){
         return otp;
     }
     const otp: string = generateFourDigitOTP().toString();
+    await prismadb.user.update({
+        where: { email },
+        data: { otp },
+      });
     const mailReponse = await sendOtp(email, otp);
     return mailReponse;
 }

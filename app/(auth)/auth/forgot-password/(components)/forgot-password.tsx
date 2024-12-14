@@ -43,7 +43,6 @@ const ForgotPasswordForm = () => {
       });
 
       const result: any = await ForgetPassword(formData);
-
       if (!result.success) {
         // Handle different error scenarios based on status code
         switch (result.status) {
@@ -82,7 +81,8 @@ const ForgotPasswordForm = () => {
           description: "OTP has been send to your email address.",
           variant: "default",
         }),
-          router.push("/otp-verification");
+        router.push("/auth/otp-verify");
+
       }
     } catch (error) {
       toast({

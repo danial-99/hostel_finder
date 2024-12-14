@@ -1,57 +1,42 @@
-"use client";
-
-import Typography from "@/components/Custom/Typography";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
-import Link from "next/link";
-import z from "zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import Typography from "@/components/Custom/Typography";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
+import { UpdatePassword } from "@/actions/authen/updatePassword";
 
 const formSchema = z.object({
-  password: z.string().refine(
-    (value) => {
-      return (
-        value.length >= 8 &&
-        /[A-Z]/.test(value) &&
-        /[!@#$%^&*()\-_+=<>?]/.test(value) &&
-        /[0-9]/.test(value)
-      );
-    },
-    {
-      message:
-        "Password must contain at least 8 characters long",
-    }
-  ),
-  confirmPassword: z.string().refine(
-    (value) => {
-      return (
-        value.length >= 8 &&
-        /[A-Z]/.test(value) &&
-        /[!@#$%^&*()\-_+=<>?]/.test(value) &&
-        /[0-9]/.test(value)
-      );
-    },
-    {
-      message:
-        "Password must contain at least 8 characters long",
-    }
-  ),
-});
+  password: z
+    .string()
+    .min(8, "Password must contain at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[!@#$%^&*()\-_+=<>?]/, "Password must contain at least one special character"),
+  
+  confirmPassword: z
+    .string()
+    .min(8, "Password must contain at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[!@#$%^&*()\-_+=<>?]/, "Password must contain at least one special character")
+    
+}).superRefine((data, ctx) => {
+  if (data.password !== data.confirmPassword) {
+    ctx.addIssue({
+      path: ["confirmPassword"],
+      message: "Passwords do not match",
+      code: z.ZodIssueCode.custom,
+    });
+  };
+})
 
-const ChangePasswordForm = () => {
-  const form = useForm<any>({
+const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       password: "",
@@ -59,24 +44,60 @@ const ChangePasswordForm = () => {
     },
   });
 
-  const { reset, handleSubmit } = form;
+  const { handleSubmit } = form;
 
-  const onSubmit = (data: any) => {
-    console.log(data, 'form data');
-  }
+  const onSubmit: SubmitHandler<any> = async (data) => {
+    try {
+      // Show a loading toast or some kind of feedback to the user
+      toast({
+        title: "Updating password...",
+        description: "Please wait while we update your password.",
+        variant: "default",
+      });
   
+      // Send the form data to the backend (assuming `updatePassword` is your API function)
+      const formData = new FormData();
+      formData.append("password", data.password);
+      const response = await UpdatePassword(formData); // Pass the actual FormData object if needed
+  
+      // Handle the backend response
+      if (response.status === 200) {
+        // Success: Show a success toast and call onSuccess
+        toast({
+          title: "Password Updated Successfully!",
+          description: response.message || "Your password has been updated.",
+          variant: "default",
+        });
+        onSuccess(); // Call onSuccess when the password update is successful
+      } else {
+        // Failure: Show an error toast based on the response message
+        toast({
+          title: "Failed to Update Password",
+          description: response.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      // Show a general error toast in case of an exception
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="mt-[30px]">
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
-            name={"password"}
+            name="password"
             render={({ field }) => (
               <FormItem className="mb-4">
                 <Input
-                  value={field.value}
-                  onChange={field.onChange}
+                  {...field}
                   type="password"
                   placeholder="New password"
                 />
@@ -88,12 +109,11 @@ const ChangePasswordForm = () => {
           />
           <FormField
             control={form.control}
-            name={"confirmPassword"}
+            name="confirmPassword"
             render={({ field }) => (
               <FormItem className="mb-4">
                 <Input
-                  value={field.value}
-                  onChange={field.onChange}
+                  {...field}
                   type="password"
                   placeholder="Confirm password"
                 />

@@ -1,11 +1,19 @@
+"use client";
 import AuthLayout from "../(components)/AuthLayout";
 import Typography from "@/components/Custom/Typography";
 import ChangePasswordForm from "./(components)/change-password";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useState } from "react";
 
 const Page = () => {
+
+  const [isPasswordChanged, setIsPasswordChanged] = useState(false);
+  const handlePasswordChangeSuccess = () => {
+    setIsPasswordChanged(true);
+  };
+
   return (
     <>
       <AuthLayout
@@ -13,7 +21,7 @@ const Page = () => {
         subTitle={"Seamless Access to Book and Manage Your Hostel Experience"}
         description="Ready to update your password? Enter a new one to keep your hostel account secure and get back to finding or managing your perfect stay"
       >
-        {false ? (
+        {!isPasswordChanged ? (
           <>
             <Typography variant="h4" className="text-[32px] font-medium">
               Change Your Password
@@ -21,7 +29,7 @@ const Page = () => {
             <Typography className="text-base font-medium text-muted-foreground mt-6">
               Enter the verification code we just sent on your email address
             </Typography>
-            <ChangePasswordForm />
+            <ChangePasswordForm onSuccess={handlePasswordChangeSuccess} />
           </>
         ) : (
           <>

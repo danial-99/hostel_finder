@@ -117,6 +117,10 @@ export async function signUp(formData: FormData) {
 
     //sending opt to user for email verification
     const otp: string = generateFourDigitOTP().toString();
+    await prismadb.user.update({
+      where: { email },
+      data: { otp },
+    });
     const mailReponse = await sendOtp(email, otp);
     
     //saving opt to cookie

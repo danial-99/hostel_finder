@@ -2,6 +2,7 @@
 import { sendEmail } from "@/helpers/email";
 import prismadb from "@/lib/prisma";
 import { generateOTP } from "@/lib/utils";
+import { sendOtp } from "../nodemailer/emailTemplates";
 
 export async function ForgetPassword(formData: FormData) {
   try {
@@ -38,12 +39,13 @@ export async function ForgetPassword(formData: FormData) {
     });
 
     // Send OTP via email
-    await sendEmail({
-      from: "alishahaman652@gmail.com",
-      to: email,
-      subject: "Confirm OTP",
-      text: "hello world",
-    });
+    // await sendEmail({
+    //   from: "alishahaman652@gmail.com",
+    //   to: email,
+    //   subject: "Confirm OTP",
+    //   text: "hello world",
+    // });
+    const mailReponse = await sendOtp(email, otp);
 
     return {
       status: 200,

@@ -33,18 +33,21 @@ DialogTrigger,
 interface HostelProfileProps {
 hostel?: {
   id: number;
-  name: string;
+  hostelName: string;
   rating: number;
   location: string;
   capacity: number;
-  image: string;
+  hostelImage: any;
+  gasBill: any;
+  electercityBill: any;
   description: string;
   facilities: string[];
   rooms: {
     name: string;
-    beds: number;
+    bedCount: number;
     price: number;
     available: boolean;
+    numberOfRooms: string;
     image: string;
   }[];
 };
@@ -67,9 +70,10 @@ type BookingFormData = z.infer<typeof bookingFormSchema>;
 
 interface Room {
 name: string;
-beds: number;
+bedCount: number;
 price: number;
 available: boolean;
+numberOfRooms: string,
 image: string;
 }
 
@@ -163,7 +167,7 @@ return (
         <div className="grid grid-cols-4 gap-4">
           <div className="col-span-2 relative aspect-[4/3]">
             <Image
-              src={hostel.image}
+              src={`data:image/jpeg;base64,${hostel.hostelImage}`}
               alt="Hostel lounge"
               className="rounded-l-xl object-cover"
               fill
@@ -171,7 +175,7 @@ return (
           </div>
           <div className="col-span-1 relative aspect-[4/3]">
             <Image
-              src="/placeholder.svg"
+              src={`data:image/jpeg;base64,${hostel.gasBill}`}
               alt="Hostel terrace"
               className="object-cover"
               fill
@@ -179,7 +183,7 @@ return (
           </div>
           <div className="col-span-1 relative aspect-[4/3]">
             <Image
-              src="/placeholder.svg"
+              src={`data:image/jpeg;base64,${hostel.electercityBill}`}
               alt="Hostel facilities"
               className="rounded-r-xl object-cover"
               fill
@@ -192,7 +196,7 @@ return (
       <div>
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold">{hostel.name}</h1>
+            <h1 className="text-3xl font-bold">{hostel.hostelName}</h1>
             <p className="text-muted-foreground mt-2">{hostel.location}</p>
           </div>
           <div className="text-right">
@@ -233,7 +237,7 @@ return (
                         <h3 className="text-lg font-semibold mb-2">{room.name}</h3>
                         <div className="grid grid-cols-1 gap-4">
                           <div className="relative aspect-video">
-                            <Image src={room.image} alt={room.name} fill className="rounded-lg object-cover" />
+                            <Image src={hostel.hostelImage} alt={room.name} fill className="rounded-lg object-cover" />
                             <Button
                               variant="secondary"
                               size="icon"
@@ -254,7 +258,7 @@ return (
                           <div className="flex flex-col justify-between">
                             <div>
                               <p className="text-sm text-muted-foreground mb-2">
-                                {room.beds === 1 ? 'Private room' : 'Shared room'} • {room.beds} bed{room.beds > 1 ? 's' : ''}
+                                {room.bedCount === 1 ? 'Private room' : 'Shared room'} • {room.bedCount} bed{room.bedCount > 1 ? 's' : ''}
                               </p>
                               <p className="font-semibold text-lg mb-2">PKR {room.price.toLocaleString()} per bed/month</p>
                               <Badge variant={room.available ? "default" : "destructive"} className="mb-2">

@@ -6,19 +6,13 @@ import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 import { sendOtp } from "../nodemailer/emailTemplates";
 import { cookies } from "next/headers";
+import { generateOTP } from "@/lib/utils";
 
 enum UserRole {
   SUPER_ADMIN = "SUPER_ADMIN",
   ADMIN = "ADMIN",
   USER = "USER",
 }
-
-function generateFourDigitOTP(): number {
-  // Generate a random number between 1000 and 9999
-  const otp = Math.floor(1000 + Math.random() * 9000);
-  return otp;
-}
-
 
 export async function signUp(formData: FormData) {
   console.log(formData);
@@ -116,7 +110,7 @@ export async function signUp(formData: FormData) {
     });
 
     //sending opt to user for email verification
-    const otp: string = generateFourDigitOTP().toString();
+    const otp = generateOTP();
     await prismadb.user.update({
       where: { email },
       data: { otp },
@@ -124,13 +118,6 @@ export async function signUp(formData: FormData) {
     const mailReponse = await sendOtp(email, otp);
     
     //saving opt to cookie
-    cookies().set("otp", otp, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60,
-      sameSite: "strict",
-      path: "/",
-    });
 
     cookies().set("userEamil", email, {
       httpOnly: true,

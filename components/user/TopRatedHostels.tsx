@@ -1,50 +1,84 @@
+"use client";
+import { useState, useEffect } from "react";
+import getHostelsList from "@/actions/hostel/listHostels";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Star, MapPin, Users } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
-const hostels = [
-  { id: 1, name: "Capital Boys Hostel", rating: 4.5, image: "/assets/room.jpg" },
-  { id: 2, name: "Capital Boys Hostel", rating: 4.2, image: "/assets/room.jpg" },
-  { id: 3, name: "Capital Boys Hostel", rating: 4.8, image: "/assets/room.jpg" },
-];
+export default function HostelList() {
+  // State to hold the hostels data
+  const [hostels, setHostels] = useState<any[]>([]);
 
-export default function TopRatedHostels() {
+  // Fetch hostel data from the backend
+  useEffect(() => {
+    async function fetchHostels() {
+      const hostelData = await getHostelsList();
+      if (hostelData) {
+        setHostels(hostelData);
+      }
+    }
+
+    fetchHostels();
+  }, []);
+console.log(hostels);
+  // Check if hostels data is empty
+  if (hostels.length === 0) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold mb-6">No hostels are currently registered</h2>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className='py-12'>
-      <div className='container mx-auto'>
-        <h2 className='text-3xl font-bold mb-6'>Top Rated Hostels</h2>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+    <section className="py-12 bg-gray-50">
+      <div className="container mx-auto">
+        <h2 className="text-3xl font-bold mb-6">Top Rated Hostels</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {hostels.map((hostel) => (
-            <Card key={hostel.id}>
-              <CardHeader className='p-0'>
-                <Image
-                  unoptimized
-                  width={0}
-                  height={0}
-                  src={hostel.image}
-                  alt={hostel.name}
-                  className='w-full h-48 object-cover'
-                />
-              </CardHeader>
-              <CardContent className='p-4'>
-                <CardTitle>{hostel.name}</CardTitle>
-                <div className='flex items-center mt-2'>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.floor(hostel.rating)
-                          ? "text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                  <span className='ml-2 text-sm text-gray-600'>
-                    {hostel.rating}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            <Link href={`/hostels/${hostel.id}`} key={hostel.id}>
+              <Card className="transition-transform hover:scale-105">
+                <CardHeader className="p-0">
+                  {/* Convert byte data to Base64 and display it as image */}
+                  <Image
+                    src={`data:image/jpeg;base64,${hostel.hostelImage}`}
+                    alt={hostel.hostelName}
+                    className="w-full h-48 object-cover"
+                    width={300}
+                    height={200}
+                  />
+                </CardHeader>
+                <CardContent className="p-4">
+                  <CardTitle>{hostel.name}</CardTitle>
+                  <div className="flex items-center mt-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < Math.floor(hostel.rating)
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                    <span className="ml-2 text-sm text-gray-600">
+                      {hostel.rating}
+                    </span>
+                  </div>
+                  <div className="flex items-center mt-2 text-sm text-gray-600">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {hostel.location}
+                  </div>
+                  <div className="flex items-center mt-2 text-sm text-gray-600">
+                    <Users className="w-4 h-4 mr-1" />
+                    Capacity: {hostel.capacity}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>

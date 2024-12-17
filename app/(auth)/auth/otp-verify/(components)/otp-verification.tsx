@@ -1,116 +1,90 @@
 "use client";
 
-import Typography from "@/components/Custom/Typography";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot
-} from "@/components/ui/input-otp";
+import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input"; // Replace with your actual input component
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import z from "zod";
+import { optVerification } from "@/actions/authen/otpVerfiy";
 import { useRouter } from "next/navigation";
 
 
-import z from "zod";
-import { optVerification } from "@/actions/authen/otpVerfiy";
-import { resendOTP } from "@/actions/authen/resendOTP";
-
+// Define a simple schema with validation for the input field (check for non-null value)
 const formSchema = z.object({
-  otp: z.string(),
+  inputValue: z.string().min(1, "This field is required"), // Ensure it is not empty
 });
 
-const OTPVerificationForm = () => {
-  const {toast} = useToast();
+const SimpleForm = () => {
+  const { toast } = useToast()
   const router = useRouter();
-  const form = useForm<any>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      otp: "",
+      inputValue: "", // Default value for the input field
     },
   });
 
-  const { reset, handleSubmit } = form;
+  const { handleSubmit, control, reset } = form;
 
+  // Function to handle form submission
   const onSubmit = async (data: any) => {
-    const res = await optVerification(data);
-    if(res){
+    try {
+      const res = await optVerification(data); // Send OTP data to backend
+    if (res) {
       toast({
         title: "Verification Successful",
-        description: "Your account has been verified successfully. Login to your account.",
+        description: "OTP Verification successfull. Change your password.",
         variant: "default",
       });
       router.push("/auth/change-password");
-    }else{
+    } else {
       toast({
-        title: "OPT verification failed!",
-        description: "OPT verification failed!",
+        title: "OTP verification failed!",
+        description: "OTP verification failed!",
         variant: "destructive",
       });
-      router.push("/auth/change-password");
     }
-    console.log(data, "form data");
+    console.log("Submitted data: ", data);
+    } catch (error) {
+      toast({
+        title: "Error!",
+        description: "Something went wrong while submitting your data.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
-    <div className="mt-[42px]">
+    <div className="w-full max-w-md mx-auto mt-10">
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
-            name={"otp"}
+            name="inputValue"
             render={({ field }) => (
-              <FormItem className="mb-[200px] mx-auto flex justify-center items-center w-full">
-                <InputOTP className="" size={80} maxLength={4}>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                  </InputOTPGroup>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={1} />
-                  </InputOTPGroup>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={2} />
-                  </InputOTPGroup>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={3} />
-                  </InputOTPGroup>
-                </InputOTP>
+              <FormItem className="mb-6">
                 <FormControl>
-                  <FormMessage />
+                  <Input
+                    {...field}
+                    type="text"
+                    placeholder="Enter your 4 digit otp here"
+                    className="w-full"
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
-          <Button
-            disabled={false}
-            className="flex justify-center items-center gap-1 w-full text-white bg-secondary hover:bg-secondary/90 mb-11"
-          >
-            {false && <Loader2 className="animate-spin text-white h-4 w-4" />}
-            <Typography variant="span">Verify</Typography>
+
+          <Button type="submit" className="w-full mt-4">
+            Submit
           </Button>
         </form>
       </Form>
-      <Typography className="text-base font-medium text-center mt-6 mx-auto">
-        {`Didn't received code?`}{" "}
-        <Button
-          variant={"link"}
-          onClick={() => resendOTP()}
-          className="text-primary"
-        >
-          Resend
-        </Button>
-      </Typography>
     </div>
   );
 };
 
-export default OTPVerificationForm;
+export default SimpleForm;

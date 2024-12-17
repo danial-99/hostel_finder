@@ -69,6 +69,7 @@ model Hostel {
     id              String       @id @default(uuid())
     ownerId         String
     owner           User?        @relation(fields: [ownerId], references: [id])
+    ownerName       String
     status          HostelStatus @default(PENDING)
     hostelName      String
     hostelImage     Bytes?
@@ -76,13 +77,18 @@ model Hostel {
     province        String
     city            String
     zipCode         String
+    address         String
     type            HostelType @default(MALE)
     category        Category   @default(STUDENT)
     cnic            String
     phone           String
     description     String
+    latitude        Int
+    longitude       Int
     rooms           RoomType[]
     facilities      String[]
+    electercityBill Bytes?
+    gasBill         Bytes?
     createdAt       DateTime     @default(now())
     updatedAt       DateTime     @updatedAt
 }
@@ -91,9 +97,10 @@ model RoomType {
     id              String   @id @default(uuid())
     hostelId        String
     hostel          Hostel   @relation(fields: [hostelId], references: [id])
-    beds            Int
+    bedCount        Int
+    numberOfRooms   Int
     price           Float
-    roomImages      Bytes[]
+    image           Bytes?
 }
 
 model BookingRequests {

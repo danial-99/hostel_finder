@@ -19,6 +19,8 @@ import { X, Camera, Upload, MapPin } from 'lucide-react'
 import { useDropzone } from "react-dropzone"
 import Image from "next/image"
 import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api'
+import router from "next/router"
+import { createHostel } from "@/actions/admin/createHostel"
 
 const formSchema = z.object({
   hostelName: z.string().min(1, "Hostel name is required"),
@@ -38,7 +40,7 @@ const formSchema = z.object({
     bedCount: z.number().min(1).max(4),
     numberOfRooms: z.number().min(0, "Number of rooms must be at least 0"),
     price: z.number().min(0, "Price must be at least 0"),
-    images: z.array(z.instanceof(File)).optional()
+    image: z.instanceof(File).optional().nullable()
   })).min(1, "At least one room type must be added"),
   facilities: z.record(z.boolean()),
   electricityBill: z.instanceof(File).optional().nullable(),
@@ -66,10 +68,10 @@ export default function HostelRegistrationForm() {
     defaultValues: {
       hostelImages: [],
       rooms: [
-        { bedCount: 1, numberOfRooms: 0, price: 0, images: [] },
-        { bedCount: 2, numberOfRooms: 0, price: 0, images: [] },
-        { bedCount: 3, numberOfRooms: 0, price: 0, images: [] },
-        { bedCount: 4, numberOfRooms: 0, price: 0, images: [] }
+        { bedCount: 1, numberOfRooms: 0, price: 0, image: null },
+        { bedCount: 2, numberOfRooms: 0, price: 0, image: null },
+        { bedCount: 3, numberOfRooms: 0, price: 0, image: null },
+        { bedCount: 4, numberOfRooms: 0, price: 0, image: null }
       ],
       facilities: {},
       latitude: pakistanCenter.lat,
@@ -125,13 +127,75 @@ export default function HostelRegistrationForm() {
     if (step < 6) {
       setStep(prev => prev + 1)
     } else {
-      console.log(data)
-      toast({
-        title: "Success",
-        description: "Hostel registration submitted successfully",
-      })
+      const selectedFacilities = Object.entries(facilitiesData)
+    .filter(([_, value]) => value)
+    .reduce((acc, [key]) => ({ ...acc, [key]: true }), {});
+
+  const formData = new FormData();
+  formData.append("facilitiesData", JSON.stringify(selectedFacilities));
+  formData.append('hostelData', JSON.stringify(data));
+
+  const gasBillFile = data.gasBill; // Assuming fileInput contains the file(s)
+    if (gasBillFile) {
+      const file = gasBillFile; // Assuming you only send one file
+      const buffer = await fileToBuffer(file); // Convert file to buffer
+      if(buffer){
+        const base64File = buffer.toString('base64'); // Convert buffer to Base64
+        formData.append("gasBill", base64File); // Append Base64 encoded file to formData
+      }
+      
     }
+  const electricityBillFile = data.electricityBill; // Assuming fileInput contains the file(s)
+  if (electricityBillFile) {
+    const file = electricityBillFile; // Assuming you only send one file
+    const buffer = await fileToBuffer(file); // Convert file to buffer
+    const base64File = buffer.toString('base64'); // Convert buffer to Base64
+    formData.append("hostelImages", base64File); // Append Base64 encoded file to formData
   }
+
+  const hostelImagesFile = data.hostelImages; // Assuming fileInput contains the file(s)
+  if (hostelImagesFile) {
+    const file = hostelImagesFile[0]; // Assuming you only send one file
+    const buffer = await fileToBuffer(file); // Convert file to buffer
+    const base64File = buffer.toString('base64'); // Convert buffer to Base64
+    formData.append("electricityBill", base64File); // Append Base64 encoded file to formData
+  }
+
+
+  const response = await createHostel(formData, userId);
+  if (!response.success) {
+    toast({
+      title: "Error",
+      description: response.message,
+      variant: "destructive",
+    });
+  } else {
+    toast({
+      title: "Success",
+      description: response.message,
+      variant: "default",
+    });
+    router.push("/admin/dashboard");
+  }
+}
+  }
+
+
+  const fileToBuffer = (file: File) => {
+    return new Promise<Buffer>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result instanceof ArrayBuffer) {
+          resolve(Buffer.from(reader.result));
+        } else {
+          reject(new Error("Failed to read file"));
+        }
+      };
+      reader.onerror = (error) => reject(error);
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
 
   const handleContinue = () => {
     if (isValid) {
@@ -378,51 +442,53 @@ export default function HostelRegistrationForm() {
               </div>
             </div>
             <div>
-              <Label>Room Images</Label>
-              <div className='mt-2 flex items-center space-x-4'>
+              <div style={{display: "none"}}>
+              <Label>Room Image</Label>
+              <div className='mt-2 flex items-center d-none space-x-4'>
                 <Input
                   type='file'
                   accept='image/*'
-                  multiple
                   onChange={e => {
                     const files = e.target.files
-                    if (files) {
-                      const currentImages = watch(`rooms.${index}.images`) || []
-                      setValue(`rooms.${index}.images`, [...currentImages, ...Array.from(files)], { shouldValidate: true })
+                    if (files && files[0]) {
+                      setValue(`rooms.${index}.image`, files[0], { shouldValidate: true })
                     }
                   }}
                   className='hidden'
-                  id={`room-images-${index}`}
+                  id={`room-image-${index}`}
                 />
-                <Button type='button' onClick={() => document.getElementById(`room-images-${index}`)?.click()}>
-                  <Upload className='mr-2 h-4 w-4' /> Upload Images
+                <Button type='button' onClick={() => document.getElementById(`room-image-${index}`)?.click()}>
+                  <Upload className='mr-2 h-4 w-4' /> Upload Image
                 </Button>
                 <Button type='button' variant='outline'>
                   <Camera className='mr-2 h-4 w-4' /> Take Photo
                 </Button>
               </div>
-              <div className='mt-4 grid grid-cols-3 gap-4'>
-                {watch(`rooms.${index}.images`)?.map((file, fileIndex) => (
-                  <div key={fileIndex} className='relative'>
-                    <Image src={URL.createObjectURL(file)} alt={`${field.bedCount} Bed Room Image ${fileIndex + 1}`} width={100} height={100} className='object-cover rounded-md' />
+              </div>
+              <div className='mt-4'>
+                {watch(`rooms.${index}.image`) && (
+                  <div className='relative'>
+                    {watch(`rooms.${index}.image`) instanceof File && (
+                      <Image 
+                        src={URL.createObjectURL(watch(`rooms.${index}.image`)!)} // Non-null assertion
+                        alt={`${field.bedCount} Bed Room Image`} 
+                        width={100} 
+                        height={100} 
+                        className='object-cover rounded-md' 
+                      />
+                    )
+                    }
                     <Button
                       type='button'
                       variant='destructive'
                       size='icon'
                       className='absolute top-0 right-0'
-                      onClick={() => {
-                        const currentImages = watch(`rooms.${index}.images`) || []
-                        setValue(
-                          `rooms.${index}.images`,
-                          currentImages.filter((_, i) => i !== fileIndex),
-                          { shouldValidate: true }
-                        )
-                      }}
+                      onClick={() => setValue(`rooms.${index}.image`, null, { shouldValidate: true })}
                     >
                       <X className='h-4 w-4' />
                     </Button>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </CardContent>
@@ -430,6 +496,7 @@ export default function HostelRegistrationForm() {
       ))}
     </div>
   )
+  
 
   const renderFacilitiesStep = () => (
     <Card className='w-full'>
@@ -643,16 +710,16 @@ export default function HostelRegistrationForm() {
                 <div key={index} className='mb-4'>
                   <p><span className='font-medium'>{room.bedCount} Bed Room:</span> {room.numberOfRooms} room(s), ${room.price}/bed</p>
                   <div className='mt-2 grid grid-cols-3 gap-2'>
-                    {room.images && room.images.map((image, imageIndex) => (
+                    {room.image && 
                       <Image 
-                        key={imageIndex}
-                        src={URL.createObjectURL(image)}
-                        alt={`${room.bedCount} Bed Room Image ${imageIndex + 1}`}
+                        key={room.numberOfRooms}
+                        src={URL.createObjectURL(room.image)}
+                        alt={`${room.bedCount} Bed Room Image ${room.numberOfRooms + 1}`}
                         width={100}
                         height={100}
                         className='object-cover rounded-md'
                       />
-                    ))}
+                    }
                   </div>
                 </div>
               )

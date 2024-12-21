@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import processPayment from "@/actions/admin/processPayment"
 
 // Define the Plan interface
 interface Plan {
@@ -24,10 +25,12 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
   const [expiryDate, setExpiryDate] = useState<string>("")
   const [cvv, setCvv] = useState<string>("")
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     // Here you would typically integrate with a payment gateway
     console.log("Processing payment...")
+    const res = await processPayment(plan);
+    console.log(res);
     onPaymentComplete()
   }
 

@@ -69,7 +69,7 @@ const SimpleForm = () => {
                   <Input
                     {...field}
                     type="text"
-                    placeholder="Enter your 4 digit otp here"
+                    placeholder="Enter your otp here"
                     className="w-full"
                   />
                 </FormControl>

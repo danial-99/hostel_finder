@@ -46,6 +46,7 @@ const SimpleForm = () => {
         variant: "destructive",
       });
     }
+    console.log("Submitted data: ", data);
     } catch (error) {
       toast({
         title: "Error!",
@@ -68,7 +69,7 @@ const SimpleForm = () => {
                   <Input
                     {...field}
                     type="text"
-                    placeholder="Enter you 4 digit otp here"
+                    placeholder="Enter your otp here"
                     className="w-full"
                   />
                 </FormControl>

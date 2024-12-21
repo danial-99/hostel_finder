@@ -52,7 +52,7 @@ export default function BookingRequestCard({
               unoptimized
               width={0}
               height={0}
-              src={imageUrl}
+              src={`data:image/jpeg;base64,${imageUrl}`}
               alt={name}
               className="w-full h-48 object-cover rounded-lg"
             />

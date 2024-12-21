@@ -59,8 +59,8 @@ model User {
     updatedAt       DateTime          @updatedAt
     hostels         Hostel[]
     bookings        BookingRequests[]
-    //   feedbacks       Feedback[]
-    //   ratings         Rating[]
+    feedbacks       Feedback[]
+    ratings         Rating[]
     otp             String?
     verifiction     Boolean           @default(false)
 }
@@ -87,8 +87,12 @@ model Hostel {
     longitude       Int
     rooms           RoomType[]
     facilities      String[]
+    bookingRequests BookingRequests[]
+    rating          Rating[]
     electercityBill Bytes?
     gasBill         Bytes?
+    promoted        Boolean      @default(false)
+    subcriptionEnd  DateTime     @default(now())
     createdAt       DateTime     @default(now())
     updatedAt       DateTime     @updatedAt
 }
@@ -99,33 +103,45 @@ model RoomType {
     hostel          Hostel   @relation(fields: [hostelId], references: [id])
     bedCount        Int
     numberOfRooms   Int
+    available       Boolean  @default(true)
     price           Float
     image           Bytes?
+    bookingRequests BookingRequests[]
 }
 
 model BookingRequests {
-    id        String   @id @default(uuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    userId    String
-    user      User     @relation(fields: [userId], references: [id])
+    id            String   @id @default(uuid())
+    checkInDate   DateTime @default(now())
+    checkOutDate  DateTime @default(now())
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    status        String   @default("PENDING")
+    userBkId      String
+    user          User     @relation(fields: [userBkId], references: [id])
+    hostelBkId    String
+    hostel        Hostel   @relation(fields: [hostelBkId], references: [id])
+    roomId        String
+    room          RoomType @relation(fields: [roomId], references: [id])
+
 }
 
-// model Feedback {
-//   id              String            @id @default(uuid())
-//   rating          Int
-//   comment         String
-//   createdAt       DateTime          @default(now())
-//   updatedAt       DateTime          @updatedAt
-//   userId          String
-//   user            User              @relation(fields: [userId], references: [id])
-// }
+ model Feedback {
+   id              String            @id @default(uuid())
+   rating          Int
+   comment         String
+   createdAt       DateTime          @default(now())
+   updatedAt       DateTime          @updatedAt
+   userFdId        String
+   user            User              @relation(fields: [userFdId], references: [id])
+ }
 
-// model Rating {
-//   id              String            @id @default(uuid())
-//   rating          Int
-//   createdAt       DateTime          @default(now())
-//   updatedAt       DateTime          @updatedAt
-//   userId          String
-//   user            User              @relation(fields: [userId], references: [id])
-// }
+ model Rating {
+   id              String            @id @default(uuid())
+   rating          Int
+   createdAt       DateTime          @default(now())
+   updatedAt       DateTime          @updatedAt
+   userRtId        String
+   user            User              @relation(fields: [userRtId], references: [id])
+   hostelRtId      String
+   hostel          Hostel   @relation(fields: [hostelRtId], references: [id])
+ }

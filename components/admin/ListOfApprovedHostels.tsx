@@ -35,7 +35,7 @@ const HostelRequestCard: React.FC<{
               unoptimized
               width={0}
               height={0}
-              src={hostel.hostelImage || ""}
+              src={`data:image/jpeg;base64,${hostel.hostelImage}`}
               alt={hostel.hostelName}
               className='w-full h-48 md:h-full object-cover'
             />

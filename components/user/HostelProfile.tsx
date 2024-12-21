@@ -29,6 +29,8 @@ DialogHeader,
 DialogTitle,
 DialogTrigger,
 } from "@/components/ui/dialog"
+import { Data } from '@react-google-maps/api';
+import bookingRequest from '@/actions/hostel/booking';
 
 interface HostelProfileProps {
 hostel?: {
@@ -69,6 +71,7 @@ checkOutDate: z.date({
 type BookingFormData = z.infer<typeof bookingFormSchema>;
 
 interface Room {
+id?: string;
 name: string;
 bedCount: number;
 price: number;
@@ -84,6 +87,8 @@ const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 const [bookingStep, setBookingStep] = useState(1);
 const [showCancellationDialog, setShowCancellationDialog] = useState(false);
 const [cancellationReason, setCancellationReason] = useState("");
+const [finalFormData, setFinalFormData] = useState<any>(null);
+
 
 const { control, handleSubmit, getValues, formState: { errors } } = useForm<BookingFormData>({
   resolver: zodResolver(bookingFormSchema),
@@ -100,28 +105,48 @@ const prevImage = () => {
 };
 
 const handleBookNow = (room: Room) => {
-  if (room.available) {
-    setSelectedRoom(room);
+  setSelectedRoom(room);
+  if (selectedRoom?.available) {
     setShowBookingForm(true);
     setBookingStep(1);
   }
 };
 
 const onSubmit = (data: BookingFormData) => {
-  console.log(data);
+  
+  const updatedData = {
+    ...data,
+    hostelId: hostel?.id,
+    selectedRoomId: selectedRoom?.id,
+  };
+
+  console.log("Updated Data:", updatedData);
+  setFinalFormData(updatedData);
   setBookingStep(2);
+
 };
 
 const handleBack = () => {
   setBookingStep(1);
 };
 
-const handleConfirmBooking = () => {
-  console.log("Booking request sent to hostel owner");
-  toast({
-    title: "Booking Request Sent",
-    description: "Your booking request has been sent to the hostel owner.",
-  });
+const handleConfirmBooking = async () => {
+  
+  const res: any = await bookingRequest(finalFormData);
+  if(res.status == 200){
+    toast({
+      title: "Booking Request Sent",
+      description: res.message,
+      variant: "default"
+    });
+  }else{
+    toast({
+      title: "Booking Request Sent",
+      description: res.message,
+      variant: "destructive"
+    });
+  }
+  
   setShowBookingForm(false);
   setBookingStep(1);
 };
@@ -237,7 +262,7 @@ return (
                         <h3 className="text-lg font-semibold mb-2">{room.name}</h3>
                         <div className="grid grid-cols-1 gap-4">
                           <div className="relative aspect-video">
-                            <Image src={hostel.hostelImage} alt={room.name} fill className="rounded-lg object-cover" />
+                            <Image src={`data:image/jpeg;base64,${room.image}`} alt={room.name} fill className="rounded-lg object-cover" />
                             <Button
                               variant="secondary"
                               size="icon"
@@ -272,7 +297,7 @@ return (
                             <Button 
                               className="w-full md:w-auto" 
                               onClick={() => handleBookNow(room)}
-                              disabled={!room.available}
+                              disabled={false}
                             >
                               {room.available ? "Book Now" : "Not Available"}
                             </Button>
@@ -401,7 +426,7 @@ return (
                           <p><strong>Phone:</strong> {getValues().phone}</p>
                           <p><strong>Check-in Date:</strong> {getValues().checkInDate ? format(getValues().checkInDate, "PPP") : 'Not selected'}</p>
                           <p><strong>Check-out Date:</strong> {getValues().checkOutDate ? format(getValues().checkOutDate, "PPP") : 'Not selected'}</p>
-                          <p><strong>Room:</strong> {selectedRoom.name}</p>
+                          <p><strong>Room:</strong> {selectedRoom.numberOfRooms}</p>
                           <p><strong>Price:</strong> PKR {selectedRoom.price.toLocaleString()} per bed/month</p>
                         </div>
                         <div className="flex flex-col gap-2">

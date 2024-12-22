@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import router from "next/router"
+
 
 // Define the Plan interface
 interface Plan {
@@ -12,6 +14,9 @@ interface Plan {
 
 interface PaymentConfirmationProps {
   plan: Plan
+}
+const gotoDashBoard = () =>{
+  router.push("/admin/dashboard");
 }
 
 export default function PaymentConfirmation({ plan }: PaymentConfirmationProps) {
@@ -31,7 +36,7 @@ export default function PaymentConfirmation({ plan }: PaymentConfirmationProps) 
         </p>
       </CardContent>
       <CardFooter className="flex justify-center">
-        <Button>Go to Dashboard</Button>
+        <Button onClick={gotoDashBoard}>Go to Dashboard</Button>
       </CardFooter>
     </Card>
   )

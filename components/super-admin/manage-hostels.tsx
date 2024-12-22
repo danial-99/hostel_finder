@@ -152,6 +152,7 @@ const ManageHostels: React.FC = () => {
         const hostelData = await getHostelsList();
         if (hostelData) {
           setHostels(hostelData);
+          
         }
       }
   

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import getHostelsList from "@/actions/hostel/listHostels";
+import {getTopHostelsList} from "@/actions/hostel/listHostels";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, MapPin, Users } from "lucide-react";
 import Image from "next/image";
@@ -13,7 +13,7 @@ export default function HostelList() {
   // Fetch hostel data from the backend
   useEffect(() => {
     async function fetchHostels() {
-      const hostelData = await getHostelsList();
+      const hostelData = await getTopHostelsList();
       if (hostelData) {
         setHostels(hostelData);
       }

@@ -2,6 +2,7 @@
 
 import prismadb from "@/lib/prisma"
 import { HostelStatus } from "@prisma/client";
+import { approvalEmail } from "../nodemailer/emailTemplates";
 
 export async function HostelStatusUpdate(userId: string, status: HostelStatus) {
     try {
@@ -27,8 +28,17 @@ export async function HostelStatusUpdate(userId: string, status: HostelStatus) {
         status: status, 
       }
     });
+    const hostelOwneremail = await prismadb.user.findUnique({
+        where:{
+            id:hostel.ownerId
+        }
+    })
+    var res = "";
+    if(hostelOwneremail){
+        res = await approvalEmail(hostelOwneremail.email);
+    }
     return {
-        message: "Hostel status updated successfully",
+        message: `Hostel status updated successfully. ${res}`,
         status: 200,
         success: true,
         hostel: updatedHostel

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import processPayment from "@/actions/admin/processPayment"
 
 // Define the Plan interface
 interface Plan {
@@ -14,11 +15,10 @@ interface Plan {
 }
 
 interface PaymentFormProps {
-  plan: Plan
   onPaymentComplete: () => void
 }
 
-export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
+export default async function PasymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
   const [cardOwner, setCardOwner] = useState<string>("")
   const [cardNumber, setCardNumber] = useState<string>("")
   const [expiryDate, setExpiryDate] = useState<string>("")
@@ -28,6 +28,8 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
     e.preventDefault()
     // Here you would typically integrate with a payment gateway
     console.log("Processing payment...")
+    const res = await processPayment(plan);
+    
     onPaymentComplete()
   }
 

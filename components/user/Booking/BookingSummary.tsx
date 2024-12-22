@@ -11,6 +11,9 @@ interface BookingSummaryProps {
 }
 
 export default function BookingSummary({ formData }: BookingSummaryProps) {
+  const handleSubmit = () =>{
+    console.log(formData);
+  }
   return (
     <div>
       <div className="space-y-4 mb-6">
@@ -50,7 +53,7 @@ export default function BookingSummary({ formData }: BookingSummaryProps) {
           </svg>
         </div>
       </div>
-      <Button className="w-full">Booking Now</Button>
+      <Button className="w-full" onClick={handleSubmit}>Booking Now</Button>
     </div>
   )
 }

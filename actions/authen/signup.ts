@@ -119,7 +119,7 @@ export async function signUp(formData: FormData) {
     
     //saving opt to cookie
 
-    cookies().set("userEamil", email, {
+    cookies().set("usrEmail", email, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60,

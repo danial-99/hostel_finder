@@ -40,7 +40,7 @@ const formSchema = z.object({
     bedCount: z.number().min(1).max(4),
     numberOfRooms: z.number().min(0, "Number of rooms must be at least 0"),
     price: z.number().min(0, "Price must be at least 0"),
-    image: z.instanceof(File).optional().nullable()
+    image: z.instanceof(File).optional().nullable(),
   })).min(1, "At least one room type must be added"),
   facilities: z.record(z.boolean()),
   electricityBill: z.instanceof(File).optional().nullable(),
@@ -160,8 +160,21 @@ export default function HostelRegistrationForm() {
     const base64File = buffer.toString('base64'); // Convert buffer to Base64
     formData.append("electricityBill", base64File); // Append Base64 encoded file to formData
   }
-
-
+  const roomsData = data.rooms;
+  await Promise.all(
+    roomsData.map(async (rm, i) => {  // Using `i` here
+      const roomImage = rm.image;
+      if (roomImage) {
+        const buffer = await fileToBuffer(roomImage);
+        const base64File = buffer.toString("base64");
+  
+        const fieldName = `roomImage_${i}`;
+        formData.append(fieldName, base64File);
+        rm.image = null;
+      }
+    })
+  );
+  formData.append("roomData", JSON.stringify(roomsData));
   const response = await createHostel(formData, userId);
   if (!response.success) {
     toast({
@@ -442,7 +455,7 @@ export default function HostelRegistrationForm() {
               </div>
             </div>
             <div>
-              <div style={{display: "none"}}>
+             
               <Label>Room Image</Label>
               <div className='mt-2 flex items-center d-none space-x-4'>
                 <Input
@@ -464,7 +477,7 @@ export default function HostelRegistrationForm() {
                   <Camera className='mr-2 h-4 w-4' /> Take Photo
                 </Button>
               </div>
-              </div>
+              
               <div className='mt-4'>
                 {watch(`rooms.${index}.image`) && (
                   <div className='relative'>

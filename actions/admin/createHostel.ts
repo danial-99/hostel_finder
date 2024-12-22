@@ -8,7 +8,7 @@ export async function createHostel(formD: any, userId: string) {
     // Collect all necessary fields from JSON strings
     const facilitiesData = JSON.parse(formD.get("facilitiesData") as string);
     const formData = JSON.parse(formD.get("hostelData") as string);
-    const roomData = formData.rooms;
+    const roomData = JSON.parse(formD.get("roomData") as string);
     const ownerName = formData.ownerName;
     const address = formData.address;
     const electercityBill = (formD.get("electricityBill"));
@@ -43,6 +43,18 @@ export async function createHostel(formD: any, userId: string) {
     const electricityBillBuffer = await fileToBuffer(electercityBill);
     const gasBillBuffer = await fileToBuffer(gasBill);
     const hostelImageBuffer = await fileToBuffer(hostelImage);
+
+    await Promise.all(
+      roomData.map(async (rm: any, i: any) => {
+        const roomImage = formD.get(`roomImage_${i}`)
+        if (roomImage) {
+          const buffer = await fileToBuffer(roomImage);
+          rm.image = buffer;
+        } else{
+          rm.image = null;
+        }
+      })
+    );
 
     // Create a new hostel entry
     const hostel = await prismadb.hostel.create({

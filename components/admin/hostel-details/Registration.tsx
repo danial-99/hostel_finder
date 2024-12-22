@@ -57,6 +57,7 @@ export default function HostelRegistrationForm() {
   const { user } = useAuth()
   const userId = user?.id as string
   const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
@@ -127,6 +128,7 @@ export default function HostelRegistrationForm() {
     if (step < 6) {
       setStep(prev => prev + 1)
     } else {
+      setLoading(true);
       const selectedFacilities = Object.entries(facilitiesData)
     .filter(([_, value]) => value)
     .reduce((acc, [key]) => ({ ...acc, [key]: true }), {});
@@ -188,8 +190,8 @@ export default function HostelRegistrationForm() {
       description: response.message,
       variant: "default",
     });
-    router.push("/admin/dashboard");
   }
+  router.push("/admin/dashboard");
 }
   }
 
@@ -812,7 +814,7 @@ export default function HostelRegistrationForm() {
             Continue
           </Button>
         ) : (
-          <Button type='submit' className='flex-1'>
+          <Button type='submit' className='flex-1' disabled={loading}>
             Submit Registration
           </Button>
         )}

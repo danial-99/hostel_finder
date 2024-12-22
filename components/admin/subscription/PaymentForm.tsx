@@ -18,7 +18,7 @@ interface PaymentFormProps {
   onPaymentComplete: () => void
 }
 
-export default async function PasymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
+export default function PasymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
   const [cardOwner, setCardOwner] = useState<string>("")
   const [cardNumber, setCardNumber] = useState<string>("")
   const [expiryDate, setExpiryDate] = useState<string>("")

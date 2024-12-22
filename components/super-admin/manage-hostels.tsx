@@ -13,12 +13,17 @@ import {
   Car,
 } from "lucide-react";
 import Image from "next/image";
+import listHostels from "@/actions/hostel/listHostels";
+import { useEffect, useState } from "react";
+import { any } from "zod";
+import getHostelsList from "@/actions/hostel/listHostels";
 
 // Types
 type Hostel = {
   id: string;
   name: string;
   type: string;
+  hostelImage: string;
   location: string;
   rating: number;
   rooms: number;
@@ -42,7 +47,7 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
               unoptimized
               width={0}
               height={0}
-              src={hostel.image}
+              src={`data:image/jpeg;base64,${hostel.hostelImage}`}
               alt={hostel.name}
               className='w-full h-48 object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none'
             />
@@ -141,30 +146,45 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
 
 // ManageHostels Component
 const ManageHostels: React.FC = () => {
-  const hostels: Hostel[] = [
-    {
-      id: "1",
-      name: "Akasia Hostel",
-      type: "Boys Hostel",
-      location: "Figueroa, Los Angeles",
-      rating: 5,
-      rooms: 12,
-      kitchen: 2,
-      area: "66x78 m²",
-      security: true,
-      wifi: true,
-      parking: true,
-      image: "/room.jpg",
-      featured: true,
-    },
-  ];
+  const [hostels, setHostels] = useState<any[]>([]);
+  useEffect(() => {
+      async function fetchHostels() {
+        const hostelData = await getHostelsList();
+        if (hostelData) {
+          setHostels(hostelData);
+        }
+      }
+  
+      fetchHostels();
+    }, []); 
+  
+  // [
+  //   {
+  //     id: "1",
+  //     name: "Akasia Hostel",
+  //     type: "Boys Hostel",
+  //     location: "Figueroa, Los Angeles",
+  //     rating: 5,
+  //     rooms: 12,
+  //     kitchen: 2,
+  //     area: "66x78 m²",
+  //     security: true,
+  //     wifi: true,
+  //     parking: true,
+  //     image: "/room.jpg",
+  //     featured: true,
+  //   },
+  // ];
 
   return (
     <div>
       <h1 className='text-3xl font-bold mb-6'>Manage Hostels</h1>
-      {hostels.map((hostel) => (
+      {(hostels.length > 0) ?
+      hostels.map((hostel: any) => (     
         <HostelCard key={hostel.id} hostel={hostel} />
-      ))}
+      ))
+    :  
+    <h2>No hostel regisreted yet</h2>}
     </div>
   );
 };

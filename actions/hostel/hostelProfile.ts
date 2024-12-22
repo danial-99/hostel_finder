@@ -2,6 +2,7 @@
 import prismadb from "@/lib/prisma";
 import { Buffer } from 'buffer';
 import { cookies } from "next/headers";
+import { Z_STREAM_END } from "zlib";
 
 export default async function getHostelsDetail(id: string) {
   const hostel = await prismadb.hostel.findUnique({
@@ -21,7 +22,6 @@ export default async function getHostelsDetail(id: string) {
       rm.image = convertToBase64(rm.image)
     })
   };
-
   if (hostel) {
     // Use map to return a transformed array
       return {

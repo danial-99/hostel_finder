@@ -22,11 +22,9 @@ interface Hostel {
 
 // Mock data for hostels and their subscriptions
 const hostelData: Hostel[] = [
-  { id: 1, name: "Sunny Beach Hostel", location: "Miami, FL", plan: "1 Year", status: "Active", lastPayment: "2023-05-15", endDate: "2024-05-15" },
-  { id: 2, name: "Mountain View Lodge", location: "Denver, CO", plan: "Free", status: "Active", lastPayment: "N/A", endDate: "N/A" },
-  { id: 3, name: "City Center Backpackers", location: "New York, NY", plan: "6 Months", status: "Active", lastPayment: "2023-05-28", endDate: "2023-11-28" },
-  { id: 4, name: "Coastal Retreat Hostel", location: "San Diego, CA", plan: "1 Month", status: "Expired", lastPayment: "2023-04-30", endDate: "2023-05-30" },
-  { id: 5, name: "Historic Downtown Inn", location: "Boston, MA", plan: "1 Month", status: "Active", lastPayment: "2023-06-05", endDate: "2023-07-05" },
+  { id: 1, name: "test hostel", location: "Murree", plan: "free", status: "Active", lastPayment: "2024-12-22", endDate: "2025-01-21" },
+  { id: 2, name: "test", location: "Islaabad", plan: "6 month", status: "Active", lastPayment: "2024-12-22", endDate: "2025-06-22" },
+  
 ]
 
 export default function SuperAdminDashboard() {

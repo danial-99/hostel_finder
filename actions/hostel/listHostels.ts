@@ -32,7 +32,7 @@ export async function getTopHostelsList() {
   const hostels = await prismadb.hostel.findMany({
     where: {
       subcriptionEnd: {
-        lt: new Date() // `lt` stands for "less than"
+        gt: new Date() // `lt` stands for "less than"
       },
       status: "APPROVED"
     }
@@ -53,6 +53,49 @@ export async function getTopHostelsList() {
   }
 }
 
+
+export async function getAllHostelsList() {
+  const hostels = await prismadb.hostel.findMany();
+
+  if (hostels.length > 0) {
+    // Use map to return a transformed array
+    return hostels.map((hostel) => {
+      return {
+        ...hostel,
+        hostelImage: convertToBase64(hostel.hostelImage),
+        electercityBill: convertToBase64(hostel.electercityBill),
+        gasBill: convertToBase64(hostel.gasBill),
+      };
+    });
+  } else {
+    return false;  // Return false if no hostels were found
+  }
+}
+
+
+export async function getFullDetials() {
+  const hostels = await prismadb.hostel.findMany();
+
+  if (hostels.length > 0) {
+    // Use map to return a transformed array
+    return hostels.map(async (hostel) => {
+      const userData = await prismadb.user.findMany({
+        where: {
+          id:hostel.ownerId
+        }
+      })
+      return {
+        ...hostel,
+        hostelImage: convertToBase64(hostel.hostelImage),
+        electercityBill: convertToBase64(hostel.electercityBill),
+        gasBill: convertToBase64(hostel.gasBill),
+        ...userData,
+      };
+    });
+  } else {
+    return false;  // Return false if no hostels were found
+  }
+}
 const convertToBase64 = (bytes: any) => {
   return Buffer.from(bytes).toString("base64");
 };

@@ -13,7 +13,7 @@ import {
   Car,
 } from "lucide-react";
 import Image from "next/image";
-import listHostels from "@/actions/hostel/listHostels";
+import listHostels, { getAllHostelsList } from "@/actions/hostel/listHostels";
 import { useEffect, useState } from "react";
 import { any } from "zod";
 import getHostelsList from "@/actions/hostel/listHostels";
@@ -149,10 +149,9 @@ const ManageHostels: React.FC = () => {
   const [hostels, setHostels] = useState<any[]>([]);
   useEffect(() => {
       async function fetchHostels() {
-        const hostelData = await getHostelsList();
+        const hostelData = await getAllHostelsList();
         if (hostelData) {
           setHostels(hostelData);
-          
         }
       }
   

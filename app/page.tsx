@@ -8,6 +8,7 @@ import MobileApp from "@/components/user/MobileApp";
 import Testimonials from "@/components/user/Testimonials";
 import TopRatedHostels from "@/components/user/TopRatedHostels";
 import WhyChooseUs from "@/components/user/WhyChooseUs";
+import PaySumm from "@/components/user/PaySumm";
 
 export default function Home() {   
   return (
@@ -19,6 +20,7 @@ export default function Home() {
         <HostelList />
         <AboutUs />
         <WhyChooseUs />
+        <PaySumm/>
         <Testimonials />
         <MobileApp />
         <ContactPage />

@@ -77,7 +77,7 @@ model Hostel {
     province        String
     city            String
     zipCode         String
-    address         String
+    address         String     @default("Address")
     type            HostelType @default(MALE)
     category        Category   @default(STUDENT)
     cnic            String

@@ -15,10 +15,11 @@ interface Plan {
 }
 
 interface PaymentFormProps {
+  plan: Plan
   onPaymentComplete: () => void
 }
 
-export default function PasymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
+export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
   const [cardOwner, setCardOwner] = useState<string>("")
   const [cardNumber, setCardNumber] = useState<string>("")
   const [expiryDate, setExpiryDate] = useState<string>("")
@@ -29,7 +30,7 @@ export default function PasymentForm({ plan, onPaymentComplete }: PaymentFormPro
     // Here you would typically integrate with a payment gateway
     console.log("Processing payment...")
     const res = await processPayment(plan);
-    
+    console.log(res);
     onPaymentComplete()
   }
 

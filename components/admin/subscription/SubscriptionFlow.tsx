@@ -10,7 +10,7 @@ interface Plan {
   name: string
   price: number
   duration: string
-  discount?: string
+  discount?: number
   features: string[]
 }
 

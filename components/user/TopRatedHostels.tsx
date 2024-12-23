@@ -21,7 +21,6 @@ export default function HostelList() {
 
     fetchHostels();
   }, []);
-console.log(hostels);
   // Check if hostels data is empty
   if (hostels.length === 0) {
     return (

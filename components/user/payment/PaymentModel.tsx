@@ -6,14 +6,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import bookingConfirm from '@/actions/payment/roomPayment'
+import { toast } from '@/hooks/use-toast'
 
 interface PaymentModalProps {
   isOpen: boolean
   onClose: () => void
   amount: number
+  id: string
 }
 
-export default function PaymentModal({ isOpen, onClose, amount }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, amount, id }: PaymentModalProps) {
   const [cardNumber, setCardNumber] = useState('')
   const [expiryDate, setExpiryDate] = useState('')
   const [cvv, setCvv] = useState('')
@@ -25,16 +28,20 @@ export default function PaymentModal({ isOpen, onClose, amount }: PaymentModalPr
     e.preventDefault()
     setIsProcessing(true)
     // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false)
-      onClose()
-      // Randomly choose between success and failure for demonstration
-      if (Math.random() > 0.5) {
-        router.push('/payment/confirmation?status=success')
-      } else {
-        router.push('/payment/confirmation?status=failure')
+    async function PaymentProcess(id: string) {
+      const res = await bookingConfirm(id);
+      if(res){
+        toast({
+          title: "Success",
+          description: "payment successfull",
+          variant: "default",
+        });
       }
-    }, 2000)
+      setIsProcessing(false);
+      onClose();
+    }
+    PaymentProcess(id);
+    
   }
 
   return (
@@ -87,7 +94,7 @@ export default function PaymentModal({ isOpen, onClose, amount }: PaymentModalPr
             />
           </div>
           <div className="text-right text-lg font-bold">
-            Total: ${amount.toFixed(2)}
+            Total: ${amount}
           </div>
           <Button type="submit" className="w-full" disabled={isProcessing}>
             {isProcessing ? 'Processing...' : 'Pay Now'}

@@ -102,6 +102,53 @@ export async function fetchBookingRequests() {
   }
 }
 
+export async function UnpaidBookingRequests() {
+    const cookieStore = cookies();
+    const curUserId = cookieStore.get('userId');
+    var userId = "";
+    if(curUserId){
+        userId = curUserId.value;
+    }
+  
+  if (curUserId) {
+    const bookingRequests = await prismadb.bookingRequests.findMany({
+        where: {
+            userBkId: userId,
+            status: "PENDING",
+        }
+    });
+
+    // Map over the bookingRequests to fetch userData for each booking request
+    const bookingData = await Promise.all(bookingRequests.map(async (request) => {
+        // Fetch user data for each booking request
+        const userData = await prismadb.user.findUnique({
+            where: {
+                id: request.userBkId  // Assuming userBkId is the correct field to identify the user
+            }
+        });
+        const roomData = await prismadb.roomType.findFirst({
+            where:{
+                id: request.roomId
+            }
+        })
+        const hostel = await prismadb.hostel.findFirst({
+            where:{
+                id: request.hostelBkId,
+            }
+          });
+        // Return an object containing both booking request and user data
+        return {
+            ...request,
+            ...userData,
+            ...roomData,
+            ...hostel,
+            bkId: request.id
+        };
+    }));
+    return bookingData;
+  }
+}
+
 const convertToBase64 = (bytes: any) => {
     return Buffer.from(bytes).toString("base64");
   };

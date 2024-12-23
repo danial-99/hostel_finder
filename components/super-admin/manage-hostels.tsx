@@ -24,6 +24,8 @@ type Hostel = {
   name: string;
   type: string;
   hostelImage: string;
+  city: string;
+  country: string;
   location: string;
   rating: number;
   rooms: number;
@@ -65,7 +67,11 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
                 <div className='flex items-center mt-1'>
                   <MapPin className='w-4 h-4 mr-1 text-gray-500' />
                   <span className='text-sm text-gray-500'>
-                    {hostel.location}
+                    {hostel.city}
+                  </span>
+                  ,
+                  <span className='text-sm text-gray-500'>
+                    {hostel.country}
                   </span>
                 </div>
                 <div className='flex items-center mt-1'>

@@ -59,7 +59,7 @@ model User {
     updatedAt       DateTime          @updatedAt
     hostels         Hostel[]
     bookings        BookingRequests[]
-    feedbacks       Feedback[]
+    //feedbacks       Feedback[]
     ratings         Rating[]
     otp             String?
     verifiction     Boolean           @default(false)
@@ -127,12 +127,16 @@ model BookingRequests {
 
  model Feedback {
    id              String            @id @default(uuid())
-   rating          Int
-   comment         String
+   rating          Int               @default(4)
+   name            String
+   email           String
+   hostelName      String
+   hostelAddress   String
+   subject         String
+   description     String
    createdAt       DateTime          @default(now())
    updatedAt       DateTime          @updatedAt
-   userFdId        String
-   user            User              @relation(fields: [userFdId], references: [id])
+   
  }
 
  model Rating {

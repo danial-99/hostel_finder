@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
 import { AlertTriangle, MessageSquare, Ban } from 'lucide-react'
+import { getFeedBack } from "@/actions/hostel/feedback"
 
 interface Report {
   id: string
@@ -33,46 +34,56 @@ interface Report {
   reporterEmail: string
   subject: string
   description: string
-  date: string
+  createdAt: string
   status: "pending" | "resolved" | "restricted"
 }
 
 export default function HostelReportsPage() {
-  const [reports, setReports] = useState<Report[]>([
-    {
-      id: "1",
-      hostelName: "Sunshine Hostel",
-      hostelAddress: "123 Beach Road, Miami, FL",
-      reporterName: "John Doe",
-      reporterEmail: "john@example.com",
-      subject: "Cleanliness Issue",
-      description: "The bathroom was not clean upon arrival.",
-      date: "2023-06-15",
-      status: "pending"
-    },
-    {
-      id: "2",
-      hostelName: "Mountain View Lodge",
-      hostelAddress: "456 Pine Street, Denver, CO",
-      reporterName: "Jane Smith",
-      reporterEmail: "jane@example.com",
-      subject: "Noise Complaint",
-      description: "Excessive noise from other guests late at night.",
-      date: "2023-06-14",
-      status: "resolved"
-    },
-    {
-      id: "3",
-      hostelName: "City Center Hostel",
-      hostelAddress: "789 Main St, New York, NY",
-      reporterName: "Alice Johnson",
-      reporterEmail: "alice@example.com",
-      subject: "Booking Discrepancy",
-      description: "My reservation was not found in the system upon arrival.",
-      date: "2023-06-16",
-      status: "pending"
-    }
-  ])
+  const [reports, setReports] = useState<any[]>([])
+   useEffect(() => {
+      async function fetchHostels() {
+        const feedbackData = await getFeedBack();
+        if (feedbackData) {
+          setReports(feedbackData);
+        }
+      }
+  
+      fetchHostels();
+    }, []);
+    // {
+    //   id: "1",
+    //   hostelName: "Sunshine Hostel",
+    //   hostelAddress: "123 Beach Road, Miami, FL",
+    //   reporterName: "John Doe",
+    //   reporterEmail: "john@example.com",
+    //   subject: "Cleanliness Issue",
+    //   description: "The bathroom was not clean upon arrival.",
+    //   date: "2023-06-15",
+    //   status: "pending"
+    // },
+    // {
+    //   id: "2",
+    //   hostelName: "Mountain View Lodge",
+    //   hostelAddress: "456 Pine Street, Denver, CO",
+    //   reporterName: "Jane Smith",
+    //   reporterEmail: "jane@example.com",
+    //   subject: "Noise Complaint",
+    //   description: "Excessive noise from other guests late at night.",
+    //   date: "2023-06-14",
+    //   status: "resolved"
+    // },
+    // {
+    //   id: "3",
+    //   hostelName: "City Center Hostel",
+    //   hostelAddress: "789 Main St, New York, NY",
+    //   reporterName: "Alice Johnson",
+    //   reporterEmail: "alice@example.com",
+    //   subject: "Booking Discrepancy",
+    //   description: "My reservation was not found in the system upon arrival.",
+    //   date: "2023-06-16",
+    //   status: "pending"
+    // }
+  //])
 
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [message, setMessage] = useState("")
@@ -131,14 +142,18 @@ export default function HostelReportsPage() {
               <TableRow key={report.id}>
                 <TableCell className="font-medium">{report.hostelName}</TableCell>
                 <TableCell>{report.subject}</TableCell>
-                <TableCell>{report.date}</TableCell>
-                <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold
+                <TableCell>{new Date(report.createdAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })}</TableCell>
+                <TableCell>Pending
+                  {/* <span className={`px-2 py-1 rounded-full text-xs font-semibold
                     ${report.status === 'pending' ? 'bg-yellow-200 text-yellow-800' :
                       report.status === 'resolved' ? 'bg-green-200 text-green-800' :
                       'bg-red-200 text-red-800'}`}>
                     {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
-                  </span>
+                  </span> */}
                 </TableCell>
                 <TableCell className="text-right">
                   <Dialog>
@@ -171,7 +186,7 @@ export default function HostelReportsPage() {
                           <Label htmlFor="reporter" className="text-right">
                             Reporter
                           </Label>
-                          <Input id="reporter" value={selectedReport?.reporterName} className="col-span-3" readOnly />
+                          <Input id="reporter" value={selectedReport?.name} className="col-span-3" readOnly />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="subject" className="text-right">

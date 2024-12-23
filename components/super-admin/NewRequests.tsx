@@ -21,6 +21,8 @@ type Hostel = {
   type: HostelType;
   cnic: string;
   phone: string;
+  address: string;
+  category: string;
   description: string;
   facilities: string[];
   createdAt: string;
@@ -48,16 +50,19 @@ const HostelRequestCard: React.FC<{
           </div>
           <div className='w-full md:w-2/3 lg:w-3/4 p-4'>
             <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-4'>
-              <div>
-                <h2 className='text-2xl font-bold'>{hostel.hostelName}</h2>
-                <p className='text-gray-500'>{hostel.type}</p>
-                <div className='flex items-center mt-2 md:mt-0'>
-                  <MapPin className='w-4 h-4 mr-1 text-gray-500' />
-                  <span className='text-sm text-gray-500'>
-                    {hostel.city}, {hostel.province}, {hostel.country}
-                  </span>
-                </div>
-              </div>
+            <div>
+            <h4 className='font-semibold mb-4'>Hostel Information</h4>
+            <p><span className='font-medium'>Name:</span>{hostel.hostelName}</p>
+            <p><span className='font-medium'>Owner:</span> {hostel.hostelName}</p>
+            <p><span className='font-medium'>Location:</span> {hostel.city},{hostel.province}, {hostel.country}</p>
+            <p><span className='font-medium'>Zip Code:</span> {hostel.zipCode}</p>
+            <p><span className='font-medium'>Address:</span>{hostel.address}</p>
+            <p><span className='font-medium'>Hostel Type:</span> {hostel.type}</p>
+            <p><span className='font-medium'>Category:</span> {hostel.category}</p>
+            <p><span className='font-medium'>CNIC:</span> {hostel.cnic}</p>
+            <p><span className='font-medium'>Phone:</span> {hostel.phone}</p>
+            <p><span className='font-medium'>Number of Rooms:</span> 4</p>
+          </div>
             </div>
             <div className='flex flex-wrap gap-2'>
               Facilities:</div>
@@ -130,3 +135,5 @@ const NewRequests: React.FC<{ pendingHostels: Hostel[] }> = ({
 };
 
 export default NewRequests;
+
+

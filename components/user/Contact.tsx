@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
 import { Mail, Phone, Send } from 'lucide-react'
+import feedback from "@/actions/hostel/feedback"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -28,10 +29,25 @@ export default function ContactPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     console.log("Form submitted", formData)
+    async function submitFeedback(data: any) {
+      const res = await feedback(data)
+      if(res.success){
+        toast({
+          title: "Report Submitted",
+          description: "We've received your report and will investigate the issue.",
+        })
+      } else{
+        toast({
+          title: "Failed to submit feedback",
+          description: "We've received your report and will investigate the issue.",
+        })
+      }
+    }
     toast({
       title: "Report Submitted",
       description: "We've received your report and will investigate the issue.",
     })
+    submitFeedback(formData);
     // Reset form after submission
     setFormData({
       name: "",

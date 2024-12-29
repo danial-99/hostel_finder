@@ -393,7 +393,7 @@ export default function HostelRegistrationForm() {
                   <SelectItem value={Category.STUDENT}>Students</SelectItem>
                   <SelectItem value={Category.PROFESSIONAL}>Professionals</SelectItem>
                   <SelectItem value={Category.FAMILY}>Family</SelectItem>
-                  <SelectItem value={Category.OTHER}>Others</SelectItem>
+                  <SelectItem value={Category.OTHER}>Student and Professionals</SelectItem>
                 </SelectContent>
               </Select>
             )}

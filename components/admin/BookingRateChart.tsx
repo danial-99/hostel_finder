@@ -1,43 +1,42 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Users, Building, CalendarCheck, Clock } from "lucide-react"
 
-const data = [
-  { name: 'Jan', value1: 400, value2: 240 },
-  { name: 'Feb', value1: 300, value2: 139 },
-  { name: 'Mar', value1: 200, value2: 980 },
-  { name: 'Apr', value1: 278, value2: 390 },
-  { name: 'May', value1: 189, value2: 480 },
-  { name: 'Jun', value1: 239, value2: 380 },
-]
-
-export default function BookingRateChart() {
+export function StatsCards() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Booking Rate</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={data}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value1" fill="#8884d8" />
-              <Bar dataKey="value2" fill="#82ca9d" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total User</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">40,689</div>
+          <p className="text-xs text-muted-foreground">
+          </p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+          <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">8,900</div>
+          <p className="text-xs text-muted-foreground">
+          </p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Pending Request</CardTitle>
+          <Clock className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">2040</div>
+          <p className="text-xs text-muted-foreground">
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

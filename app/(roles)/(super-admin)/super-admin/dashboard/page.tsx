@@ -1,4 +1,4 @@
-import { SalesGraph } from "@/components/super-admin/SalesGraph";
+
 import { StatsCards } from "@/components/super-admin/StatsCards";
 
 export default function Page() {
@@ -6,7 +6,6 @@ export default function Page() {
     <div>
       <h1 className='text-3xl font-bold mb-6'>Hello, Welcome Back 👋</h1>
       <StatsCards />
-      <SalesGraph />
     </div>
   );
 }

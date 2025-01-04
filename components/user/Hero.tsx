@@ -71,7 +71,7 @@ export default function Hero() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 max-w-3xl mx-auto">
             Discover Your Home Away From Home Hostel Finder!
           </h1>
-          <Button size="lg" className="mb-8 sm:mb-10">Book Now</Button>
+          {/* <Button size="lg" className="mb-8 sm:mb-10">Book Now</Button> */}
           <Card className="w-full max-w-md mx-auto">
             <CardContent className="p-4">
               <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">

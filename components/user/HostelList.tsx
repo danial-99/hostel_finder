@@ -73,10 +73,10 @@ export default function HostelList() {
                     <span>{hostel.city}</span>, 
                     <span>{hostel.country}</span>
                   </div>
-                  <div className="flex items-center mt-2 text-sm text-gray-600">
+                  {/* <div className="flex items-center mt-2 text-sm text-gray-600">
                     <Users className="w-4 h-4 mr-1" />
                     Capacity: {hostel.capacity}
-                  </div>
+                  </div> */}
                 </CardContent>
               </Card>
             </Link>

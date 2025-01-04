@@ -82,7 +82,7 @@ export default function ContactPage() {
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-5 w-5 text-muted-foreground" />
-                <span>+1 (555) 123-4567</span>
+                <span>+923175160306</span>
               </div>
             </CardContent>
           </Card>

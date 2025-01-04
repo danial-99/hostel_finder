@@ -21,8 +21,6 @@ export default function Home() {
         <AboutUs />
         <WhyChooseUs />
         <PaySumm/>
-        <Testimonials />
-        <MobileApp />
         <ContactPage />
       </main>
       <Footer />

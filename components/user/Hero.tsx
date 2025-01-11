@@ -1,56 +1,46 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { SearchResults } from '@/components/user/SearchResult'
 import { useToast } from "@/hooks/use-toast"
+import { getApprovedHostelsList } from "@/actions/hostel/listHostels"
 
 interface Hostel {
   id: string
-  name: string
+  hostelName: string
+  city: string
+  country: string
   location: string
-  imageUrl: string
+  hostelImage: string
 }
-
-const hostels: Hostel[] = [
-  {
-    id: "1",
-    name: "Sunshine Backpackers",
-    location: "Sydney, Australia",
-    imageUrl: "/placeholder.svg?height=300&width=400"
-  },
-  {
-    id: "2",
-    name: "Mountain View Lodge",
-    location: "Queenstown, New Zealand",
-    imageUrl: "/placeholder.svg?height=300&width=400"
-  },
-  {
-    id: "3",
-    name: "City Center Hostel",
-    location: "London, UK",
-    imageUrl: "/placeholder.svg?height=300&width=400"
-  },
-  {
-    id: "4",
-    name: "Beachside Bungalow",
-    location: "Bali, Indonesia",
-    imageUrl: "/placeholder.svg?height=300&width=400"
-  }
-]
 
 export default function Hero() {
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState<Hostel[]>([])
+  const [hostels, setHostels] = useState<any[]>([])
   const { toast } = useToast()
+
+  useEffect(() => {
+    async function fetchHostels() {
+      const hostelData = await getApprovedHostelsList()
+      if (hostelData) {
+        setHostels(hostelData)
+        console.log(hostels);
+      }
+    }
+
+    fetchHostels()
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     const results = hostels.filter(hostel => 
-      hostel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hostel.location.toLowerCase().includes(searchTerm.toLowerCase())
+      hostel.hostelName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hostel.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hostel.city.toLowerCase().includes(searchTerm.toLowerCase())
     )
     setSearchResults(results)
 
@@ -71,7 +61,6 @@ export default function Hero() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 max-w-3xl mx-auto">
             Discover Your Home Away From Home Hostel Finder!
           </h1>
-          {/* <Button size="lg" className="mb-8 sm:mb-10">Book Now</Button> */}
           <Card className="w-full max-w-md mx-auto">
             <CardContent className="p-4">
               <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">

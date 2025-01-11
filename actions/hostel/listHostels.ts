@@ -53,6 +53,26 @@ export async function getTopHostelsList() {
   }
 }
 
+export async function getApprovedHostelsList() {
+  const hostels = await prismadb.hostel.findMany({
+    where: {
+      status: "APPROVED"
+    }
+  });
+
+  if (hostels.length > 0) {
+    return hostels.map((hostel) => {
+      return {
+        ...hostel,
+        hostelImage: convertToBase64(hostel.hostelImage),
+        electercityBill: convertToBase64(hostel.electercityBill),
+        gasBill: convertToBase64(hostel.gasBill),
+      };
+    });
+  } else {
+    return false;
+  }
+}
 
 export async function getAllHostelsList() {
   const hostels = await prismadb.hostel.findMany();
@@ -71,7 +91,6 @@ export async function getAllHostelsList() {
     return false;  // Return false if no hostels were found
   }
 }
-
 
 export async function getFullDetials() {
   const hostels = await prismadb.hostel.findMany();

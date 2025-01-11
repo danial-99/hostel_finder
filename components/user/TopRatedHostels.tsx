@@ -16,6 +16,7 @@ export default function HostelList() {
       const hostelData = await getTopHostelsList();
       if (hostelData) {
         setHostels(hostelData);
+        console.log(hostels);
       }
     }
 

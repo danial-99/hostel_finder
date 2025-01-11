@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 
-export default function Images() {
+export default function Images(hostel: any) {
   const [images, setImages] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
@@ -37,7 +37,11 @@ export default function Images() {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
         {images.map((image, index) => (
           <div key={index} className="relative">
-            <img src={image} alt={`Hostel Image ${index + 1}`} className="w-full h-32 object-cover rounded" />
+            <img
+                src={`data:image/jpeg;base64,${hostel.hostelImage}`}
+                alt="Hostel lounge"
+                className="rounded-l-xl object-cover"
+              />
             <button
               className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl text-xs"
               onClick={() => deleteImage(index)}

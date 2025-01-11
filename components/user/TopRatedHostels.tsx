@@ -52,7 +52,7 @@ export default function HostelList() {
                   />
                 </CardHeader>
                 <CardContent className="p-4">
-                  <CardTitle>{hostel.name}</CardTitle>
+                  <CardTitle>{hostel.hostelName}</CardTitle>
                   <div className="flex items-center mt-2">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
@@ -74,8 +74,7 @@ export default function HostelList() {
                     <span>{hostel.country}</span>
                   </div>
                   <div className="flex items-center mt-2 text-sm text-gray-600">
-                    <Users className="w-4 h-4 mr-1" />
-                    Capacity: {hostel.capacity}
+                    {hostel.description}
                   </div>
                 </CardContent>
               </Card>

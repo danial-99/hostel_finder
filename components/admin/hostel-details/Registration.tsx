@@ -125,7 +125,7 @@ export default function HostelRegistrationForm() {
   })
 
   const onSubmit = async (data: FormData) => {
-    if (step < 6) {
+    if (step < 7) {
       setStep(prev => prev + 1)
     } else {
       setLoading(true);

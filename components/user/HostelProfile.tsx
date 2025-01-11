@@ -41,6 +41,8 @@ hostel?: {
   capacity: number;
   hostelImage: any;
   gasBill: any;
+  city: string;
+  country: string;
   electercityBill: any;
   description: string;
   facilities: string[];
@@ -198,22 +200,6 @@ return (
               fill
             />
           </div>
-          <div className="col-span-1 relative aspect-[4/3]">
-            <Image
-              src={`data:image/jpeg;base64,${hostel.gasBill}`}
-              alt="Hostel terrace"
-              className="object-cover"
-              fill
-            />
-          </div>
-          <div className="col-span-1 relative aspect-[4/3]">
-            <Image
-              src={`data:image/jpeg;base64,${hostel.electercityBill}`}
-              alt="Hostel facilities"
-              className="rounded-r-xl object-cover"
-              fill
-            />
-          </div>
         </div>
       </div>
 
@@ -222,14 +208,14 @@ return (
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">{hostel.hostelName}</h1>
-            <p className="text-muted-foreground mt-2">{hostel.location}</p>
+            <p className="text-muted-foreground mt-2">{hostel.city}, {hostel.country}</p>
           </div>
           <div className="text-right">
             <div className="flex items-center mb-1">
               <Star className="w-4 h-4 fill-primary text-primary mr-1" />
               <span className="font-bold">{hostel.rating}</span>
             </div>
-            <div className="text-sm text-muted-foreground">Superb (10494)</div>
+            <div className="text-sm text-muted-foreground">Superb (14)</div>
           </div>
         </div>
 
@@ -287,7 +273,7 @@ return (
                               </p>
                               <p className="font-semibold text-lg mb-2">PKR {room.price.toLocaleString()} per bed/month</p>
                               <Badge variant={room.available ? "default" : "destructive"} className="mb-2">
-                                {room.available ? (
+                                {(room.available) && (room.numberOfRooms != '0') ? (
                                   <><CheckCircle className="w-4 h-4 mr-1" /> Available</>
                                 ) : (
                                   <><XCircle className="w-4 h-4 mr-1" /> Not Available</>

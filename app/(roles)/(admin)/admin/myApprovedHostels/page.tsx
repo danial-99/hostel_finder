@@ -1,3 +1,4 @@
+"use client"
 import { approvedHostels } from "@/actions/admin/approvedHostels";
 import { getUserId } from "@/actions/admin/getUserId";
 import ListApprovedHostels from "@/components/admin/ListOfApprovedHostels";

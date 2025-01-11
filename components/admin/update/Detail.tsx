@@ -18,28 +18,27 @@ const detailSchema = z.object({
   'Description': z.string().min(10, 'Description must be at least 10 characters long'),
 })
 
-type DetailsType = z.infer<typeof detailSchema>
 
-export default function GeneralDetails() {
-  const [details, setDetails] = useState<DetailsType>({
-    'Hostel Name': 'My Hostel',
-    'Country': 'Pakistan',
-    'Province': 'Sindh',
-    'City': 'Karachi',
-    'Zip Code': '74200',
-    'Type': 'MALE',
-    'Category': 'STUDENT',
-    'CNIC': '12345-6789012-3',
-    'Phone': '+92-300-1234567',
-    'Description': 'A modern hostel with excellent facilities.',
+export default function GeneralDetails(hostel: any) {
+  const [details, setDetails] = useState({
+    'Hostel Name': hostel.hostelName,
+    'Country': hostel.country,
+    'Province': hostel.province,
+    'City': hostel.city,
+    'Zip Code': hostel.zipCode,
+    'Type': hostel.type,  
+    'Category': hostel.category,
+    'CNIC': hostel.cnic,
+    'Phone': hostel.phone,
+    'Description': hostel.description,
   })
 
-  const { register, handleSubmit, formState: { errors } } = useForm<DetailsType>({
+  const { register, handleSubmit, formState: { errors } } = useForm<any>({
     resolver: zodResolver(detailSchema),
     defaultValues: details,
   })
 
-  const handleSave = (key: keyof DetailsType) => {
+  const handleSave = (key: any) => {
     handleSubmit((data) => {
       setDetails(prevDetails => ({ ...prevDetails, [key]: data[key] }))
       console.log(`Saved ${key}:`, data[key])
@@ -57,9 +56,9 @@ export default function GeneralDetails() {
     <div>
       <h2 className="text-2xl font-bold mb-4">General Details</h2>
       <form onSubmit={handleUpdateAll} className="space-y-4">
-        {(Object.keys(details) as Array<keyof DetailsType>).map((key) => (
+        {(Object.keys(details) as Array<any>).map((key) => (
           <div key={key} className="flex flex-col sm:flex-row sm:items-center">
-            <label className="font-semibold w-1/3 mb-1 sm:mb-0" htmlFor={key}>{key}:</label>
+            <label className="font-semibold w-1/3 mb-1 sm:mb-0" htmlFor={key as string}>{key}:</label>
             <div className="w-full sm:w-2/3 flex gap-2">
               {key === 'Type' || key === 'Category' ? (
                 <select
@@ -98,7 +97,7 @@ export default function GeneralDetails() {
           </div>
         ))}
         {Object.entries(errors).map(([key, error]) => (
-          <p key={key} className="text-red-500 text-sm">{error.message}</p>
+          <p key={key} className="text-red-500 text-sm">{(error as { message: string }).message}</p>
         ))}
         <div className="mt-6 text-center">
           <button

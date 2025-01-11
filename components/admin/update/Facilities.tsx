@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 
-export default function Facilities() {
-  const [facilities, setFacilities] = useState(['WiFi', 'Parking'])
+export default function Facilities(hostel: any) {
+  const [facilities, setFacilities] = useState([
+    hostel.facilities.map((facilitie: any) => facilitie)
+  ])
   const [newFacility, setNewFacility] = useState('')
 
   const addFacility = () => {

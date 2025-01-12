@@ -18,7 +18,6 @@ const detailSchema = z.object({
   'Description': z.string().min(10, 'Description must be at least 10 characters long'),
 })
 
-
 export default function GeneralDetails(hostel: any) {
   const [details, setDetails] = useState({
     'Hostel Name': hostel.hostelName,
@@ -47,7 +46,7 @@ export default function GeneralDetails(hostel: any) {
   }
 
   const handleUpdateAll = handleSubmit((data) => {
-    setDetails(data)
+    setDetails(data);
     console.log('Updated General Details:', data)
     alert('All general details updated successfully!')
   })

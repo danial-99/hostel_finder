@@ -82,6 +82,13 @@ numberOfRooms: string,
 image: string;
 }
 
+const feedbackFormSchema = z.object({
+  rating: z.string().nonempty("Rating is required"),
+  feedback: z.string().min(10, "Feedback must be at least 10 characters"),
+});
+
+type FeedbackFormData = z.infer<typeof feedbackFormSchema>;
+
 export default function HostelProfile({ hostel }: HostelProfileProps) {
 const [currentImageIndex, setCurrentImageIndex] = useState(0);
 const [showBookingForm, setShowBookingForm] = useState(false);
@@ -91,9 +98,12 @@ const [showCancellationDialog, setShowCancellationDialog] = useState(false);
 const [cancellationReason, setCancellationReason] = useState("");
 const [finalFormData, setFinalFormData] = useState<any>(null);
 
-
 const { control, handleSubmit, getValues, formState: { errors } } = useForm<BookingFormData>({
   resolver: zodResolver(bookingFormSchema),
+});
+
+const { control: feedbackControl, handleSubmit: handleFeedbackSubmit, formState: { errors: feedbackErrors } } = useForm<FeedbackFormData>({
+  resolver: zodResolver(feedbackFormSchema),
 });
 
 const rooms: Room[] = hostel?.rooms || [];
@@ -133,8 +143,17 @@ const handleBack = () => {
 };
 
 const handleConfirmBooking = async () => {
-  
-  const res: any = await bookingRequest(finalFormData);
+  const checkInDate = getValues().checkInDate;
+  const checkOutDate = getValues().checkOutDate;
+  const numberOfDays = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24);
+  const adjustedPrice = selectedRoom && selectedRoom.price ? (selectedRoom.price / 30) * numberOfDays : 0;
+
+  const updatedData = {
+    ...finalFormData,
+    adjustedPrice,
+  };
+
+  const res: any = await bookingRequest(updatedData);
   if(res.status == 200){
     toast({
       title: "Booking Request Sent",
@@ -168,6 +187,16 @@ const handleConfirmCancellation = () => {
   setShowBookingForm(false);
   setBookingStep(1);
   setCancellationReason("");
+};
+
+const onSubmitFeedback = async (data: FeedbackFormData) => {
+  // Replace with your feedback submission logic
+  console.log("Feedback Data:", data);
+  toast({
+    title: "Feedback Submitted",
+    description: "Thank you for your feedback!",
+    variant: "default",
+  });
 };
 
 if (!hostel) {
@@ -215,7 +244,7 @@ return (
               <Star className="w-4 h-4 fill-primary text-primary mr-1" />
               <span className="font-bold">{hostel.rating}</span>
             </div>
-            <div className="text-sm text-muted-foreground">Superb (14)</div>
+            <div className="text-sm text-muted-foreground">Rating (0)</div>
           </div>
         </div>
 
@@ -414,6 +443,11 @@ return (
                           <p><strong>Check-out Date:</strong> {getValues().checkOutDate ? format(getValues().checkOutDate, "PPP") : 'Not selected'}</p>
                           <p><strong>Room:</strong> {selectedRoom.numberOfRooms}</p>
                           <p><strong>Price:</strong> PKR {selectedRoom.price.toLocaleString()} per bed/month</p>
+                          {getValues().checkInDate && getValues().checkOutDate && (
+                            <p>
+                              <strong>Total Price:</strong> PKR {((selectedRoom.price / 30) * ((getValues().checkOutDate.getTime() - getValues().checkInDate.getTime()) / (1000 * 60 * 60 * 24))).toLocaleString()}
+                            </p>
+                          )}
                         </div>
                         <div className="flex flex-col gap-2">
                           <Button onClick={handleConfirmBooking}>Request Booking</Button>
@@ -499,20 +533,33 @@ return (
                   {/* Feedback and Rating Section */}
                   <div className="mt-6">
                     <h3 className="text-lg font-semibold mb-4">Leave Your Feedback</h3>
-                    <form className="space-y-4">
+                    <form onSubmit={handleFeedbackSubmit(onSubmitFeedback)} className="space-y-4">
                       <div>
                         <Label htmlFor="rating">Rating</Label>
-                        <select id="rating" className="w-full mt-1 rounded-md border-gray-300">
-                          <option>5 - Excellent</option>
-                          <option>4 - Very Good</option>
-                          <option>3 - Average</option>
-                          <option>2 - Poor</option>
-                          <option>1 - Terrible</option>
-                        </select>
+                        <Controller
+                          name="rating"
+                          control={feedbackControl}
+                          render={({ field }) => (
+                            <select {...field} id="rating" className="w-full mt-1 rounded-md border-gray-300">
+                              <option value="">Select Rating</option>
+                              <option value="5">5 - Excellent</option>
+                              <option value="4">4 - Very Good</option>
+                              <option value="3">3 - Average</option>
+                              <option value="2">2 - Poor</option>
+                              <option value="1">1 - Terrible</option>
+                            </select>
+                          )}
+                        />
+                        {feedbackErrors.rating && <p className="text-red-500 text-sm mt-1">{feedbackErrors.rating.message}</p>}
                       </div>
                       <div>
                         <Label htmlFor="feedback">Your Feedback</Label>
-                        <Textarea id="feedback" placeholder="Share your experience..." className="mt-1" />
+                        <Controller
+                          name="feedback"
+                          control={feedbackControl}
+                          render={({ field }) => <Textarea {...field} id="feedback" placeholder="Share your experience..." className="mt-1" />}
+                        />
+                        {feedbackErrors.feedback && <p className="text-red-500 text-sm mt-1">{feedbackErrors.feedback.message}</p>}
                       </div>
                       <Button type="submit">Submit Review</Button>
                     </form>

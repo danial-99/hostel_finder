@@ -14,43 +14,19 @@ interface Booking {
   name: string
   phone: string
   address: string
+  checkInDate: string
+  checkOutDate: string
   date: string
   type: string
-  payment: 'unpaid' | 'paid' | 'pending'
-  status: 'Completed' | 'Active' | 'Canceled'
+  price: string
+  status: 'unpaid' | 'paid' | 'pending'
+  status2: 'completed' | 'active' | 'canceled'
 }
 
 interface BookingsTableProps {
   bookings: Booking[]
 }
 
-const StatusBadge: React.FC<{ status: Booking['status'] }> = ({ status }) => {
-  const colorMap = {
-    Completed: 'bg-primary text-primary-foreground hover:bg-primary/90',
-    Active: 'bg-secondary/20 text-secondary-foreground hover:bg-secondary/80',
-    Canceled: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-  }
-
-  return (
-    <Badge className={colorMap[status]}>
-      {status}
-    </Badge>
-  )
-}
-
-const PaymentBadge: React.FC<{ payment: Booking['payment'] }> = ({ payment }) => {
-  const colorMap = {
-    paid: 'bg-primary text-primary-foreground hover:bg-primary/90',
-    pending: 'bg-secondary/20 text-secondary-foreground hover:bg-secondary/80',
-    unpaid: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-  }
-
-  return (
-    <Badge className={colorMap[payment]}>
-      {payment}
-    </Badge>
-  )
-}
 
 export default function BookingsTable({ bookings }: BookingsTableProps) {
   return (
@@ -73,13 +49,21 @@ export default function BookingsTable({ bookings }: BookingsTableProps) {
             <TableCell className="font-medium">{booking.name}</TableCell>
             <TableCell>{booking.phone}</TableCell>
             <TableCell>{booking.address}</TableCell>
-            <TableCell>{booking.date}</TableCell>
+            <TableCell><span className="mb-2">Dates: {new Date(booking.checkInDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}  - {new Date(booking.checkOutDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })} </span></TableCell>
             <TableCell>{booking.type}</TableCell>
             <TableCell className="text-right">
-              <PaymentBadge payment={booking.payment} /> {/* Display Payment Badge */}
+              {booking.price}
             </TableCell>
             <TableCell className="text-right">
-              <StatusBadge status={booking.status} /> {/* Display Status Badge */}
+              {booking.status}
             </TableCell>
           </TableRow>
         ))}

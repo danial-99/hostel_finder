@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 export default function Facilities(hostel: any) {
   const [facilities, setFacilities] = useState([
-    hostel.facilities.map((facilitie: any) => facilitie)
+   hostel.facilities
   ])
   const [newFacility, setNewFacility] = useState('')
 

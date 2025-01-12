@@ -80,6 +80,45 @@ export async function fetchHostelsDetail() {
   }
 }
 
+export async function getHostelsDetails() {
+  const cookieStore = cookies();
+  const curUserId = cookieStore.get('userId');
+  const userId = curUserId?.value;
+
+  if (userId) {
+    const hostel = await prismadb.hostel.findFirst({
+      where: {
+        ownerId: userId,
+      },
+    });
+
+    if (hostel) {
+      const rooms = await prismadb.roomType.findMany({
+        where: {
+          hostelId: hostel.id,
+        },
+      });
+
+      if (rooms) {
+        rooms.map((rm: any) => {
+          // Ensure rm.image is valid before calling convertToBase64
+          rm.image = rm.image ? convertToBase64(rm.image) : '';
+        });
+      }
+
+      return {
+        ...hostel,
+        hostelImage: hostel.hostelImage ? convertToBase64(hostel.hostelImage) : '',
+        electercityBill: hostel.electercityBill ? convertToBase64(hostel.electercityBill) : '',
+        gasBill: hostel.gasBill ? convertToBase64(hostel.gasBill) : '',
+        rooms,
+      };
+    } else {
+      return false;  // Return false if no hostels were found
+    }
+  }
+}
+
 const convertToBase64 = (bytes: any) => {
   // Check if the input is valid (not null or undefined)
   if (!bytes) {

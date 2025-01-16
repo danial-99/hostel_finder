@@ -1,4 +1,9 @@
+'use client'
+
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,18 +24,29 @@ interface PaymentFormProps {
   onPaymentComplete: () => void
 }
 
-export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
-  const [cardOwner, setCardOwner] = useState<string>("")
-  const [cardNumber, setCardNumber] = useState<string>("")
-  const [expiryDate, setExpiryDate] = useState<string>("")
-  const [cvv, setCvv] = useState<string>("")
+// Define the Zod schema for form validation
+const paymentFormSchema = z.object({
+  cardOwner: z.string().min(3, "Name must be at least 3 characters"),
+  cardNumber: z.string().regex(/^\d{16}$/, "Card number must be 16 digits"),
+  expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Expiry date must be in MM/YY format"),
+  cvv: z.string().regex(/^\d{3,4}$/, "CVV must be 3 or 4 digits"),
+})
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // Here you would typically integrate with a payment gateway
-    console.log("Processing payment...")
-    const res = await processPayment(plan);
-    console.log(res);
+type PaymentFormData = z.infer<typeof paymentFormSchema>
+
+export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentFormSchema),
+  })
+
+  const onSubmit = async (data: PaymentFormData) => {
+    console.log("Processing payment...", data)
+    const res = await processPayment(plan)
+    console.log(res)
     onPaymentComplete()
   }
 
@@ -41,26 +57,28 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
         <CardDescription>Enter your payment information for the {plan.name} plan</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4" id="payment-form">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" id="payment-form">
           <div className="space-y-2">
             <Label htmlFor="cardOwner">Card Owner Name</Label>
             <Input
               id="cardOwner"
               placeholder="John Doe"
-              value={cardOwner}
-              onChange={(e) => setCardOwner(e.target.value)}
-              required
+              {...register("cardOwner")}
             />
+            {errors.cardOwner && (
+              <p className="text-sm text-red-500">{errors.cardOwner.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="cardNumber">Card Number</Label>
             <Input
               id="cardNumber"
-              placeholder="1234 5678 9012 3456"
-              value={cardNumber}
-              onChange={(e) => setCardNumber(e.target.value)}
-              required
+              placeholder="1234567890123456"
+              {...register("cardNumber")}
             />
+            {errors.cardNumber && (
+              <p className="text-sm text-red-500">{errors.cardNumber.message}</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -68,30 +86,31 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
               <Input
                 id="expiryDate"
                 placeholder="MM/YY"
-                value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
-                required
+                {...register("expiryDate")}
               />
+              {errors.expiryDate && (
+                <p className="text-sm text-red-500">{errors.expiryDate.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="cvv">CVV</Label>
               <Input
                 id="cvv"
                 placeholder="123"
-                value={cvv}
-                onChange={(e) => setCvv(e.target.value)}
-                required
+                {...register("cvv")}
               />
+              {errors.cvv && (
+                <p className="text-sm text-red-500">{errors.cvv.message}</p>
+              )}
             </div>
           </div>
         </form>
       </CardContent>
       <CardFooter>
-        {/* The button triggers the form's onSubmit */}
         <Button
           className="w-full"
           type="submit"
-          form="payment-form" // Link this button to the form by ID
+          form="payment-form"
         >
           Pay ${plan.price.toFixed(2)}
         </Button>
@@ -99,3 +118,4 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
     </Card>
   )
 }
+

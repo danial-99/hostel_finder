@@ -150,3 +150,21 @@ model BookingRequests {
    hostelRtId      String
    hostel          Hostel   @relation(fields: [hostelRtId], references: [id])
  }
+
+model Plan {
+  id        String     @id @default(uuid())
+  name      String
+  price     Float
+  interval  String
+  discount  Int
+  features  Feature[]
+}
+
+model Feature {
+  id      String @id @default(uuid())
+  text    String
+  planId  String
+  plan    Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
+

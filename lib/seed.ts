@@ -15,15 +15,15 @@ async function main() {
 
     // Seed Super Admin
     const superAdmin = await prismadb.user.upsert({
-      where: { email: "azharabbass786.com@gmail.com" },
+      where: { email: "shayanjaved07@gmail.com" },
       update: {},
       create: {
         name: "Super Admin",
         username: "superadmin",
-        email: "azharabbass786.com@gmail.com",
+        email: "shayanjaved07@gmail.com",
         password: hashedPassword,
         role: "SUPER_ADMIN",
-        phone: "1234567890",
+        phone: "03175160306",
         termsConditions: true,
       },
     });

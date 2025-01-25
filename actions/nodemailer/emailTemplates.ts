@@ -132,6 +132,31 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
       throw new Error('Error sending booking request email');
     }
   };
+
+  const sendReportEmail = async (email: string | undefined): Promise<string> => {
+    if (!email) {
+      console.log('No email provided');
+      return "Invalid owner email";
+    }
+
+    try {
+      const mailOptions: SendMailOptions = {
+        from: 'uisrar293@gmail.com', // Replace with your sender email
+        to: email,
+        subject: 'Booking Request Received',
+        text: 'Dear Hostel Owner, \n\nWe have received a report request for you hostel.\n\nBest regards, \nTeam Hostel Management',
+        html: `<p>Dear User,</p>
+               <p>We have received a report request for you hostel.</p>
+               <p>Best regards,<br>Team Hostel Management</p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+      return "Email is sent to Hostel Owner";
+    } catch (error) {
+      console.error('Error sending booking request email:', error);
+      throw new Error('Error sending booking request email');
+    }
+  };
   const approvalEmail = async (email: string | undefined): Promise<string> => {
     if (!email) {
       console.log('No email provided');
@@ -157,6 +182,55 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
     }
   };
 
+  const messageToOwner = async (email: string, message: string): Promise<string> => {
+    if (!email || !message) {
+      console.log('No email provided');
+      return "Invalid owner email";
+    }
+
+    try {
+      const mailOptions: SendMailOptions = {
+        from: 'uisrar293@gmail.com', // Replace with your sender email
+        to: email,
+        subject: 'Hostel Report',
+        text: `${message}\n\nBest regards, \nTeam Hostel Management`,
+        html: `
+               <p>${message}</p>
+               <p>Best regards,<br>Team Hostel Management</p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+      return "Email is sent to Hostel Owner";
+    } catch (error) {
+      console.error('Error sending booking request email:', error);
+      throw new Error('Error sending booking request email');
+    }
+  };
+
+  const suspensionEmail = async (email: string | undefined): Promise<string> => {
+    if (!email) {
+      console.log('No email provided');
+      return "Invalid owner email";
+    }
+
+    try {
+      const mailOptions: SendMailOptions = {
+        from: 'uisrar293@gmail.com', // Replace with your sender email
+        to: email,
+        subject: 'Hostel approved',
+        text: 'Dear Hostel Owner, \n\nYour hostel is suspended.\n\nBest regards, \nTeam Hostel Management',
+        html: `<p>Dear User,</p>
+               <p>Your hostel is suspended.</p>
+               <p>Best regards,<br>Team Hostel Management</p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+      return "Email is sent to Hostel Owner";
+    } catch (error) {
+      console.error('Error sending booking request email:', error);
+      throw new Error('Error sending booking request email');
+    }
+  };
 
   const sendOtp = async (email: string | undefined, otp: string | undefined) =>{
     if (!email || !otp) {
@@ -181,6 +255,6 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
       throw new Error('Error otp');
     }
   }
+ 
 
-
-export { sendRejectionEmail, sendApprovalEmail, sendBookingApprovalEmail, sendBookingRejectionEmail, sendOtp, sendBookingRequestEmail, approvalEmail};
+export { sendRejectionEmail, sendApprovalEmail, sendBookingApprovalEmail, sendBookingRejectionEmail, sendOtp, sendBookingRequestEmail, approvalEmail, sendReportEmail, suspensionEmail, messageToOwner };

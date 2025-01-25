@@ -17,7 +17,8 @@ import listHostels, { getAllHostelsList } from "@/actions/hostel/listHostels";
 import { useEffect, useState } from "react";
 import { any } from "zod";
 import getHostelsList from "@/actions/hostel/listHostels";
-
+import { updateHostelStatus } from "@/actions/super-admin/hostelstatusupdate";
+import { toast } from "@/hooks/use-toast"
 // Types
 type Hostel = {
   id: string;
@@ -38,8 +39,33 @@ type Hostel = {
   featured: boolean;
 };
 
+enum HostelStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  SUSPENDED = "SUSPENDED",
+  CLOSED = "CLOSED"
+}
+
 // HostelCard Component
 const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
+  const handleStatusUpdate = async (hostelName: string, status: HostelStatus) => {
+    const response = await updateHostelStatus(hostelName, status);
+    if (response.success) {
+      toast({
+        title: "Success",
+        description: response.message,
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: response.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className='w-full mb-4 p-6'>
       <CardContent className='p-0'>
@@ -125,20 +151,20 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
             <div className='flex flex-col justify-end space-y-2 mt-2'>
               <Button
                 variant='default'
-                onClick={() => console.log("Sustain clicked")}
+                onClick={() => handleStatusUpdate(hostel.name, HostelStatus.SUSPENDED)}
               >
                 Sustain
               </Button>
               <Button
                 className='bg-secondary/10'
                 variant='secondary'
-                onClick={() => console.log("Promote clicked")}
+                onClick={() => handleStatusUpdate(hostel.name, HostelStatus.APPROVED)}
               >
                 Promote
               </Button>
               <Button
                 variant='destructive'
-                onClick={() => console.log("Remove clicked")}
+                onClick={() => handleStatusUpdate(hostel.name, HostelStatus.CLOSED)}
               >
                 Remove
               </Button>

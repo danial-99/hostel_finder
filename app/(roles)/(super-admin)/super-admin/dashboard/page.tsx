@@ -1,5 +1,5 @@
-
-import { StatsCards } from "@/components/super-admin/StatsCards";
+'use client'
+import { StatsCards } from "@/components/admin/BookingRateChart";
 
 export default function Page() {
   return (

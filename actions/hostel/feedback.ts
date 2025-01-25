@@ -1,6 +1,7 @@
 "use server";
 
 import prismadb from "@/lib/prisma";
+import { sendReportEmail } from "../nodemailer/emailTemplates";
 
 
 export default async function feedback(data: any){
@@ -21,7 +22,7 @@ export default async function feedback(data: any){
             description
         }
     })
-    if(!feedback){
+    if(!bookingRequest){
         return {
             success: false,
             message: "Failed to create hostel",
@@ -29,6 +30,21 @@ export default async function feedback(data: any){
         };
     }
     else{
+        const hostelOwner = await prismadb.hostel.findFirst({
+            where:{
+                hostelName: data.hostelName,
+            }
+        })
+        const ownerData = await prismadb.user.findUnique({
+            where:{
+                id: hostelOwner?.ownerId,
+            }
+        })
+        var mailResponse;
+        if(ownerData){
+             mailResponse = await sendReportEmail(ownerData.email);
+        }
+        
         return{
             success: true,
             message: "Feebback Submitted",

@@ -14,6 +14,8 @@ type Hostel = {
   status: string;
   hostelName: string;
   hostelImage: string | null;
+  electercityBill: string | null;
+  gasBill: string | null;
   country: string;
   province: string;
   city: string;
@@ -47,6 +49,26 @@ const HostelRequestCard: React.FC<{
               alt={hostel.hostelName}
               className='w-full h-48 md:h-full object-cover'
             />
+          </div>
+          <div className='w-full md:w-1/3 lg:w-1/4'>
+              <h3 className="pl-3">Electricity Bills</h3>
+            <Image
+              unoptimized
+              width={0}
+              height={0}
+              src={`data:image/jpeg;base64,${hostel.electercityBill}`}
+              alt={hostel.hostelName}
+              className='w-full h-24 md:h-1/2 object-cover p-4'
+            />
+             <h3 className="pl-3">Gas Bills</h3>
+            <Image
+            unoptimized 
+            width={0}
+            height={0}
+            src={`data:image/jpeg;base64,${hostel.gasBill}`}
+            alt={hostel.hostelName}
+            className='w-full h-24 md:h-1/2 object-cover p-4'
+          />
           </div>
           <div className='w-full md:w-2/3 lg:w-3/4 p-4'>
             <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-4'>

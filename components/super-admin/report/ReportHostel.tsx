@@ -25,6 +25,7 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { AlertTriangle, MessageSquare, Ban } from 'lucide-react'
 import { getFeedBack } from "@/actions/hostel/feedback"
+import { HostelDetain } from "@/actions/super-admin/hostelstatusupdate"
 
 interface Report {
   id: string
@@ -100,11 +101,12 @@ export default function HostelReportsPage() {
     setMessage("")
   }
 
-  const handleRestrictHostel = (reportId: string) => {
+  const handleRestrictHostel = async (reportId: string) => {
     setReports(reports.map(report => 
       report.id === reportId ? { ...report, status: "restricted" } : report
     ))
     const hostelName = reports.find(r => r.id === reportId)?.hostelName;
+    const result = await HostelDetain(hostelName, "SUSPENDED");
     toast({
       title: "Hostel Restricted",
       description: `${hostelName} has been restricted.`,

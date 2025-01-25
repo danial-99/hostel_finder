@@ -115,6 +115,19 @@ export async function getFullDetials() {
     return false;  // Return false if no hostels were found
   }
 }
+
+export async function getStatistics() {
+  const totalUsers = await prismadb.user.count();
+  const totalHostels = await prismadb.hostel.count();
+  const totalBookings = await prismadb.bookingRequests.count();
+
+  return {
+    totalUsers,
+    totalHostels,
+    totalBookings
+  };
+}
+
 const convertToBase64 = (bytes: any) => {
   return Buffer.from(bytes).toString("base64");
 };

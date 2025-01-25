@@ -1,87 +1,46 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/hooks/use-toast"
 import { Edit2, Save, X, Plus, Minus } from 'lucide-react'
-
-interface Feature {
-  id: string
-  text: string
-}
-
-interface Plan {
-  id: string
-  name: string
-  price: number
-  interval: string
-  discount: number
-  features: Feature[]
-}
+import { getPlans, updatePlan, type Plan, type Feature } from "@/actions/plans/subscription"
 
 export default function SubscriptionPlansPage() {
-  const [plans, setPlans] = useState<Plan[]>([
-    {
-      id: "free",
-      name: "Free",
-      price: 0,
-      interval: "forever",
-      discount: 0,
-      features: [
-        { id: "f1", text: "Basic listing" },
-        { id: "f2", text: "Limited visibility" }
-      ]
-    },
-    {
-      id: "monthly",
-      name: "Monthly",
-      price: 29.99,
-      interval: "month",
-      discount: 0,
-      features: [
-        { id: "m1", text: "Basic listing" },
-        { id: "m2", text: "Improved visibility" }
-      ]
-    },
-    {
-      id: "semi-annual",
-      name: "Semi-Annual",
-      price: 162.39,
-      interval: "6 months",
-      discount: 5,
-      features: [
-        { id: "s1", text: "Top listing" },
-        { id: "s2", text: "High visibility" },
-        { id: "s3", text: "Get off" }
-      ]
-    },
-    {
-      id: "annual",
-      name: "Annual",
-      price: 291.50,
-      interval: "year",
-      discount: 10,
-      features: [
-        { id: "a1", text: "Top listing" },
-        { id: "a2", text: "High visibility" },
-        { id: "a3", text: "Get more off" }
-      ]
-    }
-  ])
-
+  const [plans, setPlans] = useState<Plan[]>([])
   const [editingPlan, setEditingPlan] = useState<string | null>(null)
   const [editedPlans, setEditedPlans] = useState<{ [key: string]: Plan }>({})
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    fetchPlans()
+  }, [])
+
+  const fetchPlans = async () => {
+    const result = await getPlans()
+    if (result.success && result.data) {
+      setPlans(result.data)
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to fetch subscription plans.",
+        variant: "destructive"
+      })
+    }
+  }
 
   const startEditing = (planId: string) => {
     setEditingPlan(planId)
-    setEditedPlans(prev => ({
-      ...prev,
-      [planId]: JSON.parse(JSON.stringify(plans.find(p => p.id === planId)!))
-    }))
+    const planToEdit = plans.find(p => p.id === planId)
+    if (planToEdit) {
+      setEditedPlans(prev => ({
+        ...prev,
+        [planId]: JSON.parse(JSON.stringify(planToEdit))
+      }))
+    }
   }
 
   const cancelEditing = (planId: string) => {
@@ -119,7 +78,7 @@ export default function SubscriptionPlansPage() {
         ...prev[planId],
         features: [
           ...prev[planId].features,
-          { id: `new-${Date.now()}`, text: "" }
+          { id: `new-${Date.now()}`, text: "", planId } as Feature
         ]
       }
     }))
@@ -135,17 +94,31 @@ export default function SubscriptionPlansPage() {
     }))
   }
 
-  const savePlan = (planId: string) => {
-    setPlans(prev =>
-      prev.map(p => (p.id === planId ? editedPlans[planId] : p))
-    )
-    setEditingPlan(null)
-    const { [planId]: _, ...rest } = editedPlans
-    setEditedPlans(rest)
-    toast({
-      title: "Plan Updated",
-      description: "The subscription plan has been successfully updated.",
-    })
+  const savePlan = async (planId: string) => {
+    setLoading(true)
+    try {
+      const result = await updatePlan(planId, editedPlans[planId])
+      if (result.success && result.data) {
+        await fetchPlans() // Refresh plans from server
+        setEditingPlan(null)
+        const { [planId]: _, ...rest } = editedPlans
+        setEditedPlans(rest)
+        toast({
+          title: "Success",
+          description: "The subscription plan has been successfully updated.",
+        })
+      } else {
+        throw new Error(result.error || 'Failed to update plan')
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update the subscription plan.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -266,12 +239,14 @@ export default function SubscriptionPlansPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => cancelEditing(plan.id)}
+                    disabled={loading}
                   >
                     <X className="h-4 w-4 mr-2" /> Cancel
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => savePlan(plan.id)}
+                    disabled={loading}
                   >
                     <Save className="h-4 w-4 mr-2" /> Save
                   </Button>
@@ -292,4 +267,3 @@ export default function SubscriptionPlansPage() {
     </div>
   )
 }
-

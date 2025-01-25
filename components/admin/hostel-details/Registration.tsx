@@ -20,6 +20,7 @@ import { useDropzone } from "react-dropzone"
 import Image from "next/image"
 import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api'
 import router from "next/router"
+import { useRouter } from 'next/navigation' 
 import { createHostel } from "@/actions/admin/createHostel"
 
 const formSchema = z.object({
@@ -54,6 +55,7 @@ type FormData = z.infer<typeof formSchema>
 const pakistanCenter = { lat: 30.3753, lng: 69.3451 }
 
 export default function HostelRegistrationForm() {
+  
   const { user } = useAuth()
   const userId = user?.id as string
   const [step, setStep] = useState(1)

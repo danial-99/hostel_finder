@@ -1,66 +1,89 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import processPayment from "@/actions/admin/processPayment"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import processPayment from "@/actions/admin/processPayment";
+import * as z from "zod";
+import { paymentFormSchema, PaymentFormData } from "@/lib/validation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 // Define the Plan interface
 interface Plan {
-  name: string
-  price: number
-  duration: string
-  discount?: number
-  features: string[]
+  name: string;
+  price: number;
+  duration: string;
+  discount?: number;
+  features: string[];
 }
 
 interface PaymentFormProps {
-  plan: Plan
-  onPaymentComplete: () => void
+  plan: Plan;
+  onPaymentComplete: () => void;
 }
 
 export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
-  const [cardOwner, setCardOwner] = useState<string>("")
-  const [cardNumber, setCardNumber] = useState<string>("")
-  const [expiryDate, setExpiryDate] = useState<string>("")
-  const [cvv, setCvv] = useState<string>("")
+  // Use react-hook-form with zod schema
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentFormSchema),
+  });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // Here you would typically integrate with a payment gateway
-    console.log("Processing payment...")
-    const res = await processPayment(plan);
-    console.log(res);
-    onPaymentComplete()
-  }
+  // Submit handler
+  const onSubmit = async (data: PaymentFormData) => {
+    try {
+      console.log("Processing payment with data:", data);
+      const res = await processPayment(plan);
+      console.log(res);
+      onPaymentComplete();
+    } catch (error) {
+      console.error("Payment processing error:", error);
+      alert("Payment failed. Please try again.");
+    }
+  };
 
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Payment Details</CardTitle>
-        <CardDescription>Enter your payment information for the {plan.name} plan</CardDescription>
+        <CardDescription>
+          Enter your payment information for the {plan.name} plan
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4" id="payment-form">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" id="payment-form">
           <div className="space-y-2">
             <Label htmlFor="cardOwner">Card Owner Name</Label>
             <Input
               id="cardOwner"
               placeholder="John Doe"
-              value={cardOwner}
-              onChange={(e) => setCardOwner(e.target.value)}
-              required
+              {...register("cardOwner")}
             />
+            {errors.cardOwner && (
+              <p className="text-red-500 text-sm">{errors.cardOwner.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="cardNumber">Card Number</Label>
             <Input
               id="cardNumber"
               placeholder="1234 5678 9012 3456"
-              value={cardNumber}
-              onChange={(e) => setCardNumber(e.target.value)}
-              required
+              {...register("cardNumber")}
             />
+            {errors.cardNumber && (
+              <p className="text-red-500 text-sm">{errors.cardNumber.message}</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -68,20 +91,22 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
               <Input
                 id="expiryDate"
                 placeholder="MM/YY"
-                value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
-                required
+                {...register("expiryDate")}
               />
+              {errors.expiryDate && (
+                <p className="text-red-500 text-sm">{errors.expiryDate.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="cvv">CVV</Label>
               <Input
                 id="cvv"
                 placeholder="123"
-                value={cvv}
-                onChange={(e) => setCvv(e.target.value)}
-                required
+                {...register("cvv")}
               />
+              {errors.cvv && (
+                <p className="text-red-500 text-sm">{errors.cvv.message}</p>
+              )}
             </div>
           </div>
         </form>
@@ -97,5 +122,5 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

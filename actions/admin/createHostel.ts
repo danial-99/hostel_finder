@@ -11,6 +11,7 @@ export async function createHostel(formD: any, userId: string) {
     const roomData = JSON.parse(formD.get("roomData") as string);
     const ownerName = formData.ownerName;
     const address = formData.address;
+    const category = formData.category;
     const electercityBill = (formD.get("electricityBill"));
     const gasBill = formD.get("gasBill");
     const latitude = formData.latitude;
@@ -63,6 +64,7 @@ export async function createHostel(formD: any, userId: string) {
         hostelImage: hostelImageBuffer,
         hostelName: hostelName,
         ownerName,
+        category,
         country: country,
         province: province,
         city: city,

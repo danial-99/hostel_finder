@@ -75,6 +75,9 @@ export default function HostelList() {
                   </div>
                    <div className="flex items-center mt-2 text-sm text-gray-600">
                     {hostel.description}
+                    </div>
+                    <div className="flex items-center mt-2 text-sm text-gray-600">
+                    Type: {hostel.type} | Category: {hostel.category}
                   </div> 
                 </CardContent>
               </Card>

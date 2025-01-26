@@ -4,61 +4,64 @@ import prismadb from "@/lib/prisma";
 import { sendReportEmail } from "../nodemailer/emailTemplates";
 
 
-export default async function feedback(data: any){
+export default async function feedback(data: any) {
     const name = data.name;
     const email = data.email;
     const hostelName = data.hostelName;
     const hostelAddress = data.hostelAddress;
     const subject = data.subject;
     const description = data.description;
+    const rating = 1;
+    const comment = data.subject;
 
     const bookingRequest = await prismadb.feedback.create({
-        data:{
-            name, 
+        data: {
+            name,
             email,
             hostelName,
             hostelAddress,
             subject,
-            description
+            description,
+            rating
         }
     })
-    if(!bookingRequest){
+    if (!bookingRequest) {
         return {
             success: false,
             message: "Failed to create hostel",
             status: 500,
         };
     }
-    else{
+    else {
         const hostelOwner = await prismadb.hostel.findFirst({
-            where:{
+            where: {
                 hostelName: data.hostelName,
             }
         })
         const ownerData = await prismadb.user.findUnique({
-            where:{
+            where: {
                 id: hostelOwner?.ownerId,
             }
         })
         var mailResponse;
-        if(ownerData){
-             mailResponse = await sendReportEmail(ownerData.email);
+        if (ownerData) {
+            mailResponse = await sendReportEmail(ownerData.email);
         }
-        
-        return{
+
+        return {
             success: true,
             message: "Feebback Submitted",
             status: 200,
         }
-       
+
     }
 }
 
 export async function getFeedBack() {
     const feedback = await prismadb.feedback.findMany();
-    if(feedback){
+    if (feedback) {
         return feedback;
-    }else{
+    } else {
         return false;
     }
 }

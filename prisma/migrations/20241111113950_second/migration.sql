@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Hostel" ALTER COLUMN "type" SET DEFAULT 'MALE';

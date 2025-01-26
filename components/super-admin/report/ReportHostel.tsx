@@ -25,10 +25,11 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { AlertTriangle, MessageSquare, Ban } from 'lucide-react'
 import { getFeedBack } from "@/actions/hostel/feedback"
-import { HostelDetain } from "@/actions/super-admin/hostelstatusupdate"
+import { HostelDetain, ownerMessage } from "@/actions/super-admin/hostelstatusupdate"
 
 interface Report {
   id: string
+  name: string
   hostelName: string
   hostelAddress: string
   reporterName: string
@@ -36,8 +37,8 @@ interface Report {
   subject: string
   description: string
   createdAt: string
-  status: "pending" | "resolved" | "restricted"
 }
+var status = "PENDING";
 
 export default function HostelReportsPage() {
   const [reports, setReports] = useState<any[]>([])
@@ -89,9 +90,10 @@ export default function HostelReportsPage() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [message, setMessage] = useState("")
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!selectedReport || !message.trim()) return;
-
+    const hostelName = selectedReport?.hostelName;
+    const rse = await ownerMessage(hostelName, message)
     // Here you would typically send the message to the hostel owner via an API
     console.log(`Sending message to ${selectedReport.hostelName}: ${message}`)
     toast({
@@ -103,21 +105,23 @@ export default function HostelReportsPage() {
 
   const handleRestrictHostel = async (reportId: string) => {
     setReports(reports.map(report => 
-      report.id === reportId ? { ...report, status: "restricted" } : report
+      report.id === reportId ? { ...report, status: "DONE" } : report
     ))
-    const hostelName = reports.find(r => r.id === reportId)?.hostelName;
+    status = "DONE";
+    const hostelName = selectedReport?.hostelName ?? "";
     const result = await HostelDetain(hostelName, "SUSPENDED");
     toast({
       title: "Hostel Restricted",
-      description: `${hostelName} has been restricted.`,
+      description: `${result} has been restricted.`,
       variant: "destructive",
     })
   }
 
   const handleResolveReport = (reportId: string) => {
     setReports(reports.map(report => 
-      report.id === reportId ? { ...report, status: "resolved" } : report
+      report.id === reportId ? { ...report, status: "DONE" } : report
     ))
+    status = "DONE";
     const hostelName = reports.find(r => r.id === reportId)?.hostelName;
     toast({
       title: "Report Resolved",
@@ -149,7 +153,7 @@ export default function HostelReportsPage() {
     month: 'long',
     day: 'numeric',
   })}</TableCell>
-                <TableCell>Pending
+                <TableCell>{status}
                   {/* <span className={`px-2 py-1 rounded-full text-xs font-semibold
                     ${report.status === 'pending' ? 'bg-yellow-200 text-yellow-800' :
                       report.status === 'resolved' ? 'bg-green-200 text-green-800' :
@@ -224,7 +228,7 @@ export default function HostelReportsPage() {
                           type="button" 
                           variant="outline" 
                           onClick={() => selectedReport && handleResolveReport(selectedReport.id)}
-                          disabled={selectedReport?.status === 'resolved'}
+                          disabled={status === 'DONE'}
                         >
                           <AlertTriangle className="mr-2 h-4 w-4" />
                           Mark as Resolved
@@ -233,7 +237,7 @@ export default function HostelReportsPage() {
                           type="button" 
                           variant="destructive" 
                           onClick={() => selectedReport && handleRestrictHostel(selectedReport.id)}
-                          disabled={selectedReport?.status === 'restricted'}
+                          disabled={status === 'DONE'}
                         >
                           <Ban className="mr-2 h-4 w-4" />
                           Restrict Hostel

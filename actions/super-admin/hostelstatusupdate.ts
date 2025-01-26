@@ -108,7 +108,7 @@ export async function ownerMessage(hostelName: string, message: string) {
             where: {
             hostelName: hostelName
         }
-    })
+    }) || await prismadb.hostel.findFirst();
     
     if (!hostel) {
         return {

@@ -127,6 +127,17 @@ export async function getStatistics() {
     totalBookings
   };
 }
+export async function getRvenue() {
+  const totalUsers = await prismadb.user.count();
+  const totalHostels = await prismadb.hostel.count();
+  const totalBookings = await prismadb.bookingRequests.count();
+
+  return {
+    totalUsers,
+    totalHostels,
+    totalBookings
+  };
+}
 
 const convertToBase64 = (bytes: any) => {
   return Buffer.from(bytes).toString("base64");

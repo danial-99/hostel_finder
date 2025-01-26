@@ -303,7 +303,7 @@ return (
                                 {room.bedCount === 1 ? 'Private room' : 'Shared room'} • {room.bedCount} bed{room.bedCount > 1 ? 's' : ''}
                               </p>
                               <p className="font-semibold text-lg mb-2">PKR {room.price.toLocaleString()} per bed/month</p>
-                              <Badge variant={room.available ? "default" : "destructive"} className="mb-2">
+                              <Badge variant={(room.available) && (room.numberOfRooms != '0') ? "default" : "destructive"} className="mb-2">
                                 {(room.available) && (room.numberOfRooms != '0') ? (
                                   <><CheckCircle className="w-4 h-4 mr-1" /> Available</>
                                 ) : (
@@ -316,7 +316,7 @@ return (
                               onClick={() => handleBookNow(room)}
                               disabled={false}
                             >
-                              {room.available ? "Book Now" : "Not Available"}
+                              {(room.available) && (room.numberOfRooms != '0') ? "Book Now" : "Not Available"}
                             </Button>
                           </div>
                         </div>

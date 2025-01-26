@@ -19,7 +19,7 @@ import { X, Camera, Upload, MapPin } from 'lucide-react'
 import { useDropzone } from "react-dropzone"
 import Image from "next/image"
 import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api'
-import router from "next/router"
+// import router from "next/router"
 import { useRouter } from 'next/navigation' 
 import { createHostel } from "@/actions/admin/createHostel"
 
@@ -55,7 +55,7 @@ type FormData = z.infer<typeof formSchema>
 const pakistanCenter = { lat: 30.3753, lng: 69.3451 }
 
 export default function HostelRegistrationForm() {
-  
+  const router = useRouter();
   const { user } = useAuth()
   const userId = user?.id as string
   const [step, setStep] = useState(1)
@@ -154,7 +154,7 @@ export default function HostelRegistrationForm() {
     const file = electricityBillFile; // Assuming you only send one file
     const buffer = await fileToBuffer(file); // Convert file to buffer
     const base64File = buffer.toString('base64'); // Convert buffer to Base64
-    formData.append("hostelImages", base64File); // Append Base64 encoded file to formData
+    formData.append("electricityBill", base64File); // Append Base64 encoded file to formData
   }
 
   const hostelImagesFile = data.hostelImages; // Assuming fileInput contains the file(s)
@@ -162,7 +162,7 @@ export default function HostelRegistrationForm() {
     const file = hostelImagesFile[0]; // Assuming you only send one file
     const buffer = await fileToBuffer(file); // Convert file to buffer
     const base64File = buffer.toString('base64'); // Convert buffer to Base64
-    formData.append("electricityBill", base64File); // Append Base64 encoded file to formData
+    formData.append("hostelImages", base64File); // Append Base64 encoded file to formData
   }
   const roomsData = data.rooms;
   await Promise.all(

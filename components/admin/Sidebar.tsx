@@ -22,11 +22,7 @@ const navItems = [
     label: "Register New Hostel",
     href: "/admin/hostel-details",
   },
-  {
-    icon: Building,
-    label: "Hostel Details",
-    href: "/admin/myApprovedHostels",
-  },
+  
   {
     icon:Calendar,
     label: "Hostel Update",

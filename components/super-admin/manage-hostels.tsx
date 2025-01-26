@@ -114,59 +114,21 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
                 </div>
               </div>
             </div>
-            <div className='grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4'>
-              <div className='flex items-center'>
-                <Home className='w-4 h-4 mr-2' />
-                <span className='text-sm'>{hostel.rooms} Rooms</span>
-              </div>
-              <div className='flex items-center'>
-                <CookingPot className='w-4 h-4 mr-2' />
-                <span className='text-sm'>{hostel.kitchen} Kitchen</span>
-              </div>
-              <div className='flex items-center'>
-                <LandPlot className='w-4 h-4 mr-2' />
-                <span className='text-sm'>{hostel.area}</span>
-              </div>
-              {hostel.security && (
-                <div className='flex items-center'>
-                  <Shield className='w-4 h-4 mr-2' />
-                  <span className='text-sm'>Security</span>
-                </div>
-              )}
-              {hostel.wifi && (
-                <div className='flex items-center'>
-                  <Wifi className='w-4 h-4 mr-2' />
-                  <span className='text-sm'>Wifi</span>
-                </div>
-              )}
-              {hostel.parking && (
-                <div className='flex items-center'>
-                  <Car className='w-4 h-4 mr-2' />
-                  <span className='text-sm'>Parking</span>
-                </div>
-              )}
-            </div>
           </div>
           <div className='text-right'>
             <div className='flex flex-col justify-end space-y-2 mt-2'>
               <Button
                 variant='default'
+                onClick={() => handleStatusUpdate(hostel.name, HostelStatus.APPROVED)}
+              >
+                Activate
+              </Button>
+      
+              <Button
+                variant='destructive'
                 onClick={() => handleStatusUpdate(hostel.name, HostelStatus.SUSPENDED)}
               >
                 Sustain
-              </Button>
-              <Button
-                className='bg-secondary/10'
-                variant='secondary'
-                onClick={() => handleStatusUpdate(hostel.name, HostelStatus.APPROVED)}
-              >
-                Promote
-              </Button>
-              <Button
-                variant='destructive'
-                onClick={() => handleStatusUpdate(hostel.name, HostelStatus.CLOSED)}
-              >
-                Remove
               </Button>
             </div>
           </div>

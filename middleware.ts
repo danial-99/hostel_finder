@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const url = currentUrl.pathname;
 
   // Allow access to the root page and auth folder for all users without token check
-  if (url === "/" || url.startsWith("/auth/")) {
+  if (url === "/" || url.startsWith("/auth/") || url.startsWith('/profile')) {
     return NextResponse.next();
   } 
   // Check for token only if not accessing root or auth pages

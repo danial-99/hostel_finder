@@ -39,7 +39,7 @@ export default function HostelList() {
         <h2 className="text-3xl font-bold mb-6">Top Rated Hostels</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {hostels.map((hostel) => (
-            <Link href={`/hostels/${hostel.id}`} key={hostel.id}>
+            <Link href={`/profile/${hostel.id}`} key={hostel.id}>
               <Card className="transition-transform hover:scale-105">
                 <CardHeader className="p-0">
                   {/* Convert byte data to Base64 and display it as image */}

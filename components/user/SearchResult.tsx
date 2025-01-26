@@ -35,7 +35,7 @@ export function SearchResults({ results }: SearchResultsProps) {
             </p>
           </CardContent>
           <CardFooter className="p-4">
-          <Link href={`/hostels/${hostel.id}`} key={hostel.id}>
+          <Link href={`/profile/${hostel.id}`} key={hostel.id}>
             <Button className="w-full" variant="outline">View Details</Button>
           </Link>
           </CardFooter>

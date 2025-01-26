@@ -132,10 +132,11 @@ export default function Component() {
 
       <ScrollArea className="h-[600px]">
         <div className="space-y-6">
-          {rooms.map((room) => (
+          
+          {rooms.map((room, index) => (
             <Card key={room.name}>
               <CardHeader>
-                <CardTitle>{room.name} Room</CardTitle>
+                <CardTitle>{room.bedCount} Beded Room</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-6">

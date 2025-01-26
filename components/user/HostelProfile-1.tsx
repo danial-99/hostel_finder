@@ -8,8 +8,6 @@ import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import * as z from "zod"
-import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api'
-
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -48,8 +46,6 @@ hostel?: {
   electercityBill: any;
   description: string;
   facilities: string[];
-  latitude: number;
-  longitude: number;
   rooms: {
     name: string;
     bedCount: number;
@@ -203,16 +199,6 @@ const onSubmitFeedback = async (data: FeedbackFormData) => {
   });
 };
 
-const { isLoaded } = useLoadScript({
-  googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
-  libraries: ['places']
-})
-
-const [latitude, setLatitude] = useState(hostel?.latitude?? 0); // State for latitude
-const [longitude, setLongitude] = useState(hostel?.longitude ?? 0); // State for longitude
-const lat = 0;
-const lg = 0;
-const address = hostel?.city;
 
 
 if (!hostel) {
@@ -256,6 +242,9 @@ return (
           <div>
             <h1 className="text-3xl font-bold">{hostel.hostelName}</h1>
             <p className="text-muted-foreground mt-2">{hostel.city}, {hostel.country}</p>
+            <Link href={`/hostels/${hostel.id}`} key={hostel.id}>
+            <Button>Book Now</Button>
+            </Link>
           </div>
           <div className="text-right">
             <div className="flex items-center mb-1">
@@ -327,13 +316,7 @@ return (
                                 )}
                               </Badge>
                             </div>
-                            <Button 
-                              className="w-full md:w-auto" 
-                              onClick={() => handleBookNow(room)}
-                              disabled={false}
-                            >
-                              {(room.available) && (room.numberOfRooms != '0') ? "Book Now" : "Not Available"}
-                            </Button>
+                            
                           </div>
                         </div>
                       </div>
@@ -481,63 +464,33 @@ return (
           </TabsContent>
 
           <TabsContent value="location" className="mt-6">
-          <div className='space-y-6'>
-        <div>
-          <Label htmlFor='address'>Address</Label>
-        </div>
-        {/* <div style={{ height: '400px', width: '100%' }}>
-          <GoogleMap
-            center={{ lat: latitude, lng: longitude }}
-            zoom={15}
-            mapContainerStyle={{ width: '100%', height: '100%' }}
-            options={{
-              restriction: {
-                latLngBounds: {
-                  north: 37.084107,
-                  south: 23.6345,
-                  west: 60.872955,
-                  east: 77.840516
-                },
-                strictBounds: true
-              }
-            }}
-            
-          >
-            <Marker position={{ lat: latitude, lng: longitude }} />
-          </GoogleMap>
-        </div> */}
-      </div>
+            <Card>
+              <CardContent className="p-6">
+                <Link 
+                  href={`https://www.google.com/maps?q=${hostel.location}`}
+                  target="_blank"
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <MapPin className="w-4 h-4" />
+                  View on Google Maps
+                </Link>
+                <div className="mt-4 aspect-video relative">
+                  <Image
+                    src="/placeholder.svg"
+                    alt="Map location"
+                    fill
+                    className="rounded-lg"
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <div className="grid gap-6">
-                  <div className="grid gap-4">
-                    <div className="flex items-center justify-between">
-                      <span>Cleanliness</span>
-                      <div className="flex items-center gap-2">
-                        <Progress value={92} className="w-[100px]" />
-                        <span className="w-8 text-right">9.2</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Location</span>
-                      <div className="flex items-center gap-2">
-                        <Progress value={95} className="w-[100px]" />
-                        <span className="w-8 text-right">9.5</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Staff</span>
-                      <div className="flex items-center gap-2">
-                        <Progress value={88} className="w-[100px]" />
-                        <span className="w-8 text-right">8.8</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
+                <div className="grid gap-6"> 
+                 <div className="space-y-4">
                     <div className="p-4 border rounded-lg">
                       <div className="flex justify-between mb-2">
                         <div className="font-semibold">Alex from USA</div>
@@ -555,39 +508,7 @@ return (
                   </div>
 
                   {/* Feedback and Rating Section */}
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-4">Leave Your Feedback</h3>
-                    <form onSubmit={handleFeedbackSubmit(onSubmitFeedback)} className="space-y-4">
-                      <div>
-                        <Label htmlFor="rating">Rating</Label>
-                        <Controller
-                          name="rating"
-                          control={feedbackControl}
-                          render={({ field }) => (
-                            <select {...field} id="rating" className="w-full mt-1 rounded-md border-gray-300">
-                              <option value="">Select Rating</option>
-                              <option value="5">5 - Excellent</option>
-                              <option value="4">4 - Very Good</option>
-                              <option value="3">3 - Average</option>
-                              <option value="2">2 - Poor</option>
-                              <option value="1">1 - Terrible</option>
-                            </select>
-                          )}
-                        />
-                        {feedbackErrors.rating && <p className="text-red-500 text-sm mt-1">{feedbackErrors.rating.message}</p>}
-                      </div>
-                      <div>
-                        <Label htmlFor="feedback">Your Feedback</Label>
-                        <Controller
-                          name="feedback"
-                          control={feedbackControl}
-                          render={({ field }) => <Textarea {...field} id="feedback" placeholder="Share your experience..." className="mt-1" />}
-                        />
-                        {feedbackErrors.feedback && <p className="text-red-500 text-sm mt-1">{feedbackErrors.feedback.message}</p>}
-                      </div>
-                      <Button type="submit">Submit Review</Button>
-                    </form>
-                  </div>
+                  
                 </div>
               </CardContent>
             </Card>

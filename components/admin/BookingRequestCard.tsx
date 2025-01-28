@@ -4,17 +4,21 @@ import { useState } from "react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { cn } from "@/lib/utils"
 
 interface BookingRequestCardProps {
   id: number
   name: string
   profession: string
-  email:string
-  address:string
+  email: string
+  address: string
   phone: string
   cnic: string
   roomType: string
   imageUrl: string
+  price: number
+  bedCount: number
+  status: string
 }
 
 export default function BookingRequestCard({
@@ -23,21 +27,24 @@ export default function BookingRequestCard({
   profession,
   email,
   address,
-  phone,
   cnic,
-  roomType,
+  phone,
+  bedCount,
   imageUrl,
+  price,
+  status,
 }: BookingRequestCardProps) {
   // Default payment status is 'Unpaid'
-  const [paymentStatus, setPaymentStatus] = useState<string>("Unpaid")
+  const [paymentStatus, setPaymentStatus] = useState<string>(status)
 
-  const onAccept = () => {
+  const onAccept = async () => {
     console.log(`Accepted booking request ${id}`)
     // Update payment status to indicate further action is required
-    setPaymentStatus("Pending Payment")
+    setPaymentStatus("Pending Payment");
+
   }
 
-  const onReject = () => {
+  const onReject = async () => {
     console.log(`Rejected booking request ${id}`)
     // Keep payment status as 'Unpaid' since the request was rejected
     setPaymentStatus("Unpaid")
@@ -61,20 +68,20 @@ export default function BookingRequestCard({
             <h2 className="text-2xl font-bold">{name}</h2>
             <p className="text-gray-500 mb-2">{profession}</p>
             <div className="flex items-center mb-2">
-              <span className="text-sm text-gray-600">Phone: {phone}</span>
+              <span className="text-sm text-gray-600">Phone: {cnic}</span>
             </div>
-            <p className="text-gray-600 mb-2">CNIC: {cnic}</p>
+            <p className="text-gray-600 mb-2">CNIC: {phone}</p>
             <p className="text-gray-600 mb-2">email: {email}</p>
             <p className="text-gray-600 mb-2">address: {address}</p>
-            <p className="text-gray-600 mb-4">Room Type: {roomType}</p>
+            <p className="text-gray-600 mb-4">Room Type: {bedCount} Bedded</p>
+            <p className="text-gray-600 mb-4">Cost: {price}</p>
             <p
-              className={`text-sm font-medium ${
-                paymentStatus === "Pending Payment"
-                  ? "text-blue-600"
-                  : paymentStatus === "Paid"
+              className={`text-sm font-medium ${paymentStatus === "Pending Payment" || paymentStatus == "PAID"
+                ? "text-blue-600"
+                : paymentStatus === "Paid"
                   ? "text-green-600"
                   : "text-red-600"
-              }`}
+                }`}
             >
               {paymentStatus}
             </p>

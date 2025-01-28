@@ -111,6 +111,11 @@ model RoomType {
 
 model BookingRequests {
     id            String   @id @default(uuid())
+    name      String
+    address       String
+    phone         String
+    cnic          String
+    price         Float
     checkInDate   DateTime @default(now())
     checkOutDate  DateTime @default(now())
     createdAt     DateTime @default(now())

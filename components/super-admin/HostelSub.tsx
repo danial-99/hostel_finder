@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -8,82 +8,91 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Search, Filter } from "lucide-react"
 import { HostelDetailsView } from "./subscription/HostelDetail"
+import { getTopHostelsList } from "@/actions/hostel/listHostels"
 
 // Define the type for hostel data
-interface Hostel {
-  id: number
-  name: string
-  location: string
-  plan: string
-  status: string
-  lastPayment: string
-  endDate: string
-}
+type Payment = {
+  id: string;
+  amount: number;
+  status: "pending" | "processing" | "success" | "failed";
+  cnic: string;
+  phoneNumber: string;
+  hostelName: string;
+  paymentDate: Date;
+  subcriptionEnd: Date;
+  subscriptionPlan: "Free" | "Monthly" | "6 Months" | "1 Year";
+  discountApplied: string;
+};
 
 // Mock data for hostels and their subscriptions
-const hostelData: Hostel[] = [
-  { id: 1, name: "test hostel", location: "Murree", plan: "free", status: "Active", lastPayment: "2024-12-22", endDate: "2025-01-21" },
-  { id: 2, name: "test", location: "Islaabad", plan: "6 month", status: "Active", lastPayment: "2024-12-22", endDate: "2025-06-22" },
-  
-]
-
 export default function SuperAdminDashboard() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedHostel, setSelectedHostel] = useState<Hostel | null>(null)
+ const [data, setData] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredAndSortedHostels = useMemo(() => {
-    const filtered = hostelData.filter(
-      (hostel) =>
-        hostel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        hostel.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        hostel.plan.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const fetchedData = await getTopHostelsList(); // Replace with actual API call for payments
+        if (fetchedData) {
+          const processedData = fetchedData.map((payment: Payment) => {
+            const currentDate = new Date();
+            const subcriptionEndDate = new Date(payment.subcriptionEnd);
+            const diffTime = Math.abs(subcriptionEndDate.getTime() - currentDate.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    const currentDate = new Date()
-    return filtered.sort((a, b) => {
-      if (a.endDate === "N/A" && b.endDate === "N/A") return 0
-      if (a.endDate === "N/A") return 1
-      if (b.endDate === "N/A") return -1
+            let subscriptionPlan: "Free" | "Monthly" | "6 Months" | "1 Year" = "Free";
+            let amount = 0;
+            let paymentDate = new Date();
 
-      const aDate = new Date(a.endDate)
-      const bDate = new Date(b.endDate)
+            if (diffDays <= 30) {
+              subscriptionPlan = "Monthly";
+              amount = 29.99;
+              paymentDate = new Date(subcriptionEndDate);
+              paymentDate.setMonth(paymentDate.getMonth() - 1);
+            } else if (diffDays <= 180) {
+              subscriptionPlan = "6 Months";
+              amount = 59.99;
+              paymentDate = new Date(subcriptionEndDate);
+              paymentDate.setMonth(paymentDate.getMonth() - 6);
+            } else if (diffDays <= 365) {
+              subscriptionPlan = "1 Year";
+              amount = 99.99;
+              paymentDate = new Date(subcriptionEndDate);
+              paymentDate.setFullYear(paymentDate.getFullYear() - 1);
+            }
 
-      if (aDate < currentDate && bDate >= currentDate) return -1
-      if (bDate < currentDate && aDate >= currentDate) return 1
+            return {
+              ...payment,
+              subscriptionPlan,
+              amount,
+              paymentDate,
+            };
+          });
 
-      return aDate.getTime() - bDate.getTime()
-    })
-  }, [searchTerm])
+          setData(processedData);
+        }
+      } catch (err) {
+        setError("Failed to load payments data");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value)
-  }
-
-  const handleViewDetails = (hostel: Hostel) => {
-    setSelectedHostel(hostel)
-  }
-
-  const handleCloseDetails = () => {
-    setSelectedHostel(null)
-  }
-
+    fetchData();
+  }, []);
+    
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Hostel Subscription Overview</h1>
       
-      {selectedHostel ? (
-        <HostelDetailsView hostel={selectedHostel} onClose={handleCloseDetails} />
-      ) : (
+      (
         <>
           <div className="flex justify-between items-center mb-4">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search hostels..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="pl-8 w-[300px]"
-              />
+              
             </div>
             <Button variant="outline">
               <Filter className="mr-2 h-4 w-4" />
@@ -101,34 +110,27 @@ export default function SuperAdminDashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Hostel Name</TableHead>
-                    <TableHead>Location</TableHead>
                     <TableHead>Subscription Plan</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Payment</TableHead>
+                    TableH
                     <TableHead>Subscription End Date</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAndSortedHostels.map((hostel) => {
-                    const isExpired = hostel.endDate !== "N/A" && new Date(hostel.endDate) < new Date()
+                  {data.map((hostel) => {
+                    const isExpired = hostel.subcriptionEnd.toString() !== "N/A" && new Date(hostel.subcriptionEnd) < new Date()
                     return (
                       <TableRow key={hostel.id} className={isExpired ? "bg-red-50" : ""}>
-                        <TableCell className="font-medium">{hostel.name}</TableCell>
-                        <TableCell>{hostel.location}</TableCell>
-                        <TableCell>{hostel.plan}</TableCell>
+                        <TableCell className="font-medium">{hostel.hostelName}</TableCell>
+                        <TableCell>{hostel.subscriptionPlan}</TableCell>
                         <TableCell>
                           <Badge variant={isExpired ? "destructive" : "success"}>
                             {isExpired ? "Expired" : hostel.status}
                           </Badge>
                         </TableCell>
-                        <TableCell>{hostel.lastPayment}</TableCell>
-                        <TableCell>{hostel.endDate}</TableCell>
-                        <TableCell>
-                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(hostel)}>
-                            View Details
-                          </Button>
-                        </TableCell>
+                        <TableCell>{hostel.paymentDate.toLocaleDateString()}</TableCell>
+                        <TableCell>{hostel.subcriptionEnd.toLocaleDateString()}</TableCell>
                       </TableRow>
                     )
                   })}
@@ -137,7 +139,7 @@ export default function SuperAdminDashboard() {
             </CardContent>
           </Card>
         </>
-      )}
+      )
     </div>
   )
 }

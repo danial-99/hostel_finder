@@ -12,10 +12,11 @@ export default function BookingRequestsPage() {
     const loadBookingRequests = async () => {
       try {
         setLoading(true); // Start loading
-        const requests = await fetchBookingRequests(); 
+        const requests = await fetchBookingRequests();
         console.log(requests);
-        if(requests)
-        setBookingRequests(requests); // Update the state with fetched data
+        if (requests)
+          setBookingRequests(requests); // Update the state with fetched data
+        console.log(requests);
       } catch (err) {
         setError('Failed to load booking requests'); // Set error message
         console.error(err);

@@ -126,12 +126,12 @@ export default function PaymentsPage() {
               paymentDate.setMonth(paymentDate.getMonth() - 1);
             } else if (diffDays <= 180) {
               subscriptionPlan = "6 Months";
-              amount = 170.94;
+              amount = 59.99;
               paymentDate = new Date(subcriptionEndDate);
               paymentDate.setMonth(paymentDate.getMonth() - 6);
             } else if (diffDays <= 365) {
               subscriptionPlan = "1 Year";
-              amount = 323;
+              amount = 99.99;
               paymentDate = new Date(subcriptionEndDate);
               paymentDate.setFullYear(paymentDate.getFullYear() - 1);
             }

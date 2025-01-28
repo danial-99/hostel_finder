@@ -251,7 +251,7 @@ return (
               <Star className="w-4 h-4 fill-primary text-primary mr-1" />
               <span className="font-bold">{hostel.rating}</span>
             </div>
-            <div className="text-sm text-muted-foreground">Rating (0)</div>
+          
           </div>
         </div>
 

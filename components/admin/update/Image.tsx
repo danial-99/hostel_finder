@@ -38,10 +38,10 @@ export default function Images(hostel: any) {
         {images.map((image, index) => (
           <div key={index} className="relative">
             <img
-                src={`data:image/jpeg;base64,${hostel.hostelImage}`}
-                alt="Hostel lounge"
-                className="rounded-l-xl object-cover"
-              />
+              src={`data:image/jpeg;base64,${hostel.hostel.hostelImage}`}
+              alt="Hostel lounge"
+              className="rounded-l-xl object-cover"
+            />
             <button
               className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl text-xs"
               onClick={() => deleteImage(index)}

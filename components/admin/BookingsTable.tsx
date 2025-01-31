@@ -19,6 +19,7 @@ interface Booking {
   date: string
   type: string
   price: string
+  cnic: string
   status: 'unpaid' | 'paid' | 'pending'
   status2: 'completed' | 'active' | 'canceled'
 }
@@ -36,9 +37,9 @@ export default function BookingsTable({ bookings }: BookingsTableProps) {
         <TableRow>
           <TableHead className="w-[100px]">Name</TableHead>
           <TableHead>Phone</TableHead>
+          <TableHead>CNIC</TableHead>
           <TableHead>Address</TableHead>
           <TableHead>Date</TableHead>
-          <TableHead>Type</TableHead>
           <TableHead className="text-right">Payment</TableHead> {/* Payment header */}
           <TableHead className="text-right">Status</TableHead> {/* Status header */}
         </TableRow>
@@ -48,6 +49,7 @@ export default function BookingsTable({ bookings }: BookingsTableProps) {
           <TableRow key={booking.name}>
             <TableCell className="font-medium">{booking.name}</TableCell>
             <TableCell>{booking.phone}</TableCell>
+            <TableCell>{booking.cnic}</TableCell>
             <TableCell>{booking.address}</TableCell>
             <TableCell><span className="mb-2">Dates: {new Date(booking.checkInDate).toLocaleDateString('en-US', {
               year: 'numeric',
@@ -58,7 +60,6 @@ export default function BookingsTable({ bookings }: BookingsTableProps) {
               month: 'long',
               day: 'numeric',
             })} </span></TableCell>
-            <TableCell>{booking.type}</TableCell>
             <TableCell className="text-right">
               {booking.price}
             </TableCell>

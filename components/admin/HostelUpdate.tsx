@@ -121,7 +121,7 @@ export default function HostelUpdateForm({ hostelId }: { hostelId: string }) {
         const response = await fetch(`/api/hostels/${hostelId}`)
         if (!response.ok) throw new Error('Failed to fetch hostel data')
         const hostelData = await response.json()
-        
+
         // Reset form with fetched data
         reset(hostelData)
         setFacilitiesData(hostelData.facilities)
@@ -360,7 +360,7 @@ export default function HostelUpdateForm({ hostelId }: { hostelId: string }) {
                   id={`rooms.${index}.numberOfRooms`}
                   type='number'
                   min={1}
-                  {...register(`rooms.${index}.numberOfRooms` as const, { 
+                  {...register(`rooms.${index}.numberOfRooms` as const, {
                     valueAsNumber: true,
                     min: 1
                   })}
@@ -389,7 +389,7 @@ export default function HostelUpdateForm({ hostelId }: { hostelId: string }) {
                   id={`rooms.${index}.price`}
                   type='number'
                   min={1}
-                  {...register(`rooms.${index}.price` as const, { 
+                  {...register(`rooms.${index}.price` as const, {
                     valueAsNumber: true,
                     min: 1
                   })}
@@ -591,7 +591,7 @@ export default function HostelUpdateForm({ hostelId }: { hostelId: string }) {
                 <p><span className='font-medium'>Availability:</span> {room.isAvailable ? 'Available' : 'Not Available'}</p>
                 <div className='mt-2 grid grid-cols-3 gap-2'>
                   {room.images && room.images.map((image, imageIndex) => (
-                    <Image 
+                    <Image
                       key={imageIndex}
                       src={typeof image === 'string' ? image : URL.createObjectURL(image)}
                       alt={`Room ${index + 1} Image ${imageIndex + 1}`}
@@ -638,17 +638,17 @@ export default function HostelUpdateForm({ hostelId }: { hostelId: string }) {
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6 max-w-4xl mx-auto p-6 bg-white rounded-lg shadow'>
       <h2 className='text-2xl font-bold text-center mb-6'>
         {step === 1 ? "Update Personal Details" :
-         step === 2 ? "Update Room Details" :
-         step === 3 ? "Update Facilities" :
-         step === 4 ? "Update Location" :
-         "Review Updates"}
+          step === 2 ? "Update Room Details" :
+            step === 3 ? "Update Facilities" :
+              step === 4 ? "Update Location" :
+                "Review Updates"}
       </h2>
 
       {step === 1 ? renderPersonalDetails() :
-       step === 2 ? renderRoomDetails() :
-       step === 3 ? renderFacilitiesStep() :
-       step === 4 ? renderLocationMap() :
-       renderSummary()}
+        step === 2 ? renderRoomDetails() :
+          step === 3 ? renderFacilitiesStep() :
+            step === 4 ? renderLocationMap() :
+              renderSummary()}
 
       <div className='flex justify-between gap-4'>
         {step > 1 && (

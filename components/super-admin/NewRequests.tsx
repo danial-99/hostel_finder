@@ -69,7 +69,6 @@ const HostelRequestCard: React.FC<{
                   <p><span className="font-medium">Category:</span> {hostel.category}</p>
                   <p><span className="font-medium">CNIC:</span> {hostel.cnic}</p>
                   <p><span className="font-medium">Phone:</span> {hostel.phone}</p>
-                  <p><span className="font-medium">Number of Rooms:</span> </p>
                 </div>
               </div>
 

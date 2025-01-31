@@ -116,3 +116,87 @@ function fileToBuffer(base64: string): Buffer {
   const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
   return Buffer.from(base64Data, "base64");
 }
+
+export async function updateGeneralDetails(hostelId: string, details: any) {
+  try {
+    const updatedHostel = await prismadb.hostel.update({
+      where: { id: hostelId },
+      data: {
+        hostelName: details['Hostel Name'],
+        country: details['Country'],
+        province: details['Province'],
+        city: details['City'],
+        zipCode: details['Zip Code'],
+        type: details['Type'],
+        category: details['Category'],
+        cnic: details['CNIC'],
+        phone: details['Phone'],
+        description: details['Description'],
+      },
+    });
+
+    return {
+      success: true,
+      message: 'General details updated successfully.',
+      data: updatedHostel,
+    };
+  } catch (error) {
+    console.error('Error updating general details:', error);
+    return {
+      success: false,
+      message: 'Failed to update general details.',
+    };
+  }
+}
+
+export async function updateFacilities(hostelId: string, facilitiesData: Record<string, boolean>) {
+  try {
+    const updatedFacilities = Object.keys(facilitiesData).filter(key => facilitiesData[key]);
+
+    const updatedHostel = await prismadb.hostel.update({
+      where: { id: hostelId },
+      data: {
+        facilities: updatedFacilities,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Facilities updated successfully.',
+      data: updatedHostel,
+    };
+  } catch (error) {
+    console.error('Error updating facilities:', error);
+    return {
+      success: false,
+      message: 'Failed to update facilities.',
+    };
+  }
+}
+
+export async function updateRoomDetails(rooms: any[]) {
+  try {
+    const updatePromises = rooms.map(room => {
+      return prismadb.roomType.update({
+        where: { id: room.id },
+        data: {
+          price: room.price,
+          numberOfRooms: room.numberOfRooms,
+        },
+      });
+    });
+
+    await Promise.all(updatePromises);
+
+    return {
+      success: true,
+      message: "Room details updated successfully.",
+    };
+  } catch (error) {
+    console.error("Error updating room details:", error);
+    return {
+      success: false,
+      message: "Failed to update room details.",
+    };
+  }
+}

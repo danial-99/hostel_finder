@@ -123,6 +123,55 @@ export async function fetchBookingRequests() {
                 ...userData,
                 imageUrl,
                 bedCount,
+                phone: request.phone
+            };
+        }));
+        return bookingData;
+    }
+}
+
+export async function fetchPendingBookingRequests() {
+    const cookieStore = cookies();
+    const curUserId = cookieStore.get('userId');
+    var userId = "";
+    if (curUserId) {
+        userId = curUserId.value;
+    }
+    const hostel = await prismadb.hostel.findFirst({
+        where: {
+            ownerId: userId,
+        }
+    });
+    if (hostel) {
+        const bookingRequests = await prismadb.bookingRequests.findMany({
+            where: {
+                hostelBkId: hostel.id,
+                status: "PENDING"
+            }
+        });
+
+        // Map over the bookingRequests to fetch userData for each booking request
+        const bookingData = await Promise.all(bookingRequests.map(async (request) => {
+            // Fetch user data for each booking request
+            const userData = await prismadb.user.findUnique({
+                where: {
+                    id: request.userBkId  // Assuming userBkId is the correct field to identify the user
+                }
+            });
+            const roomData = await prismadb.roomType.findFirst({
+                where: {
+                    id: request.roomId
+                }
+            })
+            const imageUrl = convertToBase64(roomData?.image);
+            const bedCount = roomData?.bedCount;
+            // Return an object containing both booking request and user data
+            return {
+                ...request,
+                ...userData,
+                imageUrl,
+                bedCount,
+                bkId: request.id,
             };
         }));
         return bookingData;
@@ -203,7 +252,7 @@ export async function rating(hostelID: number, data: any) {
         };
     } else {
         return {
-            success: false,
+            success: true,
             message: `Your comment has been published created`,
             status: 200,
         };
@@ -235,4 +284,29 @@ export async function getComments(hostelId: number | string) {
         console.error("Error fetching comments:", error);
         return false;
     }
+}
+
+export async function updateBookingStatus(id: string, status: string) {
+    const existingBooking = await prismadb.bookingRequests.findUnique({
+        where: { id }
+    });
+
+    if (!existingBooking) {
+        return {
+            success: false,
+            message: "Booking request not found",
+            status: 404,
+        };
+    }
+
+    const result = await prismadb.bookingRequests.update({
+        where: { id },
+        data: { status }
+    });
+
+    return {
+        success: true,
+        message: `Booking request status updated: ${status}`,
+        status: 200,
+    };
 }

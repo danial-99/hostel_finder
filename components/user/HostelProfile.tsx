@@ -212,25 +212,33 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
   });
 
   const [comments, setComments] = useState<any[]>([]);
-  var hostelRating = 0;
-  var iterator = 1; 
+  const [hostelRating, setHostelRating] = useState(0);
+  var iterator = 1;
   var totalRatings = 0;
   useEffect(() => {
     const curHostelID = hostel?.id ?? 0;
+
     async function fetchStats() {
-      const data = await getComments(curHostelID);
+      const data = await getComments(curHostelID); // Fetch comments
       if (data) {
-        setComments(data);
+        setComments(data); // Update comments state
+        let totalRatings = 0;
+        let iterator = 0;
+
+        // Calculate the average rating from fetched data
+        data.forEach((rat: any) => {
+          totalRatings += rat.rating;
+          iterator++;
+        });
+
+        const averageRating = iterator > 0 ? totalRatings / iterator : 0;
+        setHostelRating(averageRating); // Update hostel rating
       }
-    comments.map((rat: any) =>{
-      totalRatings += rat.rating
-      iterator++;
-    })
-    hostelRating = totalRatings/iterator;
-  }
+    }
 
     fetchStats();
-  }, []);
+  }, [hostel?.id]); // Re-run the effect when hostel.id changes
+
 
   const [latitude, setLatitude] = useState(hostel?.latitude ?? 0); // State for latitude
   const [longitude, setLongitude] = useState(hostel?.longitude ?? 0); // State for longitude

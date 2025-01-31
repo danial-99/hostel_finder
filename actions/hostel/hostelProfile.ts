@@ -111,7 +111,7 @@ export async function getHostelsDetails() {
         hostelImage: hostel.hostelImage ? convertToBase64(hostel.hostelImage) : '',
         electercityBill: hostel.electercityBill ? convertToBase64(hostel.electercityBill) : '',
         gasBill: hostel.gasBill ? convertToBase64(hostel.gasBill) : '',
-        rooms,
+        hostel,
       };
     } else {
       return false;  // Return false if no hostels were found

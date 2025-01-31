@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import BookingRequestCard from '@/components/admin/BookingRequestCard';
-import { fetchBookingRequests } from '@/actions/hostel/booking';
+import { fetchBookingRequests, fetchPendingBookingRequests } from '@/actions/hostel/booking';
 
 export default function BookingRequestsPage() {
   const [bookingRequests, setBookingRequests] = useState<any[]>([]); // State for storing booking requests
@@ -12,7 +12,7 @@ export default function BookingRequestsPage() {
     const loadBookingRequests = async () => {
       try {
         setLoading(true); // Start loading
-        const requests = await fetchBookingRequests();
+        const requests = await fetchPendingBookingRequests();
         console.log(requests);
         if (requests)
           setBookingRequests(requests); // Update the state with fetched data

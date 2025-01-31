@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { updateGeneralDetails } from '@/actions/admin/createHostel'
 
 const detailSchema = z.object({
   'Hostel Name': z.string().min(1, 'Hostel Name is required'),
@@ -19,17 +20,18 @@ const detailSchema = z.object({
 })
 
 export default function GeneralDetails(hostel: any) {
+  console.log("hostel-data: ", hostel)
   const [details, setDetails] = useState({
-    'Hostel Name': hostel.hostelName,
-    'Country': hostel.country,
-    'Province': hostel.province,
-    'City': hostel.city,
-    'Zip Code': hostel.zipCode,
-    'Type': hostel.type,  
-    'Category': hostel.category,
-    'CNIC': hostel.cnic,
-    'Phone': hostel.phone,
-    'Description': hostel.description,
+    'Hostel Name': hostel.hostel.hostelName,
+    'Country': hostel.hostel.country,
+    'Province': hostel.hostel.province,
+    'City': hostel.hostel.city,
+    'Zip Code': hostel.hostel.zipCode,
+    'Type': hostel.hostel.type,
+    'Category': hostel.hostel.category,
+    'CNIC': hostel.hostel.cnic,
+    'Phone': hostel.hostel.phone,
+    'Description': hostel.hostel.description,
   })
 
   const { register, handleSubmit, formState: { errors } } = useForm<any>({
@@ -45,10 +47,15 @@ export default function GeneralDetails(hostel: any) {
     })()
   }
 
-  const handleUpdateAll = handleSubmit((data) => {
+  const handleUpdateAll = handleSubmit(async (data) => {
     setDetails(data);
-    console.log('Updated General Details:', data)
-    alert('All general details updated successfully!')
+    console.log('Updated General Details:', data);
+    const response = await updateGeneralDetails(hostel.hostel.id, data);
+    if (response.success) {
+      alert('All general details updated successfully!');
+    } else {
+      alert('Failed to update general details.');
+    }
   })
 
   return (
@@ -75,6 +82,7 @@ export default function GeneralDetails(hostel: any) {
                       <option value="STUDENT">STUDENT</option>
                       <option value="PROFESSIONAL">PROFESSIONAL</option>
                       <option value="FAMILY">FAMILY</option>
+                      <option value="OTHER">OTHER</option>
                     </>
                   )}
                 </select>

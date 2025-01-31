@@ -5,6 +5,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { toast } from "@/hooks/use-toast"
+import { updateBookingStatus } from "@/actions/hostel/booking"
+
 
 interface BookingRequestCardProps {
   id: number
@@ -19,6 +22,7 @@ interface BookingRequestCardProps {
   price: number
   bedCount: number
   status: string
+  bkId: string
 }
 
 export default function BookingRequestCard({
@@ -33,21 +37,48 @@ export default function BookingRequestCard({
   imageUrl,
   price,
   status,
+  bkId,
 }: BookingRequestCardProps) {
   // Default payment status is 'Unpaid'
   const [paymentStatus, setPaymentStatus] = useState<string>(status)
 
   const onAccept = async () => {
-    console.log(`Accepted booking request ${id}`)
+    const res = await updateBookingStatus(bkId, "Pending Payment");
+    if (res.status == 200) {
+      toast({
+        title: "Booking Request Sent",
+        description: res.message,
+        variant: "default"
+      });
+    } else {
+      toast({
+        title: "Booking Request Sent",
+        description: res.message,
+        variant: "destructive"
+      });
+    }
     // Update payment status to indicate further action is required
     setPaymentStatus("Pending Payment");
 
   }
 
   const onReject = async () => {
-    console.log(`Rejected booking request ${id}`)
+    const res = await updateBookingStatus(bkId, "Rejected");
+    if (res.status == 200) {
+      toast({
+        title: "Booking Request Sent",
+        description: res.message,
+        variant: "default"
+      });
+    } else {
+      toast({
+        title: "Booking Request Sent",
+        description: res.message,
+        variant: "destructive"
+      });
+    }
     // Keep payment status as 'Unpaid' since the request was rejected
-    setPaymentStatus("Unpaid")
+    setPaymentStatus("Rejected")
   }
 
   return (

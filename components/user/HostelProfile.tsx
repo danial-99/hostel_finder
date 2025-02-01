@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react'
-import { Star, MapPin, ChevronLeft, ChevronRight, Calendar, CheckCircle, XCircle } from 'lucide-react'
+import { Star, MapPin, Calendar, CheckCircle, XCircle } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
 import { useForm, Controller } from "react-hook-form"
@@ -105,7 +105,6 @@ const feedbackFormSchema = z.object({
 type FeedbackFormData = z.infer<typeof feedbackFormSchema>;
 
 export default function HostelProfile({ hostel }: HostelProfileProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [bookingStep, setBookingStep] = useState(1);
@@ -122,14 +121,6 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
   });
 
   const rooms: Room[] = hostel?.rooms || [];
-
-  const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % rooms.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + rooms.length) % rooms.length);
-  };
 
   const handleBookNow = (room: Room) => {
     setSelectedRoom(room);
@@ -280,17 +271,16 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
       <div className="max-w-6xl mx-auto">
         {/* Image Gallery */}
         <div className="relative mb-6">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="col-span-2 relative aspect-[4/3]">
-              <Image
-                src={`data:image/jpeg;base64,${hostel.hostelImage}`}
-                alt="Hostel lounge"
-                className="rounded-l-xl object-cover"
-                fill
-              />
-            </div>
-          </div>
-        </div>
+      <div className="relative aspect-[16/9] w-full">
+        <Image
+          src={`data:image/jpeg;base64,${hostel.hostelImage}`}
+          alt="Hostel lounge"
+          className="rounded-xl object-cover"
+          fill
+          priority
+        />
+      </div>
+    </div>
 
         {/* Hostel Info */}
         <div>
@@ -338,22 +328,6 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
                           <div className="grid grid-cols-1 gap-4">
                             <div className="relative aspect-video">
                               <Image src={`data:image/jpeg;base64,${room.image}`} alt={room.name} fill className="rounded-lg object-cover" />
-                              <Button
-                                variant="secondary"
-                                size="icon"
-                                className="absolute left-2 top-1/2 -translate-y-1/2"
-                                onClick={prevImage}
-                              >
-                                <ChevronLeft className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="secondary"
-                                size="icon"
-                                className="absolute right-2 top-1/2 -translate-y-1/2"
-                                onClick={nextImage}
-                              >
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
                             </div>
                             <div className="flex flex-col justify-between">
                               <div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react'
-import { Star, MapPin, ChevronLeft, ChevronRight, Calendar, CheckCircle, XCircle } from 'lucide-react'
+import { Star, MapPin, Calendar, CheckCircle, XCircle } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
 import { useForm, Controller } from "react-hook-form"
@@ -169,6 +169,7 @@ const handleCancelBooking = () => {
   setShowCancellationDialog(true);
 };
 
+
 const handleConfirmCancellation = () => {
   console.log("Booking cancelled. Reason:", cancellationReason);
   toast({
@@ -217,17 +218,16 @@ return (
     <div className="max-w-6xl mx-auto">
       {/* Image Gallery */}
       <div className="relative mb-6">
-        <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-2 relative aspect-[4/3]">
-            <Image
-              src={`data:image/jpeg;base64,${hostel.hostelImage}`}
-              alt="Hostel lounge"
-              className="rounded-l-xl object-cover"
-              fill
-            />
-          </div>
-        </div>
+      <div className="relative aspect-[16/9] w-full">
+        <Image
+          src={`data:image/jpeg;base64,${hostel.hostelImage}`}
+          alt="Hostel lounge"
+          className="rounded-xl object-cover"
+          fill
+          priority
+        />
       </div>
+    </div>
 
       {/* Hostel Info */}
       <div>
@@ -238,13 +238,6 @@ return (
             <Link href={`/hostels/${hostel.id}`} key={hostel.id}>
             <Button>Book Now</Button>
             </Link>
-          </div>
-          <div className="text-right">
-            <div className="flex items-center mb-1">
-              <Star className="w-4 h-4 fill-primary text-primary mr-1" />
-              <span className="font-bold">{hostel.rating}</span>
-            </div>
-          
           </div>
         </div>
 

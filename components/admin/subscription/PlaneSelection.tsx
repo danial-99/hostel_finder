@@ -82,7 +82,7 @@ export default function PlanSelection({ onSelectPlan }: PlanSelectionProps) {
                 "Free"
               ) : (
                 <>
-                  ${calculateDiscountedPrice(plan)} /{plan.duration}
+                  Rs {calculateDiscountedPrice(plan)} /{plan.duration}
                   {plan.discount > 0 && (
                     <span className="ml-2 text-green-600">({plan.discount}% off)</span>
                   )}
@@ -98,10 +98,11 @@ export default function PlanSelection({ onSelectPlan }: PlanSelectionProps) {
             </ul>
           </CardContent>
           <CardFooter>
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               onClick={() => onSelectPlan(plan)}
               variant={plan.price === 0 ? "outline" : "default"}
+              disabled={plan.price === 0} // Disable the button for free plans
             >
               {plan.price === 0 ? "Select Free Plan" : `Select ${plan.name} Plan`}
             </Button>

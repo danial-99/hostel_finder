@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -124,9 +124,9 @@ export default function SubscriptionPlansPage() {
   return (
     <div className="container mx-auto py-10 px-4">
       <h1 className="text-3xl font-bold mb-8">Manage Subscription Plans</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {plans.map((plan) => (
-          <Card key={plan.id} className="relative">
+          <Card key={plan.id}>
             <CardHeader>
               {editingPlan === plan.id ? (
                 <div className="space-y-2">
@@ -151,7 +151,6 @@ export default function SubscriptionPlansPage() {
                     <Input
                       id={`${plan.id}-price`}
                       type="number"
-                      step="0.01"
                       value={editedPlans[plan.id].price}
                       onChange={(e) =>
                         updateEditedPlan(plan.id, "price", parseFloat(e.target.value))
@@ -181,7 +180,7 @@ export default function SubscriptionPlansPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Features</Label>
-                    {editedPlans[plan.id].features.map((feature, index) => (
+                    {editedPlans[plan.id].features.map((feature) => (
                       <div key={feature.id} className="flex items-center space-x-2">
                         <Input
                           value={feature.text}
@@ -204,6 +203,7 @@ export default function SubscriptionPlansPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => addFeature(plan.id)}
+                      className="w-full"
                     >
                       <Plus className="h-4 w-4 mr-2" /> Add Feature
                     </Button>
@@ -212,7 +212,7 @@ export default function SubscriptionPlansPage() {
               ) : (
                 <>
                   <div className="text-2xl font-bold">
-                    ${plan.price}
+                    Rs {plan.price}
                     <span className="text-sm text-muted-foreground">
                       /{plan.interval}
                     </span>

@@ -725,7 +725,7 @@ export default function HostelRegistrationForm() {
             {watch('rooms').map((room, index) => (
               room.numberOfRooms > 0 && (
                 <div key={index} className='mb-4'>
-                  <p><span className='font-medium'>{room.bedCount} Bed Room:</span> {room.numberOfRooms} room(s), ${room.price}/bed</p>
+                  <p><span className='font-medium'>{room.bedCount} Bed Room:</span> {room.numberOfRooms} room(s), Rs {room.price}/bed</p>
                   <div className='mt-2 grid grid-cols-3 gap-2'>
                     {room.image && 
                       <Image 

@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Filter } from "lucide-react"
 import { HostelDetailsView } from "./subscription/HostelDetail"
 import { getTopHostelsList } from "@/actions/hostel/listHostels"
 
@@ -90,13 +89,6 @@ export default function SuperAdminDashboard() {
       
       
         <>
-          <div className="flex justify-between items-center mb-4">
-            <div className="relative">
-              
-            </div>
-            
-          </div>
-
           <Card>
             <CardHeader>
               <CardTitle>Hostel Subscriptions</CardTitle>
@@ -110,7 +102,6 @@ export default function SuperAdminDashboard() {
                     <TableHead>Subscription Plan</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Payment</TableHead>
-                    
                     <TableHead>Subscription End Date</TableHead>
                   </TableRow>
                 </TableHeader>

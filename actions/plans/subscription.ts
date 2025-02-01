@@ -1,6 +1,6 @@
 'use server'
 
-import  prisma  from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 // Define types for better type safety
@@ -39,13 +39,7 @@ export async function getPlans(): Promise<ServerResponse<Plan[]>> {
   }
 }
 
-export async function updatePlan(planId: string, data: {
-  name: string
-  price: number
-  interval: string
-  discount: number
-  features: { id: string; text: string }[]
-}): Promise<ServerResponse<Plan>> {
+export async function updatePlan(planId: string, data: Plan): Promise<ServerResponse<Plan>> {
   try {
     // Update plan details
     const updatedPlan = await prisma.plan.update({
@@ -56,50 +50,21 @@ export async function updatePlan(planId: string, data: {
         interval: data.interval,
         discount: data.discount,
       },
-      include: {
-        features: true
-      }
     })
 
-    // Get existing features
-    const existingFeatures = await prisma.feature.findMany({
+    // Handle features
+    // Delete existing features
+    await prisma.feature.deleteMany({
       where: { planId }
     })
 
-    // Delete features that are not in the new data
-    const featureIdsToKeep = data.features.map(f => f.id)
-    const featuresToDelete = existingFeatures.filter(f => 
-      !featureIdsToKeep.includes(f.id) && f.id.startsWith('existing-')
-    )
-    
-    if (featuresToDelete.length > 0) {
-      await prisma.feature.deleteMany({
-        where: {
-          id: {
-            in: featuresToDelete.map(f => f.id)
-          }
-        }
-      })
-    }
-
-    // Update or create features
-    for (const feature of data.features) {
-      if (feature.id.startsWith('new-')) {
-        // Create new feature
-        await prisma.feature.create({
-          data: {
-            text: feature.text,
-            planId
-          }
-        })
-      } else {
-        // Update existing feature
-        await prisma.feature.update({
-          where: { id: feature.id },
-          data: { text: feature.text }
-        })
-      }
-    }
+    // Create new features
+    await prisma.feature.createMany({
+      data: data.features.map(feature => ({
+        text: feature.text,
+        planId
+      }))
+    })
 
     // Fetch the updated plan with all features
     const finalPlan = await prisma.plan.findUnique({

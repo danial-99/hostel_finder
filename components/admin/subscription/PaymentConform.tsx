@@ -1,7 +1,9 @@
+"use client" // Ensure this component is rendered on the client side
+
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import router from "next/router"
-
+import { useRouter } from "next/navigation" // Use next/navigation instead of next/router
 
 // Define the Plan interface
 interface Plan {
@@ -15,11 +17,14 @@ interface Plan {
 interface PaymentConfirmationProps {
   plan: Plan
 }
-const gotoDashBoard = () =>{
-  router.push("/admin/dashboard");
-}
 
 export default function PaymentConfirmation({ plan }: PaymentConfirmationProps) {
+  const router = useRouter() // Initialize the router
+
+  const gotoDashBoard = () => {
+    router.push("/admin/dashboard") // Use the router to navigate
+  }
+
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
@@ -29,7 +34,7 @@ export default function PaymentConfirmation({ plan }: PaymentConfirmationProps) 
       <CardContent>
         <p className="text-center text-2xl font-bold text-green-600 mb-4">✓</p>
         <p className="text-center">
-          Your payment of ${plan.price.toFixed(2)} for the {plan.name} plan has been processed successfully.
+          Your payment of Rs {plan.price.toFixed(2)} for the {plan.name} plan has been processed successfully.
         </p>
         <p className="text-center mt-4">
           You now have access to all the features included in your chosen plan.

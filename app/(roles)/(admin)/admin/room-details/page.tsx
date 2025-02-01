@@ -125,7 +125,7 @@ export default function Component() {
                     </div>
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label>Price per night (PKR)</Label>
+                        <Label>Price per Month</Label>
                         <div className="flex items-center space-x-2">
                           <Input
                             type="number"

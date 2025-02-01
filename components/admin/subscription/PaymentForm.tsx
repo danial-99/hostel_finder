@@ -118,7 +118,7 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
           type="submit"
           form="payment-form" // Link this button to the form by ID
         >
-          Pay ${plan.price.toFixed(2)}
+          Pay {plan.price.toFixed(2)}
         </Button>
       </CardFooter>
     </Card>

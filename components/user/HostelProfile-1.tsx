@@ -108,13 +108,6 @@ const { control: feedbackControl, handleSubmit: handleFeedbackSubmit, formState:
 
 const rooms: Room[] = hostel?.rooms || [];
 
-const nextImage = () => {
-  setCurrentImageIndex((prevIndex) => (prevIndex + 1) % rooms.length);
-};
-
-const prevImage = () => {
-  setCurrentImageIndex((prevIndex) => (prevIndex - 1 + rooms.length) % rooms.length);
-};
 
 const handleBookNow = (room: Room) => {
   setSelectedRoom(room);
@@ -285,22 +278,6 @@ return (
                         <div className="grid grid-cols-1 gap-4">
                           <div className="relative aspect-video">
                             <Image src={`data:image/jpeg;base64,${room.image}`} alt={room.name} fill className="rounded-lg object-cover" />
-                            <Button
-                              variant="secondary"
-                              size="icon"
-                              className="absolute left-2 top-1/2 -translate-y-1/2"
-                              onClick={prevImage}
-                            >
-                              <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              size="icon"
-                              className="absolute right-2 top-1/2 -translate-y-1/2"
-                              onClick={nextImage}
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
                           </div>
                           <div className="flex flex-col justify-between">
                             <div>

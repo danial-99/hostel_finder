@@ -11,16 +11,16 @@ if (process.env.NODE_ENV !== "production") globalThis.prisma = prismadb;
 
 async function main() {
   try {
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+    const hashedPassword = await bcrypt.hash("211072", 10);
 
     // Seed Super Admin
     const superAdmin = await prismadb.user.upsert({
-      where: { email: "shayanjaved07@gmail.com" },
+      where: { email: "uisrar293@gmail.com" },
       update: {},
       create: {
         name: "Super Admin",
         username: "superadmin",
-        email: "shayanjaved07@gmail.com",
+        email: "uisrar293@gmail.com",
         password: hashedPassword,
         role: "SUPER_ADMIN",
         phone: "03175160306",

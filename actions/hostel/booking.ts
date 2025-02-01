@@ -2,7 +2,7 @@
 
 import prismadb from "@/lib/prisma";
 import { cookies } from 'next/headers';
-import { sendBookingRequestEmail } from "../nodemailer/emailTemplates";
+import { sendBookingRequestEmail, sendBookingStatusEmail } from "../nodemailer/emailTemplates";
 import { flightRouterStateSchema } from "next/dist/server/app-render/types";
 
 
@@ -303,7 +303,16 @@ export async function updateBookingStatus(id: string, status: string) {
         where: { id },
         data: { status }
     });
-
+    if(result){
+        const user = await prismadb.user.findUnique({
+            where: {
+                id: existingBooking.userBkId
+            }
+        })
+        if(user){
+            await sendBookingStatusEmail(user.email, status);
+        }
+    }
     return {
         success: true,
         message: `Booking request status updated: ${status}`,

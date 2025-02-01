@@ -108,6 +108,31 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
     }
   };
 
+  const sendBookingStatusEmail = async (email: string | undefined, status: string | undefined): Promise<void> => {
+    if (!email) {
+      console.log('No email provided');
+      return;
+    }
+
+    try {
+      const mailOptions: SendMailOptions = {
+        from: 'uisrar293@gmail.com', // Replace with your sender email
+        to: email,
+        subject: 'Booking Status',
+        text: `Dear User, \n\nWe are here inform you that your booking request status updated to ${status} . Please contact support for further assistance.\n\nBest regards, \nTeam Hostel Management`,
+        html: `<p>Dear User,</p>
+               <p>Dear User, \n\nWe are here inform you that your booking request status updated to ${status} . Please contact support for further assistance.Best regards, Team Hostel Management</p>
+               <p>Best regards,<br>Team Hostel Management</p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Booking rejection email sent to ${email}`);
+    } catch (error) {
+      console.error('Error sending booking rejection email:', error);
+      throw new Error('Error sending booking rejection email');
+    }
+  };
+
   const sendBookingRequestEmail = async (email: string | undefined): Promise<string> => {
     if (!email) {
       console.log('No email provided');
@@ -257,4 +282,4 @@ const sendBookingApprovalEmail = async (email: string | undefined): Promise<void
   }
  
 
-export { sendRejectionEmail, sendApprovalEmail, sendBookingApprovalEmail, sendBookingRejectionEmail, sendOtp, sendBookingRequestEmail, approvalEmail, sendReportEmail, suspensionEmail, messageToOwner };
+export { sendRejectionEmail, sendApprovalEmail, sendBookingApprovalEmail, sendBookingRejectionEmail, sendOtp, sendBookingRequestEmail, approvalEmail, sendReportEmail, suspensionEmail, messageToOwner, sendBookingStatusEmail };

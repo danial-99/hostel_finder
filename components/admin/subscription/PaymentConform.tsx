@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import router from "next/router"
-
+import { useRouter } from 'next/navigation' 
 
 // Define the Plan interface
 interface Plan {
@@ -11,15 +10,17 @@ interface Plan {
   discount?: number
   features: string[]
 }
-
+var router;
 interface PaymentConfirmationProps {
   plan: Plan
 }
 const gotoDashBoard = () =>{
+ 
   router.push("/admin/dashboard");
 }
 
 export default function PaymentConfirmation({ plan }: PaymentConfirmationProps) {
+  router = useRouter();
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>

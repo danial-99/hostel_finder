@@ -176,12 +176,12 @@ export async function updateFacilities(hostelId: string, facilitiesData: Record<
 
 export async function updateRoomDetails(rooms: any[]) {
   try {
-    const updatePromises = rooms.map(room => {
+    const updatePromises = rooms.map((room) => {
       return prismadb.roomType.update({
         where: { id: room.id },
         data: {
-          price: room.price,
-          numberOfRooms: room.numberOfRooms,
+          price: Number(room.price), // Convert price to number
+          numberOfRooms: Number(room.numberOfRooms), // Convert numberOfRooms to number
         },
       });
     });

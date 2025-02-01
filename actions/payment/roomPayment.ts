@@ -13,7 +13,7 @@ export default async function bookingConfirm(id: string) {
                 id,
             },
             data:{
-                status: "PAID"
+                status: "Payment Received"
             }
         })
         if(res){

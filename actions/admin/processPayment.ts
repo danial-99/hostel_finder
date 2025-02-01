@@ -11,14 +11,14 @@ export default async function processPayment(plan: any) {
 const currentDate = new Date();
 
 // Switch based on the plan's duration
-switch(plan.duration) {
-    case "per month":
+switch(plan.name) {
+    case "Monthly":
         subDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
         break;
-    case "per 6 months":
+    case "Semi-Annual":
         subDate = new Date(currentDate.setMonth(currentDate.getMonth() + 6));
         break;
-    case "per year":
+    case "Annual":
         subDate = new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
         break;
     default:
@@ -35,11 +35,12 @@ switch(plan.duration) {
     const userId = curUserId?.value;
     const hostels = await prismadb.hostel.updateMany({
         where: {
-            ownerId: userId
-        },
-        data: {
-            subcriptionEnd: subDate
-        }
+            ownerId: userId,
+            subcriptionEnd: { lt: subDate }, // Only update if current value is less than new date
+          },
+          data: {
+            subcriptionEnd: subDate,
+          },
     });
     if(hostels){
         return "subcription successfull";

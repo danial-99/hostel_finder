@@ -62,6 +62,9 @@ interface HostelProfileProps {
   };
 }
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
 const bookingFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   address: z.string().min(5, "Address must be at least 5 characters"),
@@ -69,10 +72,17 @@ const bookingFormSchema = z.object({
   phone: z.string().regex(/^\+92\d{10}$/, "Phone number must be in the format +92xxxxxxxxxx"),
   checkInDate: z.date({
     required_error: "Check-in date is required",
+  }).refine((date) => date >= today, {
+    message: "Check-in date must be today or in the future",
   }),
+
   checkOutDate: z.date({
     required_error: "Check-out date is required",
   }),
+  
+}).refine((data) => data.checkInDate < data.checkOutDate, {
+  message: "Check-in date must be before check-out date",
+  path: ["checkInDate"], // Attach error to checkInDate
 });
 
 type BookingFormData = z.infer<typeof bookingFormSchema>;

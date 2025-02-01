@@ -32,6 +32,7 @@ type Hostel = {
   facilities: string[];
   createdAt: string;
   updatedAt: string;
+  totalRooms: number;
 };
 
 const HostelRequestCard: React.FC<{
@@ -69,6 +70,7 @@ const HostelRequestCard: React.FC<{
                   <p><span className="font-medium">Category:</span> {hostel.category}</p>
                   <p><span className="font-medium">CNIC:</span> {hostel.cnic}</p>
                   <p><span className="font-medium">Phone:</span> {hostel.phone}</p>
+                  <p><span className="font-medium">Total Rooms:</span> {hostel.totalRooms}</p>
                 </div>
               </div>
 

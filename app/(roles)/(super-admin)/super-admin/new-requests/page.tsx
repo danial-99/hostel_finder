@@ -11,7 +11,10 @@ export default async function NewRequestsPage() {
       </div>
     )
   } else{
-    <h2>No new requests</h2>
+    return (
+
+      <h2>No new requests yet</h2>
+    )
   }
   
 }

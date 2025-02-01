@@ -46,12 +46,12 @@ export default function SuperAdminDashboard() {
             let amount = 0;
             let paymentDate = new Date();
 
-            if (diffDays <= 30) {
+            if (diffDays <= 31) {
               subscriptionPlan = "Monthly";
               amount = 29.99;
               paymentDate = new Date(subcriptionEndDate);
               paymentDate.setMonth(paymentDate.getMonth() - 1);
-            } else if (diffDays <= 180) {
+            } else if (diffDays <= 185) {
               subscriptionPlan = "6 Months";
               amount = 59.99;
               paymentDate = new Date(subcriptionEndDate);
@@ -88,16 +88,13 @@ export default function SuperAdminDashboard() {
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Hostel Subscription Overview</h1>
       
-      (
+      
         <>
           <div className="flex justify-between items-center mb-4">
             <div className="relative">
               
             </div>
-            <Button variant="outline">
-              <Filter className="mr-2 h-4 w-4" />
-              Filter
-            </Button>
+            
           </div>
 
           <Card>
@@ -113,7 +110,7 @@ export default function SuperAdminDashboard() {
                     <TableHead>Subscription Plan</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Payment</TableHead>
-                    TableH
+                    
                     <TableHead>Subscription End Date</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -139,7 +136,7 @@ export default function SuperAdminDashboard() {
             </CardContent>
           </Card>
         </>
-      )
+      
     </div>
   )
 }

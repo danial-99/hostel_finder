@@ -14,8 +14,8 @@ const detailSchema = z.object({
   'Zip Code': z.string().min(1, 'Zip Code is required'),
   'Type': z.enum(['MALE', 'FEMALE', 'MIXED']),
   'Category': z.enum(['STUDENT', 'PROFESSIONAL', 'FAMILY']),
-  'CNIC': z.string().regex(/^\d{5}-\d{7}-\d$/, 'Invalid CNIC format'),
-  'Phone': z.string().regex(/^\+92-\d{3}-\d{7}$/, 'Invalid phone number format'),
+  'CNIC': z.string().regex(/^\d{13}$/, "CNIC must be 13 digits"),
+  'Phone': z.string().regex(/^\+92\d{10}$/, "Phone number must be in format +92XXXXXXXXXX"),
   'Description': z.string().min(10, 'Description must be at least 10 characters long'),
 })
 

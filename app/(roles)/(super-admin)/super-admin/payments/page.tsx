@@ -11,15 +11,18 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { getTopHostelsList } from "@/actions/hostel/listHostels";
+import { NodeNextRequest } from "next/dist/server/base-http/node";
+import { string } from "zod";
 
 type Payment = {
   id: string;
   amount: number;
   status: "pending" | "processing" | "success" | "failed";
   cnic: string;
-  phoneNumber: string;
+  phone: string;
   hostelName: string;
   paymentDate: Date;
+  discount: string;
   subcriptionEnd: Date;
   subscriptionPlan: "Free" | "Monthly" | "6 Months" | "1 Year";
   discountApplied: string;
@@ -74,7 +77,7 @@ function DataTable({ data }: { data: Payment[] }) {
                     currency: "USD",
                   }).format(payment.amount)}
                 </TableCell>
-                <TableCell>{payment.discountApplied}</TableCell>
+                <TableCell>{payment.discount}</TableCell>
                 <TableCell>
                   <div
                     className={`capitalize ${
@@ -87,7 +90,7 @@ function DataTable({ data }: { data: Payment[] }) {
                   </div>
                 </TableCell>
                 <TableCell>{payment.cnic}</TableCell>
-                <TableCell>{payment.phoneNumber}</TableCell>
+                <TableCell>{payment.phone}</TableCell>
                 <TableCell>{payment.paymentDate.toLocaleDateString()}</TableCell>
               </TableRow>
             ))}
@@ -118,20 +121,24 @@ export default function PaymentsPage() {
             let subscriptionPlan: "Free" | "Monthly" | "6 Months" | "1 Year" = "Free";
             let amount = 0;
             let paymentDate = new Date();
+            let discount= "0";
 
-            if (diffDays <= 30) {
+            if (diffDays <= 31) {
               subscriptionPlan = "Monthly";
               amount = 29.99;
+              discount= "0";
               paymentDate = new Date(subcriptionEndDate);
               paymentDate.setMonth(paymentDate.getMonth() - 1);
-            } else if (diffDays <= 180) {
+            } else if (diffDays <= 185) {
               subscriptionPlan = "6 Months";
               amount = 59.99;
+              discount= "5%";
               paymentDate = new Date(subcriptionEndDate);
               paymentDate.setMonth(paymentDate.getMonth() - 6);
             } else if (diffDays <= 365) {
               subscriptionPlan = "1 Year";
               amount = 99.99;
+              discount="10%";
               paymentDate = new Date(subcriptionEndDate);
               paymentDate.setFullYear(paymentDate.getFullYear() - 1);
             }
@@ -141,6 +148,7 @@ export default function PaymentsPage() {
               subscriptionPlan,
               amount,
               paymentDate,
+              discount,
             };
           });
 

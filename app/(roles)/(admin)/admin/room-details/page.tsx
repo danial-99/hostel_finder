@@ -79,7 +79,8 @@ export default function Component() {
 
   const saveChanges = async () => {
     try {
-      await updateRoomDetails(pendingChanges);
+      const sanitizedChanges = pendingChanges.map(({ image, ...rest }) => rest);
+      await updateRoomDetails(sanitizedChanges);
       toast({
         title: "Success",
         description: "Room details updated successfully",

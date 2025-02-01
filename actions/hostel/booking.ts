@@ -190,7 +190,7 @@ export async function UnpaidBookingRequests() {
         const bookingRequests = await prismadb.bookingRequests.findMany({
             where: {
                 userBkId: userId,
-                status: "PENDING",
+                status: "Pending Payment",
             }
         });
 

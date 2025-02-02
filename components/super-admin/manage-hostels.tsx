@@ -22,7 +22,7 @@ import { toast } from "@/hooks/use-toast"
 // Types
 type Hostel = {
   id: string;
-  name: string;
+  hostelName: string;
   type: string;
   hostelImage: string;
   city: string;
@@ -76,7 +76,7 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
               width={0}
               height={0}
               src={`data:image/jpeg;base64,${hostel.hostelImage}`}
-              alt={hostel.name}
+              alt={hostel.hostelName}
               className='w-full h-48 object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none'
             />
           </div>
@@ -84,7 +84,7 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
             <div className='flex justify-between items-start'>
               <div>
                 <div className='flex justify-start items-center gap-x-4'>
-                  <h2 className='text-2xl font-bold'>{hostel.name}</h2>
+                  <h2 className='text-2xl font-bold'>{hostel.hostelName}</h2>
                 </div>
                 <p className='text-gray-500'>{hostel.type}</p>
                 <div className='flex items-center mt-1'>
@@ -116,14 +116,14 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
             <div className='flex flex-col justify-end space-y-2 mt-2'>
               <Button
                 variant='default'
-                onClick={() => handleStatusUpdate(hostel.name, HostelStatus.APPROVED)}
+                onClick={() => handleStatusUpdate(hostel.hostelName, HostelStatus.APPROVED)}
               >
                 Activate
               </Button>
       
               <Button
                 variant='destructive'
-                onClick={() => handleStatusUpdate(hostel.name, HostelStatus.SUSPENDED)}
+                onClick={() => handleStatusUpdate(hostel.hostelName, HostelStatus.SUSPENDED)}
               >
                 Sustain
               </Button>

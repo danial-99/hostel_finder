@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Star, MapPin, Calendar, CheckCircle, XCircle } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
@@ -30,7 +30,7 @@ DialogTitle,
 DialogTrigger,
 } from "@/components/ui/dialog"
 import { Data } from '@react-google-maps/api';
-import bookingRequest from '@/actions/hostel/booking';
+import bookingRequest, { getComments } from '@/actions/hostel/booking';
 
 interface HostelProfileProps {
 hostel?: {
@@ -192,7 +192,33 @@ const onSubmitFeedback = async (data: FeedbackFormData) => {
     variant: "default",
   });
 };
+ const [comments, setComments] = useState<any[]>([]);
+  const [hostelRating, setHostelRating] = useState(0);
+  var iterator = 1;
+  var totalRatings = 0;
+  useEffect(() => {
+    const curHostelID = hostel?.id ?? 0;
 
+    async function fetchStats() {
+      const data = await getComments(curHostelID); // Fetch comments
+      if (data) {
+        setComments(data); // Update comments state
+        let totalRatings = 0;
+        let iterator = 0;
+
+        // Calculate the average rating from fetched data
+        data.forEach((rat: any) => {
+          totalRatings += rat.rating;
+          iterator++;
+        });
+
+        const averageRating = iterator > 0 ? totalRatings / iterator : 0;
+        setHostelRating(averageRating); // Update hostel rating
+      }
+    }
+
+    fetchStats();
+  }, [hostel?.id]);
 
 
 if (!hostel) {
@@ -239,6 +265,13 @@ return (
             <Button>Book Now</Button>
             </Link>
           </div>
+          <div className="text-right">
+              <div className="flex items-center mb-1">
+                <Star className="w-4 h-4 fill-primary text-primary mr-1" />
+                <span className="font-bold">{hostel.rating}</span>
+              </div>
+              <div className="text-sm text-muted-foreground">Rating {hostelRating}</div>
+            </div>
         </div>
 
         {/* Facilities */}
@@ -461,20 +494,16 @@ return (
               <CardContent className="p-6">
                 <div className="grid gap-6"> 
                  <div className="space-y-4">
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex justify-between mb-2">
-                        <div className="font-semibold">Alex from USA</div>
-                        <div className="text-sm text-muted-foreground">2 days ago</div>
+                    {comments.map((comment, index) => (
+                      <div className="p-4 border rounded-lg">
+                        <div className="flex justify-between mb-2">
+                          <div className="font-semibold">{comment.userName}</div>
+                          <div className="text-sm text-muted-foreground">{timeAgo(comment.createdAt)}</div>
+                          <div className="text-sm text-muted-foreground">Rating: {comment.rating}</div>
+                        </div>
+                        <p className="text-sm">{comment.message}</p>
                       </div>
-                      <p className="text-sm">Great location and amazing atmosphere! The staff was super friendly and helpful.</p>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex justify-between mb-2">
-                        <div className="font-semibold">Maria from Spain</div>
-                        <div className="text-sm text-muted-foreground">1 week ago</div>
-                      </div>
-                      <p className="text-sm">Perfect place to meet other travelers. The common areas are really nice.</p>
-                    </div>
+                    ))}
                   </div>
 
                   {/* Feedback and Rating Section */}
@@ -516,3 +545,31 @@ return (
 )
 }
 
+function timeAgo(createdAt: Date | string | number): string {
+  const now = new Date();
+  const createdDate = new Date(createdAt);
+  const diff = now.getTime() - createdDate.getTime();
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const weeks = Math.floor(days / 7);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (seconds < 60) {
+    return `${seconds} second${seconds !== 1 ? "s" : ""} ago`;
+  } else if (minutes < 60) {
+    return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+  } else if (hours < 24) {
+    return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+  } else if (days < 7) {
+    return `${days} day${days !== 1 ? "s" : ""} ago`;
+  } else if (weeks < 4) {
+    return `${weeks} week${weeks !== 1 ? "s" : ""} ago`;
+  } else if (months < 12) {
+    return `${months} month${months !== 1 ? "s" : ""} ago`;
+  } else {
+    return `${years} year${years !== 1 ? "s" : ""} ago`;
+  }
+}

@@ -2,6 +2,7 @@
 
 import prismadb from "@/lib/prisma";
 import { cookies } from 'next/headers';
+import { sendBookingStatusEmail } from "../nodemailer/emailTemplates";
 
 export default async function bookingConfirm(id: string) {
     const cookieStore = cookies();
@@ -16,6 +17,14 @@ export default async function bookingConfirm(id: string) {
                 status: "Payment Received"
             }
         })
+        const user = await prismadb.user.findUnique({
+            where:{
+                id: userId,
+            }
+        })
+        if(user){
+            const mailResponse = await sendBookingStatusEmail(user.email, "Payment Received")
+        }
         if(res){
             return true;
         }

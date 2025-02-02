@@ -99,9 +99,9 @@ export default function BookingRequestCard({
             <h2 className="text-2xl font-bold">{name}</h2>
             <p className="text-gray-500 mb-2">{profession}</p>
             <div className="flex items-center mb-2">
-              <span className="text-sm text-gray-600">Phone: {cnic}</span>
+              <span className="text-sm text-gray-600">Phone: {phone}</span>
             </div>
-            <p className="text-gray-600 mb-2">CNIC: {phone}</p>
+            <p className="text-gray-600 mb-2">CNIC: {cnic}</p>
             <p className="text-gray-600 mb-2">email: {email}</p>
             <p className="text-gray-600 mb-2">address: {address}</p>
             <p className="text-gray-600 mb-4">Room Type: {bedCount} Bedded</p>

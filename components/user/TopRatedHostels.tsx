@@ -71,7 +71,10 @@ export default function HostelList() {
                   <div className="flex items-center mt-2 text-sm text-gray-600">
                     <MapPin className="w-4 h-4 mr-1" />
                     <span>{hostel.city}</span>, 
-                    <span>{hostel.country}</span>
+                    <span>{hostel.country}</span> 
+                  </div>
+                  <div className="flex items-center mt-2 text-sm text-gray-600">
+                    Type: {hostel.type} | Category: {hostel.category}
                   </div>
                   <div className="flex items-center mt-2 text-sm text-gray-600">
                     {hostel.description}

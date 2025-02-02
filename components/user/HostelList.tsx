@@ -73,12 +73,12 @@ export default function HostelList() {
                     <span>{hostel.city}</span>, 
                     <span>{hostel.country}</span>
                   </div>
+                  <div className="flex items-center mt-2 text-sm text-gray-600">
+                    Type: {hostel.type} | Category: {hostel.category}
+                  </div>
                    <div className="flex items-center mt-2 text-sm text-gray-600">
                     {hostel.description}
-                    </div>
-                    <div className="flex items-center mt-2 text-sm text-gray-600">
-                    Type: {hostel.type} | Category: {hostel.category}
-                  </div> 
+                    </div> 
                 </CardContent>
               </Card>
             </Link>

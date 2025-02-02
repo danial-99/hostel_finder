@@ -11,11 +11,7 @@ const features = [
     title: 'Simple search process',
     description: 'With our powerful search, you can find all the accommodations that match your needs.',
   },
-  {
-    icon: HeadphonesIcon,
-    title: '24/7 Support',
-    description: 'Our customer service team is available 24/7 to assist you with any questions or concerns.',
-  },
+ 
   {
     icon: Users,
     title: 'We are nice',
@@ -29,7 +25,7 @@ export default function WhyChooseUs() {
       <div className="container mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8">Why Choose Us</h2>
         <p className='text-center w-6/12 mx-auto text-lg'>{`The main reason is because our competitors have disgusting sites, but we can' t write that here, so the text here will be different`}</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <div key={index} className="flex flex-col items-center text-center">
               <feature.icon className="w-12 h-12 text-primary mb-4" />

@@ -1,30 +1,46 @@
-import { NextResponse, NextMiddleware, NextRequest } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const Role = request.cookies.get("userRole")?.value;
   const currentUrl = request.nextUrl.clone();
   const url = currentUrl.pathname;
 
-  // Allow access to the root page and auth folder for all users without token check
-  if (url === "/" || url.startsWith("/auth/") || url.startsWith('/profile')) {
+  // List of static pages to allow unrestricted access
+  const allowedStaticPages = [
+    "/about-us",
+    "/safety-center",
+    "/community-guidelines",
+    "/terms-of-service",
+    "/privacy-policy",
+  ];
+
+  // Allow access to root, auth, profile, and static pages
+  if (
+    url === "/" ||
+    url.startsWith("/auth/") ||
+    url.startsWith("/profile") ||
+    allowedStaticPages.includes(url)
+  ) {
     return NextResponse.next();
-  } 
+  }
+
   // Check for token only if not accessing root or auth pages
   const token = request.cookies.get("accessToken");
-
-  // If no token or token is undefined, redirect to login
   if (!token || token.value === "undefined") {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // Only proceed with API call and role checking if there's a valid token
   try {
     if (!Role) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
-    if(url.startsWith("/pay")){
+
+    // Special case for /pay
+    if (url.startsWith("/pay")) {
       return NextResponse.next();
     }
+
+    // Role-based access control
     if (Role === "SUPER_ADMIN") {
       if (url.startsWith("/super-admin")) {
         return NextResponse.next();
@@ -38,16 +54,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/accessDenied", request.url));
       }
     } else if (Role === "USER") {
-      if (url.startsWith("/user")) {
+      if (url.startsWith("/user") || url.startsWith("/hostels")) {
         return NextResponse.next();
-      }else if(url.startsWith("/hostels")){
-        return NextResponse.next();
-      }
-      else {
+      } else {
         return NextResponse.redirect(new URL("/accessDenied", request.url));
       }
-    }
-    else {
+    } else {
       return NextResponse.redirect(new URL("/accessDenied", request.url));
     }
   } catch (error) {

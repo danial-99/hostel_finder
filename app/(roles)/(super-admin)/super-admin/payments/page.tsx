@@ -74,7 +74,7 @@ function DataTable({ data }: { data: Payment[] }) {
                 <TableCell>
                   {new Intl.NumberFormat("en-US", {
                     style: "currency",
-                    currency: "USD",
+                    currency: "Pkr",
                   }).format(payment.amount)}
                 </TableCell>
                 <TableCell>{payment.discount}</TableCell>

@@ -1,30 +1,38 @@
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 const footerSections = [
   {
     title: "Company",
-    links: ["About Us", "Careers", "Press", "Blog"],
+    links: [
+      { name: "About Us", href: "/about-us" },
+    ],
   },
   {
     title: "Support",
-    links: ["Help Center", "Safety Center", "Community Guidelines"],
+    links: [
+      { name: "Safety Center", href: "/safety-center" },
+      { name: "Community Guidelines", href: "/community-guidelines" },
+    ],
   },
   {
     title: "Legal",
-    links: ["Terms of Service", "Privacy Policy", "Cookie Policy"],
+    links: [
+      { name: "Terms of Service", href: "/terms-of-service" },
+      { name: "Privacy Policy", href: "/privacy-policy" },
+    ],
   },
-]
+];
 
 const socialLinks = [
   { name: "Facebook", icon: Facebook, href: "#" },
   { name: "Twitter", icon: Twitter, href: "#" },
   { name: "Instagram", icon: Instagram, href: "#" },
   { name: "LinkedIn", icon: Linkedin, href: "#" },
-]
+];
 
 export default function Footer() {
   return (
@@ -56,12 +64,12 @@ export default function Footer() {
               <h3 className="text-lg font-semibold mb-4">{section.title}</h3>
               <ul className="space-y-2">
                 {section.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.name}>
                     <Link
-                      href="#"
+                      href={link.href}
                       className="text-sm hover:text-white transition-colors"
                     >
-                      {link}
+                      {link.name}
                     </Link>
                   </li>
                 ))}
@@ -69,27 +77,7 @@ export default function Footer() {
             </div>
           ))}
         </div>
-        <div className="mt-12 pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm mb-4 md:mb-0">
-              &copy; {new Date().getFullYear()} Hostel Finder. All rights reserved.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <h3 className="text-lg font-semibold">Subscribe to Newsletter</h3>
-              <form className="flex w-full sm:w-auto">
-                <Input
-                  type="email"
-                  placeholder="Your email"
-                  className="bg-gray-800 text-white rounded-r-none"
-                />
-                <Button type="submit" className="rounded-l-none">
-                  Subscribe
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
       </div>
     </footer>
-  )
+  );
 }

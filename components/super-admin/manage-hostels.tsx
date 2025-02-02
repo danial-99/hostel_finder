@@ -85,9 +85,6 @@ const HostelCard: React.FC<{ hostel: Hostel }> = ({ hostel }) => {
               <div>
                 <div className='flex justify-start items-center gap-x-4'>
                   <h2 className='text-2xl font-bold'>{hostel.name}</h2>
-                  <Badge variant={hostel.featured ? "default" : "secondary"}>
-                    {hostel.featured ? "Featured" : "Not Featured"}
-                  </Badge>
                 </div>
                 <p className='text-gray-500'>{hostel.type}</p>
                 <div className='flex items-center mt-1'>

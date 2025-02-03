@@ -27,17 +27,23 @@ export default function Component() {
   const [pendingChanges, setPendingChanges] = useState<Room[]>([]);
 
   useEffect(() => {
-    // Fetch room data from your API
     const fetchRooms = async () => {
       try {
-        const res = await fetchHostelsDetail(); // Replace with your actual API endpoint
-        var roomsData;
+        const res = await fetchHostelsDetail();
         if (res) {
-          roomsData = res.rooms;
-          setRooms(roomsData); // Set the rooms state with the fetched data
+          const roomsData = res.rooms.map((room: any) => ({
+            id: room.id,
+            bedCount: room.bedCount,
+            price: room.price,
+            available: room.available,
+            numberOfRooms: room.numberOfRooms.toString(), // Convert number to string
+            image: room.image ? room.image.toString('base64') : "", // Convert Buffer to Base64 string if it exists
+            // Optionally, you can drop hostelId if not needed
+          }));
+          setRooms(roomsData);
         }
       } catch (error) {
-        console.error('Error fetching rooms data:', error);
+        console.error("Error fetching rooms data:", error);
         toast({
           title: "Error",
           description: "Failed to fetch rooms data.",
@@ -45,9 +51,10 @@ export default function Component() {
         });
       }
     };
-
+  
     fetchRooms();
-  }, []); // Run only once when component mounts
+  }, []);
+  
 
   const handlePriceChange = (roomId: string, newPrice: number) => {
     if (newPrice <= 0) {

@@ -2,15 +2,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Building, CalendarCheck, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getStatistics } from "@/actions/hostel/listHostels";
+import { getBookingData, getStatistics } from "@/actions/hostel/listHostels";
 
 export function StatsCards() {
-  const [stats, setStats] = useState({ totalUsers: 0, totalHostels: 0, totalBookings: 0 });
+  const [stats, setStats] = useState({ totalBookings: 0 });
 
   useEffect(() => {
     async function fetchStats() {
-      const data = await getStatistics();
-      setStats(data);
+      const data = await getBookingData();
+      if(data){
+        setStats(data);
+      }
     }
     fetchStats();
   }, []);

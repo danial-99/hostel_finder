@@ -152,7 +152,7 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
     const checkInDate = getValues().checkInDate;
     const checkOutDate = getValues().checkOutDate;
     const numberOfDays = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24);
-    const adjustedPrice = selectedRoom && selectedRoom.price ? (selectedRoom.price / 30) * numberOfDays : 0;
+    const adjustedPrice = selectedRoom && selectedRoom.price ? ((selectedRoom.price / 30) * numberOfDays).toFixed(0) : 0;
 
     const updatedData = {
       ...finalFormData,
@@ -200,11 +200,19 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
     // Replace with your feedback submission logic
     const curHostelID = hostel?.id ?? 0;
     const res = await rating(curHostelID, data);
+    if(res.status == 404) {
+      toast({
+        title: "Feedback Not Submitted",
+        description: res.message,
+        variant: "destructive",
+      });
+    } else{
     toast({
       title: "Feedback Submitted",
       description: res.message,
       variant: "default",
     });
+  }
   };
 
   const { isLoaded } = useLoadScript({
@@ -232,7 +240,7 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
           iterator++;
         });
 
-        const averageRating = iterator > 0 ? totalRatings / iterator : 0;
+        const averageRating = iterator > 0 ? parseFloat((totalRatings / iterator).toFixed(1)) : 0;
         setHostelRating(averageRating); // Update hostel rating
       }
     }
@@ -473,7 +481,7 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
                             <p><strong>Phone:</strong> {getValues().phone}</p>
                             <p><strong>Check-in Date:</strong> {getValues().checkInDate ? format(getValues().checkInDate, "PPP") : 'Not selected'}</p>
                             <p><strong>Check-out Date:</strong> {getValues().checkOutDate ? format(getValues().checkOutDate, "PPP") : 'Not selected'}</p>
-                            <p><strong>Room:</strong> {selectedRoom.numberOfRooms}</p>
+                            <p><strong>Room Type:</strong> {selectedRoom.bedCount}</p>
                             <p><strong>Price:</strong> PKR {selectedRoom.price.toLocaleString()} per bed/month</p>
                             {getValues().checkInDate && getValues().checkOutDate && (
                               <p>

@@ -51,7 +51,7 @@ export default function Facilities({ hostel }: any) {
     // Pre-fill the facilities based on data from the hostel
     if (hostel?.hostel?.facilities?.length) {
       const updatedFacilities = { ...fullFacilitiesList }
-      hostel.hostel.facilities.forEach((facility: string) => {
+      hostel.hostel.facilities.forEach((facility: keyof typeof fullFacilitiesList) => {
         if (updatedFacilities.hasOwnProperty(facility)) {
           updatedFacilities[facility] = true
         }

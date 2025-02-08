@@ -35,7 +35,7 @@ export default function SuperAdminDashboard() {
         setLoading(true);
         const fetchedData = await getTopHostelsList(); // Replace with actual API call for payments
         if (fetchedData) {
-          const processedData = fetchedData.map((payment: Payment) => {
+          const processedData = fetchedData.map((payment: any) => {
             const currentDate = new Date();
             const subcriptionEndDate = new Date(payment.subcriptionEnd);
             const diffTime = Math.abs(subcriptionEndDate.getTime() - currentDate.getTime());

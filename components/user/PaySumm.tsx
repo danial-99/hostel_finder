@@ -8,7 +8,7 @@ import { UnpaidBookingRequests } from '@/actions/hostel/booking'
 export default function Summ() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [bookings, setBookindgs] = useState<any[]>([]);
-  const [selectedBooking, setSelectedBooking] = useState<any[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
 
   // Fetch hostel data from the backend
   useEffect(() => {

@@ -172,6 +172,7 @@ export async function fetchPendingBookingRequests() {
                 imageUrl,
                 bedCount,
                 bkId: request.id,
+                phone: request.phone,
             };
         }));
         return bookingData;
@@ -236,6 +237,20 @@ export async function rating(hostelID: number, data: any) {
     const hostelRtId = hostelID.toString();
     const rating = parseInt(data.rating);
     const message = data.feedback;
+
+    const booking = await prismadb.bookingRequests.findFirst({
+        where: {
+            userBkId: userRtId
+        }
+    })
+
+    if(booking == null){
+        return {
+            success: false,
+            message: "For feedback please book the hostel first",
+            status: 404,
+        }
+    }
     const result = await prismadb.rating.create({
         data: {
             rating,

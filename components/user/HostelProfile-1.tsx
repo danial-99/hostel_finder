@@ -212,7 +212,7 @@ const onSubmitFeedback = async (data: FeedbackFormData) => {
           iterator++;
         });
 
-        const averageRating = iterator > 0 ? totalRatings / iterator : 0;
+        const averageRating = iterator > 0 ? parseFloat((totalRatings / iterator).toFixed(1)) : 0;
         setHostelRating(averageRating); // Update hostel rating
       }
     }

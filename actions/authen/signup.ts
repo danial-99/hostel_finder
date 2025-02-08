@@ -15,7 +15,6 @@ enum UserRole {
 }
 
 export async function signUp(formData: FormData) {
-  console.log(formData);
   try {
     const name = formData.get("username") as string;
     const role = formData.get("role") as UserRole;
@@ -23,81 +22,111 @@ export async function signUp(formData: FormData) {
     const password = formData.get("password") as string;
     const termsConditions = formData.get("terms&Conditions") as string;
 
-    console.log(name, email, role, termsConditions, password);
+    // Validate required fields
+    if (!name || !role || !email || !password || !termsConditions) {
+      const missingField = !name ? "Name" : !role ? "Role" : !email ? "Email" : !password ? "Password" : "Terms & Conditions";
+      return {
+        status: 400,
+        success: false,
+        message: `${missingField} is required`,
+        error: `${missingField} is required`,
+      };
+    }
 
-    if (!name)
-      return {
-        status: 400,
-        success: false,
-        message: "Name is required",
-        error: "Name is required",
-      };
-    if (!role)
-      return {
-        status: 400,
-        success: false,
-        message: "Role is required",
-        error: "Role is required",
-      };
-    if (!email)
-      return {
-        status: 400,
-        success: false,
-        message: "Email is required",
-        error: "Email is required",
-      };
-    if (!password)
-      return {
-        status: 400,
-        success: false,
-        message: "Password is required",
-        error: "Password is required",
-      };
-    if (!termsConditions)
-      return {
-        status: 400,
-        success: false,
-        message: "Terms & Conditions acceptance is required",
-        error: "Terms & Conditions acceptance is required",
-      };
-
-    // if([name, role, email, password, termsConditions].find((t) => t))
-
-    //check if user already exists
-    const existingUser = await prismadb.user.findFirst({
+    // First check if a verified user exists with this email
+    const verifiedUser = await prismadb.user.findFirst({
       where: {
         email: email,
         verifiction: true,
       },
     });
 
-    if (existingUser) {
-      return {
-        status: 409,
-        success: false,
-        message: "User with this email already exists",
-        error: "User with this email already exists",
-      };
+    if (verifiedUser) {
+      // Check if the roles match to give a more specific error message
+      if (verifiedUser.role === role) {
+        return {
+          status: 409,
+          success: false,
+          message: `An account with this email already exists as a ${role.toLowerCase()}`,
+          error: "Account already exists",
+        };
+      } else {
+        return {
+          status: 409,
+          success: false,
+          message: `This email is already registered with a different role`,
+          error: "Account exists with different role",
+        };
+      }
     }
 
-    // Hash the password
+    // Check for unverified user
+    const unverifiedUser = await prismadb.user.findFirst({
+      where: {
+        email: email,
+        verifiction: false,
+      },
+    });
+
+    if (unverifiedUser) {
+      const otp = generateOTP();
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Update existing unverified user
+      const updatedUser = await prismadb.user.update({
+        where: { email },
+        data: {
+          name,
+          role,
+          password: hashedPassword,
+          termsConditions: termsConditions === "true",
+          otp,
+        },
+      });
+
+      // Set email cookie
+      cookies().set("usrEmail", email, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60,
+        sameSite: "strict",
+        path: '/',
+      });
+
+      // Try to send OTP email
+      try {
+        await sendOtp(email, otp);
+        return {
+          status: 200,
+          success: true,
+          message: "Verification email resent",
+          data: {
+            id: updatedUser.id,
+            email: updatedUser.email,
+            role: updatedUser.role,
+          },
+          isResend: true,
+        };
+      } catch (emailError) {
+        console.error("Failed to send OTP email:", emailError);
+        return {
+          status: 200,
+          success: true,
+          message: "Account exists but needs verification. OTP email failed to send.",
+          data: {
+            id: updatedUser.id,
+            email: updatedUser.email,
+            role: updatedUser.role,
+          },
+          emailError: true,
+          isResend: true,
+        };
+      }
+    }
+
+    // Create new user if they don't exist
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    //sendEmail
-    // const mailResponse = await sendEmail({
-    //   from: "devshavaiz200@gmail.com",
-    //   to: email,
-    //   subject: "HostelFinder - Sign Up Confirmation",
-    //   text: `Welcome to HostelFinder, ${name}. Please confirm your email address by clicking the link below:
-    //   https://example.com/confirm-email/${email}`,
-    //   html: `
-    //   <h1>Welcome to HostelFinder, ${name}!</h1>
-    //   <p>Please confirm your email address by clicking the link below:</p>
-    //   <a href="https://example.com/confirm-email/${email}">Confirm Email</a>
-    //   `,
-    // });
-
-    // console.log(mailResponse);
+    const otp = generateOTP();
 
     const user = await prismadb.user.create({
       data: {
@@ -105,20 +134,12 @@ export async function signUp(formData: FormData) {
         role,
         email,
         password: hashedPassword,
-        termsConditions: termsConditions === "on",
+        termsConditions: termsConditions === "true",
+        otp,
       },
     });
 
-    //sending opt to user for email verification
-    const otp = generateOTP();
-    await prismadb.user.update({
-      where: { email },
-      data: { otp },
-    });
-    const mailReponse = await sendOtp(email, otp);
-    
-    //saving opt to cookie
-
+    // Set email cookie
     cookies().set("usrEmail", email, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -127,18 +148,35 @@ export async function signUp(formData: FormData) {
       path: '/',
     });
 
+    // Try to send OTP email
+    try {
+      await sendOtp(email, otp);
+    } catch (emailError) {
+      console.error("Failed to send OTP email:", emailError);
+      return {
+        status: 201,
+        success: true,
+        message: "Account created but verification email failed to send",
+        data: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        },
+        emailError: true,
+      };
+    }
+
     return {
       status: 201,
       success: true,
-      message: `User created successfully ${mailReponse}`,
+      message: "Account created successfully",
       data: {
         id: user.id,
-        name: user.name,
         email: user.email,
         role: user.role,
       },
-      // mailResponse,
     };
+
   } catch (error) {
     console.error("[USER_SIGNUP]", error);
     return {

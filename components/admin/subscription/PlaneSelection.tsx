@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { getPlans, type Plan as AdminPlan } from "@/actions/plans/subscription"
 import { toast } from "@/hooks/use-toast"
+import { checkPlan } from "@/actions/admin/processPayment"
+
 
 // Define the Plan interface for the owner's view
 interface OwnerPlan {
@@ -56,6 +58,30 @@ export default function PlanSelection({ onSelectPlan }: PlanSelectionProps) {
     }
   }
 
+  const checkCurrPlans = async (plan: OwnerPlan) => {
+    const checkplan = await checkPlan(plan);
+    return checkplan;
+  }
+
+  const handleSelectPlan = async (plan: OwnerPlan) => {
+    const isEligible = await checkCurrPlans(plan);
+    if (!isEligible) {
+      toast({
+        title: "Already Subscribed",
+        description: "You have already subscribed to a bigger plan.",
+        variant: "destructive"
+      });
+      return;
+    } else{
+      toast({
+        title: "Already Subscribed",
+        description: "But your plan will be upgraded.",
+        variant: "default" // Changed variant to green
+      });
+    }
+    onSelectPlan(plan);
+  }
+
   const calculateDiscountedPrice = (plan: OwnerPlan): string => {
     if (plan.discount) {
       return (plan.price * (100 - plan.discount) / 100).toFixed(2)
@@ -100,7 +126,7 @@ export default function PlanSelection({ onSelectPlan }: PlanSelectionProps) {
           <CardFooter>
             <Button
               className="w-full"
-              onClick={() => onSelectPlan(plan)}
+              onClick={() => handleSelectPlan(plan)}
               variant={plan.price === 0 ? "outline" : "default"}
               disabled={plan.price === 0} // Disable the button for free plans
             >

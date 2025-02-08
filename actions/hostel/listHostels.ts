@@ -1,6 +1,7 @@
 'use server';
 import prismadb from "@/lib/prisma";
 import { Buffer } from 'buffer';
+import { cookies } from "next/headers";
 import { date } from "zod";
 
 export default async function getHostelsList() {
@@ -127,6 +128,33 @@ export async function getStatistics() {
     totalBookings
   };
 }
+
+export async function getBookingData(){
+  const cookieStore = cookies();
+    const curUserId = cookieStore.get('userId');
+    var userId = "";
+    if (curUserId) {
+        userId = curUserId.value;
+    }
+    const hostel = await prismadb.hostel.findFirst({
+        where: {
+            ownerId: userId,
+        }
+    });
+    if (hostel) {
+        const totalBookings = await prismadb.bookingRequests.count({
+            where: {
+                hostelBkId: hostel.id,
+                status: "Payment Received"
+            }
+        })
+
+  return {
+    totalBookings
+  };
+    }
+  }
+
 export async function getRvenue() {
   const totalUsers = await prismadb.user.count();
   const totalHostels = await prismadb.hostel.count();

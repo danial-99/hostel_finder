@@ -25,6 +25,13 @@ export default function PaymentConfirmation({ plan }: PaymentConfirmationProps) 
     router.push("/admin/dashboard") // Use the router to navigate
   }
 
+  const calculateDiscountedPrice = (plan: Plan): string => {
+    if (plan.discount) {
+      return (plan.price * (100 - plan.discount) / 100).toFixed(2)
+    }
+    return plan.price.toFixed(2)
+  }
+
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
@@ -34,7 +41,7 @@ export default function PaymentConfirmation({ plan }: PaymentConfirmationProps) 
       <CardContent>
         <p className="text-center text-2xl font-bold text-green-600 mb-4">✓</p>
         <p className="text-center">
-          Your payment of Rs {plan.price.toFixed(2)} for the {plan.name} plan has been processed successfully.
+          Your payment of Rs {calculateDiscountedPrice(plan)} for the {plan.name} plan has been processed successfully.
         </p>
         <p className="text-center mt-4">
           You now have access to all the features included in your chosen plan.

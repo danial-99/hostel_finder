@@ -18,7 +18,6 @@ import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/actions/authen/signup";
@@ -42,10 +41,9 @@ const SignupForm = () => {
     },
   });
 
-  const { reset, handleSubmit } = form;
+  const { handleSubmit } = form;
 
   const onSubmit = async (data: z.infer<typeof SignupFormSchema>) => {
-    console.log("registering");
     setIsLoading(true);
     try {
       const formData = new FormData();
@@ -55,7 +53,7 @@ const SignupForm = () => {
 
       const result = await signUp(formData);
 
-      if (result.error) {
+      if (!result.success) {
         // Handle different error scenarios based on status code
         switch (result.status) {
           case 400:
@@ -67,16 +65,15 @@ const SignupForm = () => {
             break;
           case 409:
             toast({
-              title: "User Already Exists",
-              description: "An account with this email already exists.",
+              title: "Account Already Exists",
+              description: result.message || "An account with this email already exists.",
               variant: "destructive",
             });
             break;
           case 500:
             toast({
               title: "Server Error",
-              description:
-                "An unexpected error occurred. Please try again later.",
+              description: "An unexpected error occurred. Please try again later.",
               variant: "destructive",
             });
             break;
@@ -88,12 +85,30 @@ const SignupForm = () => {
             });
         }
       } else {
-        // Signup successful
-        toast({
-          title: "Signup Successful",
-          description: "Your account has been created successfully.",
-          variant: "default",
-        });
+        // Store signup data in session storage
+        sessionStorage.setItem('signupData', JSON.stringify(data));
+
+        if (result.isResend) {
+          toast({
+            title: "Account Exists",
+            description: "A new verification code has been sent to your email.",
+            variant: "default",
+          });
+        } else if (result.emailError) {
+          toast({
+            title: "Account Created",
+            description: "Your account was created but we couldn't send the verification email. You can request a new code on the verification page.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Verification Required",
+            description: "Please check your email for the verification code to complete registration.",
+            variant: "default",
+          });
+        }
+        
+        // Redirect to OTP verification in all cases
         router.push("/auth/otp-verification");
       }
     } catch (error) {
@@ -110,12 +125,12 @@ const SignupForm = () => {
   return (
     <div className="mt-12">
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="role"
             render={({ field }) => (
-              <FormItem className="space-y-3 mb-4">
+              <FormItem className="space-y-3">
                 <FormLabel>Register As</FormLabel>
                 <FormControl>
                   <RadioGroup
@@ -133,9 +148,7 @@ const SignupForm = () => {
                       <FormControl>
                         <RadioGroupItem value="ADMIN" />
                       </FormControl>
-                      <FormLabel className="font-normal">
-                        Hostel Owner
-                      </FormLabel>
+                      <FormLabel className="font-normal">Hostel Owner</FormLabel>
                     </FormItem>
                   </RadioGroup>
                 </FormControl>
@@ -145,78 +158,78 @@ const SignupForm = () => {
           />
           <FormField
             control={form.control}
-            name={"username"}
+            name="username"
             render={({ field }) => (
-              <FormItem className="mb-4">
-                <Input
-                  value={field.value}
-                  onChange={field.onChange}
-                  type="text"
-                  placeholder="Username"
-                />
+              <FormItem>
                 <FormControl>
-                  <FormMessage />
+                  <Input
+                    {...field}
+                    type="text"
+                    placeholder="Username"
+                    autoComplete="username"
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name={"email"}
+            name="email"
             render={({ field }) => (
-              <FormItem className="mb-4">
-                <Input
-                  value={field.value}
-                  onChange={field.onChange}
-                  type="email"
-                  placeholder="Enter your email"
-                />
+              <FormItem>
                 <FormControl>
-                  <FormMessage />
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder="Enter your email"
+                    autoComplete="email"
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name={"password"}
+            name="password"
             render={({ field }) => (
-              <FormItem className="mb-4">
-                <Input
-                  value={field.value}
-                  onChange={field.onChange}
-                  type="password"
-                  placeholder="Password"
-                />
+              <FormItem>
                 <FormControl>
-                  <FormMessage />
+                  <Input
+                    {...field}
+                    type="password"
+                    placeholder="Password"
+                    autoComplete="new-password"
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name={"confirmPassword"}
+            name="confirmPassword"
             render={({ field }) => (
-              <FormItem className="mb-4">
-                <Input
-                  value={field.value}
-                  onChange={field.onChange}
-                  type="password"
-                  placeholder="Confirm password"
-                />
+              <FormItem>
                 <FormControl>
-                  <FormMessage />
+                  <Input
+                    {...field}
+                    type="password"
+                    placeholder="Confirm password"
+                    autoComplete="new-password"
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name={"terms&Conditions"}
+            name="terms&Conditions"
             render={({ field }) => (
-              <FormItem className="mb-4">
-                <div className="flex justify-start items-center gap-x-2">
+              <FormItem>
+                <div className="flex items-center gap-x-2">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
@@ -225,10 +238,7 @@ const SignupForm = () => {
                   </FormControl>
                   <Typography className="text-muted-foreground text-xs">
                     I accept{" "}
-                    <Link
-                      href={"/terms-conditions"}
-                      className="text-xs text-primary"
-                    >
+                    <Link href="/terms-conditions" className="text-primary">
                       terms and conditions
                     </Link>
                   </Typography>
@@ -238,19 +248,18 @@ const SignupForm = () => {
             )}
           />
           <Button
+            type="submit"
             disabled={isLoading}
-            className="flex justify-center items-center gap-1 w-full text-white bg-secondary hover:bg-secondary/90"
+            className="w-full text-white bg-secondary hover:bg-secondary/90"
           >
-            {isLoading && (
-              <Loader2 className="animate-spin text-white h-4 w-4" />
-            )}
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Typography variant="span">Register</Typography>
           </Button>
         </form>
       </Form>
-      <Typography className="text-base font-medium text-center mt-6 mx-auto">
+      <Typography className="text-base font-medium text-center mt-6">
         Already have an account?{" "}
-        <Link href={"/auth/login"} className="text-primary">
+        <Link href="/auth/login" className="text-primary">
           Login Now
         </Link>
       </Typography>

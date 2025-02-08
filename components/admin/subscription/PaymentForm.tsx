@@ -30,6 +30,13 @@ interface PaymentFormProps {
   onPaymentComplete: () => void;
 }
 
+const calculateDiscountedPrice = (plan: Plan): string => {
+  if (plan.discount) {
+    return (plan.price * (100 - plan.discount) / 100).toFixed(2)
+  }
+  return plan.price.toFixed(2)
+}
+
 export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
   // Use react-hook-form with zod schema
   const {
@@ -40,16 +47,23 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
     resolver: zodResolver(paymentFormSchema),
   });
 
+  const [isProcessing, setIsProcessing] = useState(false);
+
   // Submit handler
   const onSubmit = async (data: PaymentFormData) => {
     try {
+      setIsProcessing(true);
       console.log("Processing payment with data:", data);
       const res = await processPayment(plan);
-      console.log(res);
-      onPaymentComplete();
+      
+      setTimeout(() => {
+        setIsProcessing(false);
+        onPaymentComplete();
+      }, 3000);
     } catch (error) {
       console.error("Payment processing error:", error);
       alert("Payment failed. Please try again.");
+      setIsProcessing(false);
     }
   };
 
@@ -117,8 +131,9 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
           className="w-full"
           type="submit"
           form="payment-form" // Link this button to the form by ID
+          disabled={isProcessing}
         >
-          Pay {plan.price.toFixed(2)}
+          {isProcessing ? "Processing..." : `Pay ${calculateDiscountedPrice(plan)}`}
         </Button>
       </CardFooter>
     </Card>

@@ -85,3 +85,20 @@ export async function updatePlan(planId: string, data: Plan): Promise<ServerResp
     return { success: false, error: 'Failed to update plan' }
   }
 }
+
+export async function getCurrentPlan(name: any): Promise<ServerResponse<Plan[]>> {
+  try {
+    const plans = await prisma.plan.findMany({
+      where:{
+          id: name
+      },
+      include: {
+        features: true
+      }
+    })
+    return { success: true, data: plans }
+  } catch (error) {
+    console.error('Error fetching plans:', error)
+    return { success: false, error: 'Failed to fetch plans' }
+  }
+}

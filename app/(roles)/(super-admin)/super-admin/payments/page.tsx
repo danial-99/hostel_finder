@@ -31,7 +31,7 @@ type Payment = {
 const columns = [
   { key: "hostelName", header: "Hostel Name" },
   { key: "subscriptionPlan", header: "Subscription Plan" },
-  { key: "amount", header: "Amount Paid" },
+  { key: "amount", header: "Amount" },
   { key: "discountApplied", header: "Discount" },
   { key: "status", header: "Status" },
   { key: "cnic", header: "CNIC" },
@@ -112,7 +112,7 @@ export default function PaymentsPage() {
         setLoading(true);
         const fetchedData = await getTopHostelsList(); // Replace with actual API call for payments
         if (fetchedData) {
-          const processedData = fetchedData.map((payment: Payment) => {
+          const processedData = fetchedData.map((payment: any) => {
             const currentDate = new Date();
             const subcriptionEndDate = new Date(payment.subcriptionEnd);
             const diffTime = Math.abs(subcriptionEndDate.getTime() - currentDate.getTime());
@@ -124,14 +124,15 @@ export default function PaymentsPage() {
             let discount= "0";
 
             if (diffDays <= 31) {
+
               subscriptionPlan = "Monthly";
-              amount = 29.99;
-              discount= "0";
+              amount = 29.99 - 29.99*0.02;
+              discount= "2%";
               paymentDate = new Date(subcriptionEndDate);
               paymentDate.setMonth(paymentDate.getMonth() - 1);
             } else if (diffDays <= 185) {
               subscriptionPlan = "6 Months";
-              amount = 59.99;
+              amount = 59.99 ;
               discount= "5%";
               paymentDate = new Date(subcriptionEndDate);
               paymentDate.setMonth(paymentDate.getMonth() - 6);

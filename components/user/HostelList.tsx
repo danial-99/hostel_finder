@@ -53,18 +53,6 @@ export default function HostelList() {
                 </CardHeader>
                 <CardContent className="p-4">
                   <CardTitle>{hostel.hostelName}</CardTitle>
-                  <div className="flex items-center mt-2">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(hostel.rating)
-                            ? "text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
                   <div className="flex items-center mt-2 text-sm text-gray-600">
                     <MapPin className="w-4 h-4 mr-1" />
                     <span>{hostel.city}</span>, 

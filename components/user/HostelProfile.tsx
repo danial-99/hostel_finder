@@ -272,7 +272,38 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
     );
   }
 
-
+  const renderLocationMap = () => {
+    if (!isLoaded) return <div>Loading map...</div>;
+    if (!latitude || !longitude) return <div>Location data is not available.</div>;
+  
+    return (
+      <div className='space-y-6'>
+        <div>
+          <Label htmlFor='address'>Address</Label>
+        </div>
+        <div style={{ height: '400px', width: '100%' }}>
+          <GoogleMap
+            center={{ lat: latitude, lng: longitude }}
+            zoom={15}
+            mapContainerStyle={{ width: '100%', height: '100%' }}
+            options={{
+              restriction: {
+                latLngBounds: {
+                  north: 37.084107,
+                  south: 23.6345,
+                  west: 60.872955,
+                  east: 77.840516
+                },
+                strictBounds: true
+              }
+            }}
+          >
+            <Marker position={{ lat: latitude, lng: longitude }} />
+          </GoogleMap>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -503,32 +534,7 @@ export default function HostelProfile({ hostel }: HostelProfileProps) {
             </TabsContent>
 
             <TabsContent value="location" className="mt-6">
-              <div className='space-y-6'>
-                <div>
-                  <Label htmlFor='address'>Address</Label>
-                </div>
-                {/* <div style={{ height: '400px', width: '100%' }}>
-          <GoogleMap
-            center={{ lat: latitude, lng: longitude }}
-            zoom={15}
-            mapContainerStyle={{ width: '100%', height: '100%' }}
-            options={{
-              restriction: {
-                latLngBounds: {
-                  north: 37.084107,
-                  south: 23.6345,
-                  west: 60.872955,
-                  east: 77.840516
-                },
-                strictBounds: true
-              }
-            }}
-            
-          >
-            <Marker position={{ lat: latitude, lng: longitude }} />
-          </GoogleMap>
-        </div> */}
-              </div>
+              {renderLocationMap()}
             </TabsContent>
 
             <TabsContent value="reviews" className="mt-6">

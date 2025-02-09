@@ -8,6 +8,7 @@ import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import * as z from "zod"
+import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api'
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -45,6 +46,8 @@ hostel?: {
   country: string;
   electercityBill: any;
   description: string;
+  latitude: number;
+  longitude: number;
   facilities: string[];
   rooms: {
     name: string;
@@ -192,6 +195,11 @@ const onSubmitFeedback = async (data: FeedbackFormData) => {
     variant: "default",
   });
 };
+
+const { isLoaded } = useLoadScript({
+  googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+  libraries: ['places']
+});
  const [comments, setComments] = useState<any[]>([]);
   const [hostelRating, setHostelRating] = useState(0);
   var iterator = 1;
@@ -220,7 +228,8 @@ const onSubmitFeedback = async (data: FeedbackFormData) => {
     fetchStats();
   }, [hostel?.id]);
 
-
+  const [latitude, setLatitude] = useState(hostel?.latitude ?? 0); // State for latitude
+  const [longitude, setLongitude] = useState(hostel?.longitude ?? 0); // State for longitude
 if (!hostel) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
@@ -237,7 +246,38 @@ if (!hostel) {
   );
 }
 
+const renderLocationMap = () => {
+  if (!isLoaded) return <div>Loading map...</div>;
+  if (!latitude || !longitude) return <div>Location data is not available.</div>;
 
+  return (
+    <div className='space-y-6'>
+      <div>
+        <Label htmlFor='address'>Address</Label>
+      </div>
+      <div style={{ height: '400px', width: '100%' }}>
+        <GoogleMap
+          center={{ lat: latitude, lng: longitude }}
+          zoom={15}
+          mapContainerStyle={{ width: '100%', height: '100%' }}
+          options={{
+            restriction: {
+              latLngBounds: {
+                north: 37.084107,
+                south: 23.6345,
+                west: 60.872955,
+                east: 77.840516
+              },
+              strictBounds: true
+            }
+          }}
+        >
+          <Marker position={{ lat: latitude, lng: longitude }} />
+        </GoogleMap>
+      </div>
+    </div>
+  );
+};
 
 return (
   <div className="min-h-screen bg-background p-6">
@@ -467,26 +507,7 @@ return (
           </TabsContent>
 
           <TabsContent value="location" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
-                <Link 
-                  href={`https://www.google.com/maps?q=${hostel.location}`}
-                  target="_blank"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <MapPin className="w-4 h-4" />
-                  View on Google Maps
-                </Link>
-                <div className="mt-4 aspect-video relative">
-                  <Image
-                    src="/placeholder.svg"
-                    alt="Map location"
-                    fill
-                    className="rounded-lg"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+          {renderLocationMap()}
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6">

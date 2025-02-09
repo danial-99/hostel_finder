@@ -64,9 +64,6 @@ export default function HostelList() {
                         }`}
                       />
                     ))}
-                    <span className="ml-2 text-sm text-gray-600">
-                      {hostel.rating}
-                    </span>
                   </div>
                   <div className="flex items-center mt-2 text-sm text-gray-600">
                     <MapPin className="w-4 h-4 mr-1" />

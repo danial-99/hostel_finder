@@ -27,7 +27,7 @@ export default function Header() {
     { href: "#", label: "Home" },
     { href: "#about-us", label: "About" },
     { href: "#contact-us", label: "Contact" },
-    {href:  "#payment", label:"Booking Payment"},
+   // {href:  "#payment", label:"Booking Payment"},
   ];
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,6 @@ import { paymentFormSchema, PaymentFormData } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-// Define the Plan interface
 interface Plan {
   name: string;
   price: number;
@@ -38,18 +37,39 @@ const calculateDiscountedPrice = (plan: Plan): string => {
 }
 
 export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProps) {
-  // Use react-hook-form with zod schema
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Submit handler
+  // Format card number as user types
+  const formatCardNumber = (value: string) => {
+    const cleaned = value.replace(/\D/g, ''); // Remove non-digits
+    const limited = cleaned.slice(0, 16); // Limit to 16 digits
+    return limited.replace(/(\d{4})/g, '$1 ').trim(); // Add spaces every 4 digits
+  };
+
+  // Format expiry date as user types
+  const formatExpiryDate = (value: string) => {
+    const cleaned = value.replace(/\D/g, ''); // Remove non-digits
+    if (cleaned.length >= 2) {
+      return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`;
+    }
+    return cleaned;
+  };
+
+  // Format CVV as user types
+  const formatCVV = (value: string) => {
+    return value.replace(/\D/g, '').slice(0, 4); // Remove non-digits and limit to 4
+  };
+
   const onSubmit = async (data: PaymentFormData) => {
     try {
       setIsProcessing(true);
@@ -93,7 +113,14 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
             <Input
               id="cardNumber"
               placeholder="1234 5678 9012 3456"
-              {...register("cardNumber")}
+              maxLength={19} // 16 digits + 3 spaces
+              {...register("cardNumber", {
+                onChange: (e) => {
+                  const formatted = formatCardNumber(e.target.value);
+                  e.target.value = formatted;
+                  setValue('cardNumber', formatted.replace(/\s/g, '')); // Remove spaces for validation
+                }
+              })}
             />
             {errors.cardNumber && (
               <p className="text-red-500 text-sm">{errors.cardNumber.message}</p>
@@ -105,7 +132,14 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
               <Input
                 id="expiryDate"
                 placeholder="MM/YY"
-                {...register("expiryDate")}
+                maxLength={5} // MM/YY format
+                {...register("expiryDate", {
+                  onChange: (e) => {
+                    const formatted = formatExpiryDate(e.target.value);
+                    e.target.value = formatted;
+                    setValue('expiryDate', formatted);
+                  }
+                })}
               />
               {errors.expiryDate && (
                 <p className="text-red-500 text-sm">{errors.expiryDate.message}</p>
@@ -116,7 +150,15 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
               <Input
                 id="cvv"
                 placeholder="123"
-                {...register("cvv")}
+                maxLength={4}
+                type="password"
+                {...register("cvv", {
+                  onChange: (e) => {
+                    const formatted = formatCVV(e.target.value);
+                    e.target.value = formatted;
+                    setValue('cvv', formatted);
+                  }
+                })}
               />
               {errors.cvv && (
                 <p className="text-red-500 text-sm">{errors.cvv.message}</p>
@@ -126,11 +168,10 @@ export default function PaymentForm({ plan, onPaymentComplete }: PaymentFormProp
         </form>
       </CardContent>
       <CardFooter>
-        {/* The button triggers the form's onSubmit */}
         <Button
           className="w-full"
           type="submit"
-          form="payment-form" // Link this button to the form by ID
+          form="payment-form"
           disabled={isProcessing}
         >
           {isProcessing ? "Processing..." : `Pay ${calculateDiscountedPrice(plan)}`}
